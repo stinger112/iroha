@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-#ifndef __IROHA_GENERATOR_GENERATOR_HPP__
-#define __IROHA_GENERATOR_GENERATOR_HPP__
+#ifndef IROHA_GENERATOR_GENERATOR_HPP
+#define IROHA_GENERATOR_GENERATOR_HPP
 
 #include <algorithm>
 #include "common/types.hpp"
@@ -40,4 +40,4 @@ namespace generator {
 
 }  // namespace generator
 
-#endif  // __IROHA_GENERATOR_GENERATOR_HPP__
+#endif  // IROHA_GENERATOR_GENERATOR_HPP
