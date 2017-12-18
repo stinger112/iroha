@@ -50,7 +50,9 @@ namespace iroha {
     const std::string can_get_all_signatories = "CanGetAllSignatories";
 
     const std::string can_get_my_acc_ast = "CanGetMyAccountAssets";
-    const std::string can_get_all_acc_ast = "CanGetAllAccountAssets";
+      const std::string can_get_all_acc_ast = "CanGetAllAccountAssets";
+    const std::string can_get_my_acc_detail = "CanGetMyAccountDetail";
+      const std::string can_get_all_acc_detail = "CanGetAllAccountDetail";
 
     const std::string can_get_my_acc_txs = "CanGetMyAccountTransactions";
     const std::string can_get_all_acc_txs = "CanGetAllAccountTransactions";
@@ -65,7 +67,8 @@ namespace iroha {
         can_get_my_acc_txs,
         can_get_my_acc_ast,
         can_get_my_acc_ast_txs,
-        can_get_my_signatories};
+        can_get_my_signatories,
+        can_get_my_acc_detail};
 
     const std::set<std::string> read_all_group = {
         can_get_all_accounts,
@@ -94,6 +97,7 @@ namespace iroha {
         can_get_my_account,
         can_get_my_acc_txs,
         can_get_my_acc_ast,
+        can_get_my_acc_detail,
         can_get_my_acc_ast_txs,
         can_get_my_signatories,
         can_get_all_accounts,
