@@ -19,7 +19,7 @@ addtest(stateless_transaction_validator_test stateless/transaction_validator_tes
 target_link_libraries(stateless_transaction_validator_test
     stateless_validator
     hash
-    cryptography
+    ed25519_impl
     schema
     model
     )

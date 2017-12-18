@@ -18,15 +18,19 @@
 add_library(ed25519_impl
     crypto.cpp
     )
-target_link_libraries(ed25519_impl
+target_link_libraries(ed25519_impl PUBLIC
     ed25519 # imported
+    sha3_impl
     )
 
 add_library(sha3_impl
     hash.cpp
     )
-target_link_libraries(sha3_impl
+target_link_libraries(sha3_impl PUBLIC
     ed25519 # contains hash
+
+    # TODO: should not be here
+    pb_model_converters
     )
 
 
@@ -37,5 +41,5 @@ add_library(keys_manager
 
 target_link_libraries(keys_manager
     optional
-    cryptography
+    ed25519_impl
     )
