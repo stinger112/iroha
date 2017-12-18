@@ -19,7 +19,7 @@ add_library(ed25519_impl
     crypto.cpp
     )
 target_link_libraries(ed25519_impl PUBLIC
-    ed25519 # imported
+    ed25519 # importedc
     sha3_impl
     )
 
