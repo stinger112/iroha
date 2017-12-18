@@ -15,6 +15,22 @@
 # limitations under the License.
 #
 
+add_library(ed25519_impl
+    crypto.cpp
+    )
+target_link_libraries(ed25519_impl
+    ed25519 # imported
+    )
+
+add_library(sha3_impl
+    hash.cpp
+    )
+target_link_libraries(sha3_impl
+    ed25519 # contains hash
+    )
+
+
+
 add_library(keys_manager
     keys_manager_impl.cpp
     )

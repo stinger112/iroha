@@ -42,7 +42,7 @@ add_library(model
     impl/query_execution.cpp
     )
 target_link_libraries(model
-    hash
+    sha3_impl
     optional
     rxcpp
     logger
