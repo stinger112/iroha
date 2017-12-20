@@ -130,9 +130,13 @@ bool QueryProcessingFactory::validate(
 bool QueryProcessingFactory::validate(
   const model::GetAccountDetail& query) {
   // TODO: check signatures
-  return
-    hasQueryPermission(query.creator_account_id, query.account_id, *_wsvQuery,
-                       can_get_my_acc_detail, can_get_all_acc_detail);
+  return hasQueryPermission(query.creator_account_id,
+                            query.account_id,
+                            *_wsvQuery,
+                            can_get_my_acc_detail,
+                            can_get_all_acc_detail,
+                            can_get_domain_acc_detail
+                            );
 }
 
 bool QueryProcessingFactory::validate(
