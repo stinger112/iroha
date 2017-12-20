@@ -27,6 +27,7 @@
 %include "std_vector.i"
 
 namespace std {
+  %template(StringVector) vector<string>;
   %template(ByteVector) vector<uint8_t>;
 };
 
