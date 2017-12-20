@@ -127,7 +127,7 @@ bool QueryProcessingFactory::validate(
                             can_get_domain_acc_ast);
 }
 
-bool iroha::model::QueryProcessingFactory::validate(
+bool QueryProcessingFactory::validate(
   const model::GetAccountDetail& query) {
   // TODO: check signatures
   return hasQueryPermission(query.creator_account_id,
@@ -243,11 +243,6 @@ QueryProcessingFactory::executeGetAccountAssets(
   return std::make_shared<AccountAssetResponse>(response);
 }
 
-<<<<<<< HEAD
-std::shared_ptr<QueryResponse>
-QueryProcessingFactory::executeGetAccountAssetTransactions(
-    const model::GetAccountAssetTransactions &query) {
-=======
 std::shared_ptr<iroha::model::QueryResponse>
 iroha::model::QueryProcessingFactory::executeGetAccountDetail(
   const model::GetAccountDetail& query) {
@@ -268,7 +263,6 @@ iroha::model::QueryProcessingFactory::executeGetAccountDetail(
 std::shared_ptr<iroha::model::QueryResponse>
 iroha::model::QueryProcessingFactory::executeGetAccountAssetTransactions(
     const model::GetAccountAssetTransactions& query) {
->>>>>>> Add query execution
   auto acc_asset_tx = _blockQuery->getAccountAssetTransactions(query.account_id,
                                                                query.asset_id);
   TransactionsResponse response;
@@ -329,9 +323,6 @@ QueryProcessingFactory::execute(
     }
     return executeGetAccountAssets(*qry);
   }
-<<<<<<< HEAD
-  if (instanceof <GetSignatories>(query.get())) {
-=======
   if (instanceof <iroha::model::GetAccountDetail>(query.get())) {
     auto qry =
       std::static_pointer_cast<const iroha::model::GetAccountDetail>(query);
@@ -344,7 +335,6 @@ QueryProcessingFactory::execute(
     return executeGetAccountDetail(*qry);
   }
   if (instanceof <iroha::model::GetSignatories>(query.get())) {
->>>>>>> Add query execution
     auto qry =
         std::static_pointer_cast<const GetSignatories>(query);
     if (!validate(*qry)) {
