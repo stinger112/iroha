@@ -15,18 +15,25 @@
  * limitations under the License.
  */
 
-#include "verifier.hpp"
-#include "cryptography/ed25519_sha3_impl/internal/ed25519_impl.hpp"
+#include "backend/protobuf/util.hpp"
+#include "block.pb.h"
 
-namespace shared_model {
-  namespace crypto {
-    bool Verifier::verify(const Signed &signedData,
-                          const Blob &orig,
-                          const PublicKey &publicKey) {
-      return iroha::verify(
-          crypto::toBinaryString(orig),
-          publicKey.makeOldModel<PublicKey::OldPublicKeyType>(),
-          signedData.makeOldModel<Signed::OldSignatureType>());
-    }
-  }  // namespace crypto
-}  // namespace shared_model
+#include <gtest/gtest.h>
+
+using namespace iroha;
+using namespace shared_model::proto;
+using shared_model::crypto::toBinaryString;
+
+/**
+ * @given some protobuf object
+ * @when making a blob from it
+ * @then make sure that the deserialized from string is the same
+ */
+TEST(UtilTest, StringFromMakeBlob) {
+  protocol::Header base, deserialized;
+  base.set_created_time(100);
+  auto blob = makeBlob(base);
+
+  ASSERT_TRUE(deserialized.ParseFromString(toBinaryString(blob)));
+  ASSERT_EQ(deserialized.created_time(), base.created_time());
+}

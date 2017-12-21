@@ -40,7 +40,7 @@ namespace shared_model {
       }
 
       PublicKey *copy() const override {
-        return new PublicKey(blob());
+        return new PublicKey(crypto::toBinaryString(*this));
       }
     };
   }  // namespace crypto

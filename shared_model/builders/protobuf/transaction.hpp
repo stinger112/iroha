@@ -124,7 +124,7 @@ namespace shared_model {
         return addCommand([&](auto proto_command) {
           auto command = proto_command->mutable_add_peer();
           command->set_address(address);
-          command->set_peer_key(peer_key.blob());
+          command->set_peer_key(crypto::toBinaryString(peer_key));
         });
       }
 
@@ -133,7 +133,7 @@ namespace shared_model {
         return addCommand([&](auto proto_command) {
           auto command = proto_command->mutable_add_signatory();
           command->set_account_id(account_id);
-          command->set_public_key(public_key.blob());
+          command->set_public_key(crypto::toBinaryString(public_key));
         });
       }
 
@@ -143,7 +143,7 @@ namespace shared_model {
         return addCommand([&](auto proto_command) {
           auto command = proto_command->mutable_remove_sign();
           command->set_account_id(account_id);
-          command->set_public_key(public_key.blob());
+          command->set_public_key(crypto::toBinaryString(public_key));
         });
       }
 
@@ -175,7 +175,7 @@ namespace shared_model {
           auto command = proto_command->mutable_create_account();
           command->set_account_name(account_name);
           command->set_domain_id(domain_id);
-          command->set_main_pubkey(main_pubkey.blob());
+          command->set_main_pubkey(crypto::toBinaryString(main_pubkey));
         });
       }
 
@@ -203,9 +203,8 @@ namespace shared_model {
       }
 
       template <typename Collection>
-      auto createRole(
-          const interface::types::RoleIdType &role_name,
-          const Collection &permissions) const {
+      auto createRole(const interface::types::RoleIdType &role_name,
+                      const Collection &permissions) const {
         return addCommand([&](auto proto_command) {
           auto command = proto_command()->mutable_create_role();
           command->set_role_name(role_name);
@@ -306,7 +305,7 @@ namespace shared_model {
         static_assert(S == (1 << TOTAL) - 1, "Required fields are not set");
 
         auto answer = stateless_validator_.validate(
-            detail::make_polymorphic<Transaction>(transaction_));
+            detail::makePolymorphic<Transaction>(transaction_));
         if (answer.hasErrors()) {
           throw std::invalid_argument(answer.reason());
         }

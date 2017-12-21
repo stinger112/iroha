@@ -20,25 +20,38 @@
 
 #include <iomanip>
 #include <sstream>
+#include <vector>
 #include "interfaces/base/model_primitive.hpp"
-#include "utils/swig_keyword_hider.hpp"
 #include "utils/lazy_initializer.hpp"
 #include "utils/string_builder.hpp"
+#include "utils/swig_keyword_hider.hpp"
 
 namespace shared_model {
   namespace crypto {
 
+    class Blob;
+    static inline std::string toBinaryString(const Blob &b);
     /**
      * Blob class present user-friendly blob for working with low-level
      * binary stuff. Its length is not fixed in compile time.
      */
     class Blob : public interface::ModelPrimitive<Blob> {
      public:
+      using Bytes = std::vector<uint8_t>;
+
       /**
        * Create blob from a string
        * @param blob - string to create blob from
        */
-      explicit Blob(const std::string &blob) : blob_(blob) {
+      explicit Blob(const std::string &blob)
+          : Blob(Bytes(blob.begin(), blob.end())) {}
+
+      /**
+       * Create blob from a vector
+       * @param blob - vector to create blob from
+       */
+      explicit Blob(const Bytes &blob) : Blob(Bytes(blob)) {}
+      explicit Blob(Bytes &&blob) : blob_(std::move(blob)) {
         std::stringstream ss;
         ss << std::hex << std::setfill('0');
         for (const auto &c : blob_) {
@@ -50,10 +63,11 @@ namespace shared_model {
       /**
        * @return provides raw representation of blob
        */
-      virtual const std::string &blob() const { return blob_; }
+      virtual const Bytes &blob() const { return blob_; }
 
       /**
-       * @return provides human-readable representation of blob without leading 0x
+       * @return provides human-readable representation of blob without leading
+       * 0x
        */
       virtual const std::string &hex() const { return hex_; }
 
@@ -85,14 +99,18 @@ namespace shared_model {
 
       template <typename BlobType>
       DEPRECATED BlobType makeOldModel() const {
-        return BlobType::from_string(blob());
+        return BlobType::from_string(toBinaryString(*this));
       }
 
      private:
       // TODO: 17/11/2017 luckychess use improved Lazy with references support
-      std::string blob_;
+      Bytes blob_;
       std::string hex_;
     };
+
+    static inline std::string toBinaryString(const Blob &b) {
+      return std::string(b.blob().begin(), b.blob().end());
+    }
   }  // namespace crypto
 }  // namespace shared_model
 #endif  // IROHA_SHARED_MODEL_BLOB_HPP

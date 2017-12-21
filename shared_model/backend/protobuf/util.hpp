@@ -15,18 +15,25 @@
  * limitations under the License.
  */
 
-#include "verifier.hpp"
-#include "cryptography/ed25519_sha3_impl/internal/ed25519_impl.hpp"
+#ifndef IROHA_SHARED_MODEL_PROTO_UTIL_HPP
+#define IROHA_SHARED_MODEL_PROTO_UTIL_HPP
+
+#include <google/protobuf/message.h>
+#include <vector>
+#include "cryptography/blob.hpp"
 
 namespace shared_model {
-  namespace crypto {
-    bool Verifier::verify(const Signed &signedData,
-                          const Blob &orig,
-                          const PublicKey &publicKey) {
-      return iroha::verify(
-          crypto::toBinaryString(orig),
-          publicKey.makeOldModel<PublicKey::OldPublicKeyType>(),
-          signedData.makeOldModel<Signed::OldSignatureType>());
+  namespace proto {
+
+    template <typename T>
+    crypto::Blob makeBlob(T &message) {
+      crypto::Blob::Bytes data;
+      data.resize(message.ByteSizeLong());
+      message.SerializeToArray(data.data(), data.size());
+      return crypto::Blob(std::move(data));
     }
-  }  // namespace crypto
+
+  }  // namespace proto
 }  // namespace shared_model
+
+#endif  // IROHA_SHARED_MODEL_PROTO_UTIL_HPP
