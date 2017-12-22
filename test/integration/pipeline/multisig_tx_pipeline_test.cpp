@@ -25,6 +25,8 @@
 iroha::model::Transaction addSignature(const iroha::model::Transaction &t,
                                        iroha::keypair_t keypair) {
   iroha::model::Transaction tx = t;
+  tx.created_ts = iroha::time::now();
+  tx.tx_hash = iroha::hash(tx);
   iroha::model::ModelCryptoProviderImpl(keypair).sign(tx);
   return tx;
 }
@@ -37,8 +39,8 @@ iroha::model::Transaction addSignature(const iroha::model::Transaction &t,
  */
 TEST(MST, OnePeerSendsTest) {
   // TODO 21/12/2017 muratovv rework with auto erased crypto manager
-  auto user1 = "user1", user2 = "user2";
-  auto key_user1 = iroha::create_keypair(), key_user2 = iroha::create_keypair();
+  auto user1 = "user1";
+  auto key1 = iroha::create_keypair(), key2 = iroha::create_keypair();
   iroha::model::generators::CommandGenerator gen;
 
   iroha::model::Transaction tx;
@@ -47,10 +49,9 @@ TEST(MST, OnePeerSendsTest) {
 
   integration_framework::IntegrationTestFramework()
       .setInitialState()  // todo replace with valid genesis block
-      .addUser(user1, key_user1)
-      .addUser(user2, key_user2)
-      .sendTx(addSignature(tx, key_user1))  // todo replace with tx with sign 1
-      .sendTx(addSignature(tx, key_user2))  // todo replace with tx with sign 2
+      .addUser(user1, key1, {key2.pubkey})
+      .sendTx(addSignature(tx, key1))  // todo replace with tx with sign 1
+      .sendTx(addSignature(tx, key2))  // todo replace with tx with sign 2
       .skipProposal()
       .checkBlock([](const auto &block) {
       })  // todo check that transactions with both signatures appears
