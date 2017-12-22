@@ -25,6 +25,7 @@
 #include "interfaces/common_objects/types.hpp"
 #include "interfaces/transaction.hpp"
 #include "utils/polymorphic_wrapper.hpp"
+#include "validator/address_validator.hpp"
 #include "validators/answer.hpp"
 
 namespace shared_model {
@@ -264,14 +265,9 @@ namespace shared_model {
         void validatePeerAddress(
             ReasonsGroupType &reason,
             const interface::AddPeer::AddressType &address) const {
-          if (address != "localhost") {
-            std::regex ipRegex(
-                "((([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5]))).){3}(([0-1]?\\d\\d?"
-                ")|((2[0-4]"
-                "\\d)|(25[0-5])))");
-            if (not std::regex_match(address, ipRegex)) {
-              reason.second.push_back("Wrongly formed PeerAddress");
-            }
+          if (not(iroha::validator::isValidIpV4(address)
+                  or iroha::validator::isValidHostname(address))) {
+            reason.second.push_back("Wrongly formed PeerAddress: " + address);
           }
         }
 
