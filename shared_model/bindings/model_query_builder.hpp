@@ -79,10 +79,12 @@ namespace shared_model {
       /**
        * Queries account transaction collection
        * @param account_id - id of account to query
+       * @param pager - pager for requested transactions
        * @return builder with getAccountTransactions query inside
        */
       ModelQueryBuilder getAccountTransactions(
-          const interface::types::AccountIdType &account_id);
+          const interface::types::AccountIdType &account_id,
+          const interface::Pager &pager);
 
       /**
        * Queries account transaction collection for a given asset

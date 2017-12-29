@@ -45,8 +45,9 @@ namespace shared_model {
     }
 
     ModelQueryBuilder ModelQueryBuilder::getAccountTransactions(
-        const interface::types::AccountIdType &account_id) {
-      return ModelQueryBuilder(builder_.getAccountTransactions(account_id));
+        const interface::types::AccountIdType &account_id,
+        const interface::Pager &pager) {
+      return ModelQueryBuilder(builder_.getAccountTransactions(account_id, pager));
     }
 
     ModelQueryBuilder ModelQueryBuilder::getAccountAssetTransactions(

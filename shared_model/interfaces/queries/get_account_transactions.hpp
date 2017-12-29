@@ -17,6 +17,7 @@
 
 #include "interfaces/base/primitive.hpp"
 #include "interfaces/common_objects/types.hpp"
+#include "interfaces/common_objects/pager.hpp"
 #include "model/queries/get_account_transactions.hpp"
 
 #ifndef IROHA_SHARED_MODEL_GET_ACCOUNT_TRANSACTIONS_HPP
@@ -35,6 +36,11 @@ namespace shared_model {
        * @return account_id of requested transactions
        */
       virtual const types::AccountIdType &accountId() const = 0;
+
+      /**
+       * @return pager of requested transactions
+       */
+      virtual const interface::Pager &pager() const = 0;
 
       virtual OldModelType *makeOldModel() const override {
         auto oldModel = new iroha::model::GetAccountTransactions;

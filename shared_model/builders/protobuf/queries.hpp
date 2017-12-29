@@ -80,10 +80,15 @@ namespace shared_model {
       }
 
       NextBuilder<QueryField> getAccountTransactions(
-          const interface::types::AccountIdType &account_id) {
+          const interface::types::AccountIdType &account_id,
+          const interface::Pager &pager) {
         auto query =
             query_.mutable_payload()->mutable_get_account_transactions();
         query->set_account_id(account_id);
+        auto &mutable_pager = *query->mutable_pager();
+        mutable_pager.set_tx_hash(
+          shared_model::crypto::toBinaryString(pager.transactionHash()));
+        mutable_pager.set_limit(pager.limit());
         return *this;
       }
 
