@@ -81,7 +81,6 @@ namespace iroha {
     bool AppendRoleExecutor::isValid(const Command &command,
                                      ametsuchi::WsvQuery &queries,
                                      const std::string &creator_account_id) {
-
       auto cmd_value = static_cast<const AppendRole &>(command);
       auto role_permissions = queries.getRolePermissions(cmd_value.role_name);
       auto account_roles = queries.getAccountRoles(creator_account_id);
@@ -102,7 +101,8 @@ namespace iroha {
       return std::none_of((*role_permissions).begin(),
                           (*role_permissions).end(),
                           [&account_permissions](const auto &perm) {
-                            return account_permissions.find(perm) == account_permissions.end();
+                            return account_permissions.find(perm)
+                                == account_permissions.end();
                           });
     }
 
@@ -166,20 +166,12 @@ namespace iroha {
       auto cmd_value = static_cast<const CreateRole &>(command);
       cmd_value.role_name.size();
 
-      auto role_is_a_subset =
-          std::all_of(cmd_value.permissions.begin(),
-                      cmd_value.permissions.end(),
-                      [&queries, &creator_account_id](auto perm) {
-                        return checkAccountRolePermission(
-                            creator_account_id, queries, perm);
-                      });
-
-      return role_is_a_subset and not cmd_value.role_name.empty()
-          and cmd_value.role_name.size() < 8 and
-          // Role must be well-formed (no system symbols)
-          std::all_of(std::begin(cmd_value.role_name),
-                      std::end(cmd_value.role_name),
-                      [](char c) { return std::isalnum(c) and islower(c); });
+      return std::all_of(cmd_value.permissions.begin(),
+                         cmd_value.permissions.end(),
+                         [&queries, &creator_account_id](auto perm) {
+                           return checkAccountRolePermission(
+                               creator_account_id, queries, perm);
+                         });
     }
 
     // --------------------|Grant Permission|-----------------------
@@ -338,11 +330,13 @@ namespace iroha {
       log_ = logger::log("SubtractAssetQuantityExecutor");
     }
 
-      bool SubtractAssetQuantityExecutor::execute(const Command &command,
-                                             WsvQuery &queries,
-                                             WsvCommand &commands,
+    bool SubtractAssetQuantityExecutor::execute(
+        const Command &command,
+        WsvQuery &queries,
+        WsvCommand &commands,
         const std::string &creator_account_id) {
-        auto subtract_asset_quantity = static_cast<const SubtractAssetQuantity &>(command);
+      auto subtract_asset_quantity =
+          static_cast<const SubtractAssetQuantity &>(command);
 
       auto asset = queries.getAsset(subtract_asset_quantity.asset_id);
       if (not asset) {
@@ -377,20 +371,22 @@ namespace iroha {
       return commands.upsertAccountAsset(account_asset.value());
     }
 
-      bool SubtractAssetQuantityExecutor::hasPermissions(const Command &command,
-                                                    WsvQuery &queries,
-                                                    const std::string &creator_account_id) {
-        auto cmd_value = static_cast<const SubtractAssetQuantity &>(command);
-        return creator_account_id == cmd_value.account_id
-               and checkAccountRolePermission(
-          creator_account_id, queries, can_subtract_asset_qty);
-      }
-
-      bool SubtractAssetQuantityExecutor::isValid(const Command &command,
-                                             ametsuchi::WsvQuery &queries,
+    bool SubtractAssetQuantityExecutor::hasPermissions(
+        const Command &command,
+        WsvQuery &queries,
         const std::string &creator_account_id) {
-        return true;
-      }
+      auto cmd_value = static_cast<const SubtractAssetQuantity &>(command);
+      return creator_account_id == cmd_value.account_id
+          and checkAccountRolePermission(
+                  creator_account_id, queries, can_subtract_asset_qty);
+    }
+
+    bool SubtractAssetQuantityExecutor::isValid(
+        const Command &command,
+        ametsuchi::WsvQuery &queries,
+        const std::string &creator_account_id) {
+      return true;
+    }
 
     // --------------------------|AddPeer|------------------------------
 
@@ -512,11 +508,7 @@ namespace iroha {
                                         const std::string &creator_account_id) {
       auto create_account = static_cast<const CreateAccount &>(command);
 
-      return
-          // Name is within some range
-          not create_account.account_name.empty()
-          // Account must be well-formed (no system symbols)
-          and validator::isValidDomainName(create_account.account_name);
+      return true;
     }
 
     // --------------------------|CreateAsset|---------------------------
@@ -554,14 +546,7 @@ namespace iroha {
                                       const std::string &creator_account_id) {
       auto create_asset = static_cast<const CreateAsset &>(command);
 
-      return
-          // Name is within some range
-          not create_asset.asset_name.empty()
-          && create_asset.asset_name.size() < 10 &&
-          // Account must be well-formed (no system symbols)
-          std::all_of(std::begin(create_asset.asset_name),
-                      std::end(create_asset.asset_name),
-                      [](char c) { return std::isalnum(c); });
+      return true;
     }
 
     // ------------------------|CreateDomain|---------------------------
@@ -597,14 +582,7 @@ namespace iroha {
                                        const std::string &creator_account_id) {
       auto create_domain = static_cast<const CreateDomain &>(command);
 
-      return
-          // Name is within some range
-          not create_domain.domain_id.empty()
-          and create_domain.domain_id.size() < 10 and
-          // Account must be well-formed (no system symbols)
-          std::all_of(std::begin(create_domain.domain_id),
-                      std::end(create_domain.domain_id),
-                      [](char c) { return std::isalnum(c); });
+      return true;
     }
 
     // --------------------|RemoveSignatory|--------------------
@@ -646,8 +624,10 @@ namespace iroha {
                                                     can_remove_signatory));
     }
 
-    bool RemoveSignatoryExecutor::isValid(const Command &command,
-                                          ametsuchi::WsvQuery &queries, const std::string &creator_account_id) {
+    bool RemoveSignatoryExecutor::isValid(
+        const Command &command,
+        ametsuchi::WsvQuery &queries,
+        const std::string &creator_account_id) {
       auto remove_signatory = static_cast<const RemoveSignatory &>(command);
 
       auto account = queries.getAccount(remove_signatory.account_id);
@@ -698,8 +678,10 @@ namespace iroha {
               creator_account_id, cmd.account_id, can_set_detail);
     }
 
-    bool SetAccountDetailExecutor::isValid(const Command &command,
-                                           ametsuchi::WsvQuery &queries, const std::string &creator_account_id) {
+    bool SetAccountDetailExecutor::isValid(
+        const Command &command,
+        ametsuchi::WsvQuery &queries,
+        const std::string &creator_account_id) {
       return true;
     }
 
@@ -741,7 +723,8 @@ namespace iroha {
     }
 
     bool SetQuorumExecutor::isValid(const Command &command,
-                                    ametsuchi::WsvQuery &queries, const std::string &creator_account_id) {
+                                    ametsuchi::WsvQuery &queries,
+                                    const std::string &creator_account_id) {
       auto set_quorum = static_cast<const SetQuorum &>(command);
       auto signatories = queries.getSignatories(set_quorum.account_id);
 
@@ -750,8 +733,7 @@ namespace iroha {
         return false;
       }
       // You can't remove if size of rest signatories less than the quorum
-      return set_quorum.new_quorum > 0 and set_quorum.new_quorum < 10
-          and signatories.value().size() >= set_quorum.new_quorum;
+      return signatories.value().size() >= set_quorum.new_quorum;
     }
 
     // ------------------------|TransferAsset|-------------------------
@@ -860,11 +842,6 @@ namespace iroha {
                                         ametsuchi::WsvQuery &queries,
                                         const std::string &creator_account_id) {
       auto transfer_asset = static_cast<const TransferAsset &>(command);
-
-      if (transfer_asset.amount.getIntValue() == 0) {
-        log_->info("amount must be not zero");
-        return false;
-      }
 
       auto asset = queries.getAsset(transfer_asset.asset_id);
       if (not asset.has_value()) {

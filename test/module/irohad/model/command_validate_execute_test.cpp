@@ -36,11 +36,11 @@
 #include "model/execution/command_executor_factory.hpp"
 #include "model/permissions.hpp"
 
-using ::testing::Return;
-using ::testing::AtLeast;
-using ::testing::_;
 using ::testing::AllOf;
+using ::testing::AtLeast;
+using ::testing::Return;
 using ::testing::StrictMock;
+using ::testing::_;
 
 using namespace iroha;
 using namespace iroha::ametsuchi;
@@ -170,18 +170,6 @@ TEST_F(AddAssetQuantityTest, InvalidWhenNoRoles) {
   // Creator has no roles
   EXPECT_CALL(*wsv_query, getAccountRoles(add_asset_quantity->account_id))
       .WillOnce(Return(nonstd::nullopt));
-  ASSERT_FALSE(validateAndExecute());
-}
-
-TEST_F(AddAssetQuantityTest, InvalidWhenZeroAmount) {
-  // Amount is zero
-  Amount amount(0);
-  add_asset_quantity->amount = amount;
-  EXPECT_CALL(*wsv_query, getAsset(asset.asset_id)).WillOnce(Return(asset));
-  EXPECT_CALL(*wsv_query, getAccountRoles(creator.account_id))
-      .WillOnce(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(role_permissions));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -323,23 +311,6 @@ TEST_F(SubtractAssetQuantityTest, InvalidWhenNoRoles) {
   // Creator has no roles
   EXPECT_CALL(*wsv_query, getAccountRoles(subtract_asset_quantity->account_id))
       .WillOnce(Return(nonstd::nullopt));
-  ASSERT_FALSE(validateAndExecute());
-}
-
-/**
- * @given SubtractAssetQuantity
- * @when arguments amount is zero
- * @then executor will be failed
- */
-TEST_F(SubtractAssetQuantityTest, InvalidWhenZeroAmount) {
-  // Amount is zero
-  Amount amount(0);
-  subtract_asset_quantity->amount = amount;
-  EXPECT_CALL(*wsv_query, getAsset(asset.asset_id)).WillOnce(Return(asset));
-  EXPECT_CALL(*wsv_query, getAccountRoles(creator.account_id))
-      .WillOnce(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(role_permissions));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -517,28 +488,6 @@ TEST_F(CreateAccountTest, InvalidWhenNoPermissions) {
   // Creator has no permission
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(nonstd::nullopt));
-  ASSERT_FALSE(validateAndExecute());
-}
-
-TEST_F(CreateAccountTest, InvalidWhenLongName) {
-  // Not valid name for account
-  EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillOnce(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(role_permissions));
-  create_account->account_name =
-      "aAccountNameMustBeLessThan64characters00000000000000000000000000";
-  ASSERT_FALSE(validateAndExecute());
-}
-
-TEST_F(CreateAccountTest, InvalidWhenNameWithSystemSymbols) {
-  // Not valid name for account (system symbols)
-  EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillOnce(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(role_permissions));
-  create_account->account_name = "test@";
-
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -1041,22 +990,6 @@ TEST_F(TransferAssetTest, ValidWhenCreatorHasPermission) {
   ASSERT_TRUE(validateAndExecute());
 }
 
-TEST_F(TransferAssetTest, InvalidWhenZeroAmount) {
-  // Transfer zero assets
-  EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->dest_account_id))
-      .WillOnce(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->src_account_id))
-      .WillOnce(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .Times(2)
-      .WillRepeatedly(Return(role_permissions));
-
-  Amount amount(0, 2);
-  transfer_asset->amount = amount;
-
-  ASSERT_FALSE(validateAndExecute());
-}
-
 class AddPeerTest : public CommandValidateExecuteTest {
  public:
   void SetUp() override {
@@ -1134,16 +1067,6 @@ TEST_F(CreateRoleTest, InvalidCaseWhenRoleSuperset) {
       .WillRepeatedly(Return(role_permissions));
   std::set<std::string> perms = {can_add_peer, can_append_role};
   command = std::make_shared<CreateRole>("master", perms);
-  ASSERT_FALSE(validateAndExecute());
-}
-
-TEST_F(CreateRoleTest, InvalidCaseWhenWrongRoleName) {
-  EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillRepeatedly(Return(admin_roles));
-  EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillRepeatedly(Return(role_permissions));
-  std::set<std::string> perms = {can_create_role};
-  command = std::make_shared<CreateRole>("m!Aster", perms);
   ASSERT_FALSE(validateAndExecute());
 }
 
