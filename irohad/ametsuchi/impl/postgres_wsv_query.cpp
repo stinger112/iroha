@@ -22,8 +22,7 @@ namespace iroha {
 
     using std::string;
 
-    using nonstd::optional;
-    using nonstd::nullopt;
+    using outcome::result;
     using model::Account;
     using model::Asset;
     using model::AccountAsset;
@@ -55,7 +54,7 @@ namespace iroha {
       return result.size() == 1;
     }
 
-    nonstd::optional<std::vector<std::string>>
+    outcome::result<std::vector<std::string>>
     PostgresWsvQuery::getAccountRoles(const std::string &account_id) {
       pqxx::result result;
       try {
@@ -65,7 +64,8 @@ namespace iroha {
             + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        // TODO: add typed enum for error code
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       std::vector<std::string> roles;
       for (const auto &row : result) {
@@ -74,7 +74,7 @@ namespace iroha {
       return roles;
     }
 
-    nonstd::optional<std::vector<std::string>>
+    outcome::result<std::vector<std::string>>
     PostgresWsvQuery::getRolePermissions(const std::string &role_name) {
       pqxx::result result;
       try {
@@ -84,7 +84,7 @@ namespace iroha {
             + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       std::vector<std::string> permissions;
       for (const auto &row : result) {
@@ -93,13 +93,13 @@ namespace iroha {
       return permissions;
     }
 
-    nonstd::optional<std::vector<std::string>> PostgresWsvQuery::getRoles() {
+    outcome::result<std::vector<std::string>> PostgresWsvQuery::getRoles() {
       pqxx::result result;
       try {
         result = transaction_.exec("SELECT role_id FROM role;");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       std::vector<std::string> roles;
       for (const auto &row : result) {
@@ -108,7 +108,7 @@ namespace iroha {
       return roles;
     }
 
-    optional<Account> PostgresWsvQuery::getAccount(const string &account_id) {
+    outcome::result<Account> PostgresWsvQuery::getAccount(const string &account_id) {
       pqxx::result result;
       try {
         result = transaction_.exec("SELECT * FROM account WHERE account_id = "
@@ -116,11 +116,11 @@ namespace iroha {
                                    + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       if (result.empty()) {
         log_->info("Account {} not found", account_id);
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       Account account;
       auto row = result.at(0);
@@ -132,7 +132,7 @@ namespace iroha {
       return account;
     }
 
-    nonstd::optional<std::string> PostgresWsvQuery::getAccountDetail(
+    outcome::result<std::string> PostgresWsvQuery::getAccountDetail(
         const std::string &account_id,
         const std::string &creator_account_id,
         const std::string &detail) {
@@ -146,11 +146,11 @@ namespace iroha {
             + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       if (result.empty()) {
         log_->info("Account {} not found", account_id);
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       auto row = result.at(0);
       std::string res;
@@ -158,12 +158,12 @@ namespace iroha {
 
       // if res is empty, then that key does not exist for this account
       if (res.empty()) {
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       return res;
     }
 
-    nonstd::optional<std::vector<pubkey_t>> PostgresWsvQuery::getSignatories(
+    outcome::result<std::vector<pubkey_t>> PostgresWsvQuery::getSignatories(
         const string &account_id) {
       pqxx::result result;
       try {
@@ -173,7 +173,7 @@ namespace iroha {
             + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       std::vector<pubkey_t> signatories;
       for (const auto &row : result) {
@@ -185,7 +185,7 @@ namespace iroha {
       return signatories;
     }
 
-    optional<Asset> PostgresWsvQuery::getAsset(const string &asset_id) {
+    outcome::result<Asset> PostgresWsvQuery::getAsset(const string &asset_id) {
       pqxx::result result;
       try {
         result = transaction_.exec("SELECT * FROM asset WHERE asset_id = "
@@ -193,11 +193,11 @@ namespace iroha {
                                    + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       if (result.empty()) {
         log_->info("Asset {} not found", asset_id);
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       Asset asset;
       auto row = result.at(0);
@@ -210,7 +210,7 @@ namespace iroha {
       return asset;
     }
 
-    optional<AccountAsset> PostgresWsvQuery::getAccountAsset(
+    outcome::result<AccountAsset> PostgresWsvQuery::getAccountAsset(
         const std::string &account_id, const std::string &asset_id) {
       pqxx::result result;
       try {
@@ -222,11 +222,11 @@ namespace iroha {
             + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       if (result.empty()) {
         log_->info("Account {} does not have asset {}", account_id, asset_id);
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       model::AccountAsset asset;
       auto row = result.at(0);
@@ -238,7 +238,7 @@ namespace iroha {
       return asset;
     }
 
-    nonstd::optional<model::Domain> PostgresWsvQuery::getDomain(
+    outcome::result<model::Domain> PostgresWsvQuery::getDomain(
         const std::string &domain_id) {
       pqxx::result result;
       try {
@@ -247,11 +247,11 @@ namespace iroha {
                                    + ";");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       if (result.empty()) {
         log_->info("Domain {} not found", domain_id);
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       Domain domain;
       auto row = result.at(0);
@@ -260,13 +260,13 @@ namespace iroha {
       return domain;
     }
 
-    nonstd::optional<std::vector<model::Peer>> PostgresWsvQuery::getPeers() {
+    outcome::result<std::vector<model::Peer>> PostgresWsvQuery::getPeers() {
       pqxx::result result;
       try {
         result = transaction_.exec("SELECT * FROM peer;");
       } catch (const std::exception &e) {
         log_->error(e.what());
-        return nullopt;
+        return outcome::failure(std::error_code(1, std::system_category()));
       }
       std::vector<Peer> peers;
       for (const auto &row : result) {

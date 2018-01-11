@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include <outcome/success_failure.hpp>
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 
 #include "framework/test_subscriber.hpp"
@@ -224,10 +225,13 @@ TEST_F(GetAccountTest, NoAccountExist) {
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
 
+  outcome::result<iroha::model::Account> get_account_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getAccount(get_account->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_account_res));
+
+  outcome::result<std::vector<std::string>> get_acc_roles_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getAccountRoles(get_account->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_acc_roles_res));
 
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
@@ -385,9 +389,10 @@ TEST_F(GetAccountAssetsTest, NoAccountExist) {
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
 
+  outcome::result<iroha::model::AccountAsset> get_account_assets_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query,
               getAccountAsset(get_account_assets->account_id, asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_account_assets_res));
 
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
@@ -528,8 +533,9 @@ TEST_F(GetSignatoriesTest, NoAccountExist) {
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
 
+  outcome::result<std::vector<iroha::pubkey_t>> get_signatories_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getSignatories(get_signatories->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_signatories_res));
 
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<::ErrorResponse>(response);
@@ -973,8 +979,10 @@ TEST_F(GetAssetInfoTest, AssetInvalidCase) {
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
+
+  outcome::result<iroha::model::Asset> get_asset_result = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getAsset(qry->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_asset_result));
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
   ASSERT_EQ(cast_resp->reason, ErrorResponse::NO_ASSET);
@@ -1108,8 +1116,10 @@ TEST_F(GetRolePermissionsTest, InValidCaseNoRole) {
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
+
+  outcome::result<std::vector<std::string>> get_permissions_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getRolePermissions(qry->role_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_permissions_res));
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
   ASSERT_EQ(cast_resp->reason, ErrorResponse::NO_ROLES);

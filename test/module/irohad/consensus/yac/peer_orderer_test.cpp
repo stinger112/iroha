@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -62,7 +61,8 @@ TEST_F(YacPeerOrdererTest, PeerOrdererInitialOrderWhenInvokeNormalCase) {
 TEST_F(YacPeerOrdererTest, PeerOrdererInitialOrderWhenInvokeFailCase) {
   cout << "----------| InitialOrder() => nullopt case |----------" << endl;
 
-  EXPECT_CALL(*wsv, getLedgerPeers()).WillOnce(Return(nonstd::nullopt));
+  outcome::result<std::vector<iroha::model::Peer>> get_ledger_peers_result = outcome::failure(std::error_code(1, std::system_category()));
+  EXPECT_CALL(*wsv, getLedgerPeers()).WillOnce(Return(get_ledger_peers_result));
   auto order = orderer.getInitialOrdering();
   ASSERT_EQ(order, nonstd::nullopt);
 }
@@ -78,7 +78,8 @@ TEST_F(YacPeerOrdererTest, PeerOrdererOrderingWhenInvokeNormalCase) {
 TEST_F(YacPeerOrdererTest, PeerOrdererOrderingWhenInvokeFaillCase) {
   cout << "----------| Order() => nullopt case |----------" << endl;
 
-  EXPECT_CALL(*wsv, getLedgerPeers()).WillOnce(Return(nonstd::nullopt));
+  outcome::result<std::vector<iroha::model::Peer>> get_ledger_peers_result = outcome::failure(std::error_code(1, std::system_category()));
+  EXPECT_CALL(*wsv, getLedgerPeers()).WillOnce(Return(get_ledger_peers_result));
   auto order = orderer.getOrdering(YacHash());
   ASSERT_EQ(order, nonstd::nullopt);
 }

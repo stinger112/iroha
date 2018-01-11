@@ -119,6 +119,10 @@ namespace iroha {
     return std::string(source.begin(), source.end());
   }
 
+
+
+
+
   /**
    * Bind operator. If argument has value, dereferences argument and calls
    * given function, which should return wrapped value
@@ -140,10 +144,10 @@ namespace iroha {
    */
   template <typename T, typename Transform>
   auto operator|(T t, Transform f) ->
-      typename std::enable_if<not std::is_same<decltype(f(*t)), void>::value,
-                              decltype(f(*t))>::type {
+      typename std::enable_if<not std::is_same<decltype(f(t.value())), void>::value,
+                              decltype(f(t.value()))>::type {
     if (t) {
-      return f(*t);
+      return f(t.value());
     }
     return {};
   }
@@ -168,12 +172,24 @@ namespace iroha {
    */
   template <typename T, typename Transform>
   auto operator|(T t, Transform f) ->
-      typename std::enable_if<std::is_same<decltype(f(*t)),
+      typename std::enable_if<std::is_same<decltype(f(t.value())),
                                            void>::value>::type {
     if (t) {
-      f(*t);
+      f(t.value());
     }
   }
+
+//  namespace outcome = OUTCOME_V2_NAMESPACE;
+//
+//  template<typename T, typename Transform>
+//  auto operator|(outcome::result<T> t, Transform f) ->
+//  typename std::enable_if<not std::is_same<decltype(f(t.value())), void>::value,
+//                          decltype(f(t.value()))>::type {
+//    if (t) {
+//      return f(t.value());
+//    }
+//    return {};
+//  }
 
   /**
    * Create map get function for value retrieval by key

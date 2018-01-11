@@ -32,6 +32,7 @@ namespace iroha {
        public:
         static constexpr auto default_ip = "0.0.0.0";
         static constexpr auto default_address = "0.0.0.0:0";
+
         void SetUp() override {
           notifications = std::make_shared<MockYacNetworkNotifications>();
 

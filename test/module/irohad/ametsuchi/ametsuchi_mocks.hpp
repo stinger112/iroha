@@ -35,33 +35,33 @@ namespace iroha {
     class MockWsvQuery : public WsvQuery {
      public:
       MOCK_METHOD1(getAccountRoles,
-                   nonstd::optional<std::vector<std::string>>(
+                   outcome::result<std::vector<std::string>>(
                        const std::string &account_id));
       MOCK_METHOD3(
           getAccountDetail,
-          nonstd::optional<std::string>(const std::string &account_id,
+          outcome::result<std::string>(const std::string &account_id,
                                         const std::string &creator_account_id,
                                         const std::string &detail));
       MOCK_METHOD1(getRolePermissions,
-                   nonstd::optional<std::vector<std::string>>(
+                   outcome::result<std::vector<std::string>>(
                        const std::string &role_name));
-      MOCK_METHOD0(getRoles, nonstd::optional<std::vector<std::string>>());
+      MOCK_METHOD0(getRoles, outcome::result<std::vector<std::string>>());
       MOCK_METHOD1(
           getAccount,
-          nonstd::optional<model::Account>(const std::string &account_id));
+          outcome::result<model::Account>(const std::string &account_id));
       MOCK_METHOD1(getSignatories,
-                   nonstd::optional<std::vector<pubkey_t>>(
+                   outcome::result<std::vector<pubkey_t>>(
                        const std::string &account_id));
       MOCK_METHOD1(getAsset,
-                   nonstd::optional<model::Asset>(const std::string &asset_id));
+                   outcome::result<model::Asset>(const std::string &asset_id));
       MOCK_METHOD2(
           getAccountAsset,
-          nonstd::optional<model::AccountAsset>(const std::string &account_id,
+          outcome::result<model::AccountAsset>(const std::string &account_id,
                                                 const std::string &asset_id));
-      MOCK_METHOD0(getPeers, nonstd::optional<std::vector<model::Peer>>());
+      MOCK_METHOD0(getPeers, outcome::result<std::vector<model::Peer>>());
       MOCK_METHOD1(
           getDomain,
-          nonstd::optional<model::Domain>(const std::string &domain_id));
+          outcome::result<model::Domain>(const std::string &domain_id));
       MOCK_METHOD3(hasAccountGrantablePermission,
                    bool(const std::string &permitee_account_id,
                         const std::string &account_id,
@@ -176,7 +176,7 @@ namespace iroha {
       MockPeerQuery() = default;
 
       MOCK_METHOD0(getLedgerPeers,
-                   nonstd::optional<std::vector<model::Peer>>());
+                   outcome::result<std::vector<model::Peer>>());
     };
 
     class MockStorage : public Storage {

@@ -20,6 +20,7 @@
 
 #include <set>
 #include <string>
+#include <outcome.hpp>
 #include "common/types.hpp"
 #include "model/account.hpp"
 #include "model/account_asset.hpp"

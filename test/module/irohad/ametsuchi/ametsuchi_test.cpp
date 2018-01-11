@@ -118,9 +118,9 @@ void validateAccountAsset(W &&wsv,
                           const iroha::Amount &amount) {
   auto account_asset = wsv->getAccountAsset(account, asset);
   ASSERT_TRUE(account_asset);
-  ASSERT_EQ(account_asset->account_id, account);
-  ASSERT_EQ(account_asset->asset_id, asset);
-  ASSERT_EQ(account_asset->balance, amount);
+  ASSERT_EQ(account_asset.value().account_id, account);
+  ASSERT_EQ(account_asset.value().asset_id, asset);
+  ASSERT_EQ(account_asset.value().balance, amount);
 }
 
 /**
@@ -136,8 +136,8 @@ void validateAccount(W &&wsv,
                      const std::string &domain) {
   auto account = wsv->getAccount(id);
   ASSERT_TRUE(account);
-  ASSERT_EQ(account->account_id, id);
-  ASSERT_EQ(account->domain_id, domain);
+  ASSERT_EQ(account.value().account_id, id);
+  ASSERT_EQ(account.value().domain_id, domain);
 }
 
 /**
@@ -280,11 +280,12 @@ TEST_F(AmetsuchiTest, PeerTest) {
 
   apply(storage, block);
 
-  auto peers = wsv->getPeers();
-  ASSERT_TRUE(peers);
-  ASSERT_EQ(peers->size(), 1);
-  ASSERT_EQ(peers->at(0).pubkey, addPeer.peer_key);
-  ASSERT_EQ(peers->at(0).address, addPeer.address);
+  auto peers_res = wsv->getPeers();
+  ASSERT_TRUE(peers_res);
+  auto peers = peers_res.value();
+  ASSERT_EQ(peers.size(), 1);
+  ASSERT_EQ(peers.at(0).pubkey, addPeer.peer_key);
+  ASSERT_EQ(peers.at(0).address, addPeer.address);
 }
 
 TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
@@ -465,15 +466,17 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   apply(storage, block);
 
   {
-    auto account = wsv->getAccount(user1id);
-    ASSERT_TRUE(account);
-    ASSERT_EQ(account->account_id, user1id);
-    ASSERT_EQ(account->domain_id, createAccount.domain_id);
+    auto account_res = wsv->getAccount(user1id);
+    ASSERT_TRUE(account_res);
+    auto account = account_res.value();
+    ASSERT_EQ(account.account_id, user1id);
+    ASSERT_EQ(account.domain_id, createAccount.domain_id);
 
-    auto signatories = wsv->getSignatories(user1id);
-    ASSERT_TRUE(signatories);
-    ASSERT_EQ(signatories->size(), 1);
-    ASSERT_EQ(signatories->at(0), pubkey1);
+    auto signatories_res = wsv->getSignatories(user1id);
+    ASSERT_TRUE(signatories_res);
+    auto signatories = signatories_res.value();
+    ASSERT_EQ(signatories.size(), 1);
+    ASSERT_EQ(signatories.at(0), pubkey1);
   }
 
   // 2nd tx (add sig2 to user1)
@@ -499,11 +502,12 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
     auto account = wsv->getAccount(user1id);
     ASSERT_TRUE(account);
 
-    auto signatories = wsv->getSignatories(user1id);
-    ASSERT_TRUE(signatories);
-    ASSERT_EQ(signatories->size(), 2);
-    ASSERT_EQ(signatories->at(0), pubkey1);
-    ASSERT_EQ(signatories->at(1), pubkey2);
+    auto signatories_res = wsv->getSignatories(user1id);
+    ASSERT_TRUE(signatories_res);
+    auto signatories = signatories_res.value();
+    ASSERT_EQ(signatories.size(), 2);
+    ASSERT_EQ(signatories.at(0), pubkey1);
+    ASSERT_EQ(signatories.at(1), pubkey2);
   }
 
   // 3rd tx (create user2 with pubkey1 that is same as user1's key)
@@ -533,16 +537,18 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
     auto account2 = wsv->getAccount(user2id);
     ASSERT_TRUE(account2);
 
-    auto signatories1 = wsv->getSignatories(user1id);
-    ASSERT_TRUE(signatories1);
-    ASSERT_EQ(signatories1->size(), 2);
-    ASSERT_EQ(signatories1->at(0), pubkey1);
-    ASSERT_EQ(signatories1->at(1), pubkey2);
+    auto signatories1_res = wsv->getSignatories(user1id);
+    ASSERT_TRUE(signatories1_res);
+    auto signatories1 = signatories1_res.value();
+    ASSERT_EQ(signatories1.size(), 2);
+    ASSERT_EQ(signatories1.at(0), pubkey1);
+    ASSERT_EQ(signatories1.at(1), pubkey2);
 
-    auto signatories2 = wsv->getSignatories(user2id);
-    ASSERT_TRUE(signatories2);
-    ASSERT_EQ(signatories2->size(), 1);
-    ASSERT_EQ(signatories2->at(0), pubkey1);
+    auto signatories2_res = wsv->getSignatories(user2id);
+    ASSERT_TRUE(signatories2_res);
+    auto signatories2 = signatories2_res.value();
+    ASSERT_EQ(signatories2.size(), 1);
+    ASSERT_EQ(signatories2.at(0), pubkey1);
   }
 
   // 4th tx (remove pubkey1 from user1)
@@ -569,16 +575,18 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
     ASSERT_TRUE(account);
 
     // user1 has only pubkey2.
-    auto signatories1 = wsv->getSignatories(user1id);
-    ASSERT_TRUE(signatories1);
-    ASSERT_EQ(signatories1->size(), 1);
-    ASSERT_EQ(signatories1->at(0), pubkey2);
+    auto signatories1_res = wsv->getSignatories(user1id);
+    ASSERT_TRUE(signatories1_res);
+    auto signatories1 = signatories1_res.value();
+    ASSERT_EQ(signatories1.size(), 1);
+    ASSERT_EQ(signatories1.at(0), pubkey2);
 
     // user2 still has pubkey1.
-    auto signatories2 = wsv->getSignatories(user2id);
-    ASSERT_TRUE(signatories2);
-    ASSERT_EQ(signatories2->size(), 1);
-    ASSERT_EQ(signatories2->at(0), pubkey1);
+    auto signatories2_res = wsv->getSignatories(user2id);
+    ASSERT_TRUE(signatories2_res);
+    auto signatories2 = signatories2_res.value();
+    ASSERT_EQ(signatories2.size(), 1);
+    ASSERT_EQ(signatories2.at(0), pubkey1);
   }
 
   // 5th tx (add sig2 to user2 and set quorum = 1)
@@ -608,14 +616,15 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   {
     auto account = wsv->getAccount(user2id);
     ASSERT_TRUE(account);
-    ASSERT_EQ(account->quorum, 2);
+    ASSERT_EQ(account.value().quorum, 2);
 
     // user2 has pubkey1 and pubkey2.
-    auto signatories = wsv->getSignatories(user2id);
-    ASSERT_TRUE(signatories);
-    ASSERT_EQ(signatories->size(), 2);
-    ASSERT_EQ(signatories->at(0), pubkey1);
-    ASSERT_EQ(signatories->at(1), pubkey2);
+    auto signatories_res = wsv->getSignatories(user2id);
+    ASSERT_TRUE(signatories_res);
+    auto signatories = signatories_res.value();
+    ASSERT_EQ(signatories.size(), 2);
+    ASSERT_EQ(signatories.at(0), pubkey1);
+    ASSERT_EQ(signatories.at(1), pubkey2);
   }
 
   // 6th tx (remove sig2 fro user2: This must success)
@@ -639,10 +648,11 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
 
   {
     // user2 only has pubkey1.
-    auto signatories = wsv->getSignatories(user2id);
-    ASSERT_TRUE(signatories);
-    ASSERT_EQ(signatories->size(), 1);
-    ASSERT_EQ(signatories->at(0), pubkey1);
+    auto signatories_res = wsv->getSignatories(user2id);
+    ASSERT_TRUE(signatories_res);
+    auto signatories = signatories_res.value();
+    ASSERT_EQ(signatories.size(), 1);
+    ASSERT_EQ(signatories.at(0), pubkey1);
   }
 }
 

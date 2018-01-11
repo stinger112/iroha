@@ -132,8 +132,9 @@ class AddAssetQuantityTest : public CommandValidateExecuteTest {
 TEST_F(AddAssetQuantityTest, ValidWhenNewWallet) {
   // Add asset first time - no wallet
   // When there is no wallet - new accountAsset will be created
+  outcome::result<iroha::model::AccountAsset> get_account_asset_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getAccountAsset(add_asset_quantity->account_id, _))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_account_asset_res));
 
   EXPECT_CALL(*wsv_query, getAsset(add_asset_quantity->asset_id))
       .WillOnce(Return(asset));
@@ -168,8 +169,9 @@ TEST_F(AddAssetQuantityTest, ValidWhenExistingWallet) {
 
 TEST_F(AddAssetQuantityTest, InvalidWhenNoRoles) {
   // Creator has no roles
+  outcome::result<std::vector<std::string>> get_account_roles_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getAccountRoles(add_asset_quantity->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_account_roles_res));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -211,8 +213,9 @@ TEST_F(AddAssetQuantityTest, InvalidWhenNoAsset) {
       .WillOnce(Return(role_permissions));
   add_asset_quantity->asset_id = "noass";
 
+  outcome::result<iroha::model::Asset> get_asset_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query, getAsset(add_asset_quantity->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_asset_res));
 
   ASSERT_FALSE(validateAndExecute());
 }
@@ -257,10 +260,11 @@ class SubtractAssetQuantityTest : public CommandValidateExecuteTest {
 TEST_F(SubtractAssetQuantityTest, InvalidWhenNoWallet) {
   // Subtract asset - no wallet
   // When there is no wallet - Failed
+  outcome::result<iroha::model::AccountAsset> get_asset_res = outcome::failure(std::error_code(1, std::system_category()));
   EXPECT_CALL(*wsv_query,
               getAccountAsset(subtract_asset_quantity->account_id,
                               subtract_asset_quantity->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(get_asset_res));
 
   EXPECT_CALL(*wsv_query, getAccountRoles(subtract_asset_quantity->account_id))
       .WillOnce(Return(admin_roles));
@@ -321,8 +325,10 @@ TEST_F(SubtractAssetQuantityTest, InvalidWhenOverAmount) {
  */
 TEST_F(SubtractAssetQuantityTest, InvalidWhenNoRoles) {
   // Creator has no roles
+  outcome::result<iroha::model::Asset> get_asset_res = outcome::failure(std::error_code(1, std::system_category()));
+
   EXPECT_CALL(*wsv_query, getAccountRoles(subtract_asset_quantity->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -385,7 +391,7 @@ TEST_F(SubtractAssetQuantityTest, InvalidWhenNoAsset) {
   subtract_asset_quantity->asset_id = "noass";
 
   EXPECT_CALL(*wsv_query, getAsset(subtract_asset_quantity->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<iroha::model::Asset>(std::error_code(1, std::system_category()))));
 
   ASSERT_FALSE(validateAndExecute());
 }
@@ -516,7 +522,7 @@ TEST_F(CreateAccountTest, ValidWhenNewAccount) {
 TEST_F(CreateAccountTest, InvalidWhenNoPermissions) {
   // Creator has no permission
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -576,7 +582,7 @@ TEST_F(CreateAssetTest, InvalidWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
 
   ASSERT_FALSE(validateAndExecute());
 }
@@ -611,7 +617,7 @@ TEST_F(CreateDomainTest, ValidWhenCreatorHasPermissions) {
 TEST_F(CreateDomainTest, InvalidWhenNoPermissions) {
   // Creator has no permissions
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -859,7 +865,7 @@ TEST_F(TransferAssetTest, ValidWhenNewWallet) {
       .WillRepeatedly(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getAccountAsset(transfer_asset->dest_account_id, _))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<iroha::model::AccountAsset>(std::error_code(1, std::system_category()))));
 
   EXPECT_CALL(
       *wsv_query,
@@ -915,7 +921,7 @@ TEST_F(TransferAssetTest, ValidWhenExistingWallet) {
 TEST_F(TransferAssetTest, InvalidWhenNoPermissions) {
   // Creator has no permissions
   EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->src_account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
 
   ASSERT_FALSE(validateAndExecute());
 }
@@ -924,7 +930,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoDestAccount) {
   // No destination account exists
   transfer_asset->dest_account_id = "noacc";
   EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->dest_account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
 
   EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->src_account_id))
       .WillOnce(Return(admin_roles));
@@ -949,7 +955,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoSrcAccountAsset) {
   EXPECT_CALL(
       *wsv_query,
       getAccountAsset(transfer_asset->src_account_id, transfer_asset->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<iroha::model::AccountAsset>(std::error_code(1, std::system_category()))));
 
   ASSERT_FALSE(validateAndExecute());
 }
@@ -973,7 +979,7 @@ TEST_F(TransferAssetTest, InvalidWhenInsufficientFunds) {
   EXPECT_CALL(*wsv_query, getAsset(transfer_asset->asset_id))
       .WillOnce(Return(asset));
   EXPECT_CALL(*wsv_query, getAccount(transfer_asset->dest_account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<iroha::model::Account>(std::error_code(1, std::system_category()))));
 
   ASSERT_FALSE(validateAndExecute());
 }
@@ -1021,7 +1027,7 @@ TEST_F(TransferAssetTest, ValidWhenCreatorHasPermission) {
       .WillOnce(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getAccountAsset(transfer_asset->dest_account_id, _))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<iroha::model::AccountAsset>(std::error_code(1, std::system_category()))));
 
   EXPECT_CALL(
       *wsv_query,
@@ -1089,7 +1095,7 @@ TEST_F(AddPeerTest, InvalidCaseWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -1123,7 +1129,7 @@ TEST_F(CreateRoleTest, InvalidCaseWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillRepeatedly(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillRepeatedly(Return(nonstd::nullopt));
+      .WillRepeatedly(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -1180,7 +1186,7 @@ TEST_F(AppendRoleTest, InvalidCase) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -1211,7 +1217,7 @@ TEST_F(DetachRoleTest, InvalidCase) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 
@@ -1243,7 +1249,7 @@ TEST_F(GrantPermissionTest, InvalidCaseWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(outcome::result<std::vector<std::string>>(std::error_code(1, std::system_category()))));
   ASSERT_FALSE(validateAndExecute());
 }
 

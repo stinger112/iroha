@@ -42,6 +42,7 @@ using namespace iroha::ametsuchi;
 namespace iroha {
   namespace model {
 
+
     // ----------------------------| Common |-----------------------------
 
     CommandExecutor::CommandExecutor() {
@@ -91,16 +92,16 @@ namespace iroha {
       }
 
       std::set<std::string> account_permissions;
-      for (const auto &role : *account_roles) {
+      for (const auto &role : account_roles.value()) {
         auto permissions = queries.getRolePermissions(role);
         if (not permissions.has_value())
           continue;
-        for (const auto &permission : *permissions)
+        for (const auto &permission : permissions.value())
           account_permissions.insert(permission);
       }
 
-      return std::none_of((*role_permissions).begin(),
-                          (*role_permissions).end(),
+      return std::none_of((role_permissions.value()).begin(),
+                          (role_permissions.value()).end(),
                           [&account_permissions](const auto &perm) {
                             return account_permissions.find(perm) == account_permissions.end();
                           });
@@ -271,7 +272,7 @@ namespace iroha {
       auto add_asset_quantity = static_cast<const AddAssetQuantity &>(command);
 
       auto asset = queries.getAsset(add_asset_quantity.asset_id);
-      if (not asset.has_value()) {
+      if (not asset) {
         log_->info("asset {} is absent", add_asset_quantity.asset_id);
         return false;
       }
@@ -281,21 +282,21 @@ namespace iroha {
         log_->info("amount is wrongly formed:");
         return false;
       }
-      if (not queries.getAccount(add_asset_quantity.account_id).has_value()) {
+      if (not queries.getAccount(add_asset_quantity.account_id)) {
         log_->info("amount {} is absent", add_asset_quantity.account_id);
         return false;
       }
       auto account_asset = queries.getAccountAsset(
           add_asset_quantity.account_id, add_asset_quantity.asset_id);
-      if (not account_asset.has_value()) {
+      if (not account_asset) {
         log_->info("create wallet {} for {}",
                    add_asset_quantity.asset_id,
                    add_asset_quantity.account_id);
 
         account_asset = AccountAsset();
-        account_asset->asset_id = add_asset_quantity.asset_id;
-        account_asset->account_id = add_asset_quantity.account_id;
-        account_asset->balance = add_asset_quantity.amount;
+        account_asset.value().asset_id = add_asset_quantity.asset_id;
+        account_asset.value().account_id = add_asset_quantity.account_id;
+        account_asset.value().balance = add_asset_quantity.amount;
       } else {
         auto account_asset_value = account_asset.value();
 
@@ -304,7 +305,7 @@ namespace iroha {
         if (not new_balance.has_value()) {
           return false;
         }
-        account_asset->balance = new_balance.value();
+        account_asset.value().balance = new_balance.value();
       }
 
       // accountAsset.value().balance += amount;
@@ -371,7 +372,7 @@ namespace iroha {
         log_->info("Not sufficient amount");
         return false;
       }
-      account_asset->balance = new_balance.value();
+      account_asset.value().balance = new_balance.value();
 
       // accountAsset.value().balance -= amount;
       return commands.upsertAccountAsset(account_asset.value());
@@ -485,7 +486,7 @@ namespace iroha {
       account.quorum = 1;
       account.json_data = "{}";
       auto domain = queries.getDomain(create_account.domain_id);
-      if (not domain.has_value()) {
+      if (not domain) {
         log_->info("Domain {} not found", create_account.domain_id);
         return false;
       }
@@ -653,7 +654,7 @@ namespace iroha {
       auto account = queries.getAccount(remove_signatory.account_id);
       auto signatories = queries.getSignatories(remove_signatory.account_id);
 
-      if (not(account.has_value() and signatories.has_value())) {
+      if (not(account and signatories)) {
         // No account or signatories found
         return false;
       }
@@ -716,7 +717,7 @@ namespace iroha {
       auto set_quorum = static_cast<const SetQuorum &>(command);
 
       auto account = queries.getAccount(set_quorum.account_id);
-      if (not account.has_value()) {
+      if (not account) {
         log_->info("absent account {}", set_quorum.account_id);
         return false;
       }
@@ -745,7 +746,7 @@ namespace iroha {
       auto set_quorum = static_cast<const SetQuorum &>(command);
       auto signatories = queries.getSignatories(set_quorum.account_id);
 
-      if (not(signatories.has_value())) {
+      if (not(signatories)) {
         // No  signatories of an account found
         return false;
       }
@@ -767,7 +768,7 @@ namespace iroha {
 
       auto src_account_asset = queries.getAccountAsset(
           transfer_asset.src_account_id, transfer_asset.asset_id);
-      if (not src_account_asset.has_value()) {
+      if (not src_account_asset) {
         log_->info("asset {} is absent of {}",
                    transfer_asset.asset_id,
                    transfer_asset.src_account_id,
@@ -780,7 +781,7 @@ namespace iroha {
       auto dest_account_asset = queries.getAccountAsset(
           transfer_asset.dest_account_id, transfer_asset.asset_id);
       auto asset = queries.getAsset(transfer_asset.asset_id);
-      if (not asset.has_value()) {
+      if (not asset) {
         log_->info("asset {} is absent of {}",
                    transfer_asset.asset_id,
                    transfer_asset.dest_account_id,
@@ -867,7 +868,7 @@ namespace iroha {
       }
 
       auto asset = queries.getAsset(transfer_asset.asset_id);
-      if (not asset.has_value()) {
+      if (not asset) {
         log_->info("Asset not found");
         return false;
       }
@@ -879,7 +880,7 @@ namespace iroha {
       auto account_asset = queries.getAccountAsset(
           transfer_asset.src_account_id, transfer_asset.asset_id);
 
-      return account_asset.has_value() and
+      return account_asset and
           // Check if dest account exist
           queries.getAccount(transfer_asset.dest_account_id) and
           // Balance in your wallet should be at least amount of transfer

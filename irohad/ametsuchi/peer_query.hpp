@@ -36,7 +36,7 @@ namespace iroha {
        * Fetch peers stored in ledger
        * @return list of peers in insertion to ledger order
        */
-      virtual nonstd::optional<std::vector<model::Peer>> getLedgerPeers() = 0;
+      virtual outcome::result<std::vector<model::Peer>> getLedgerPeers() = 0;
 
       virtual ~PeerQuery() = default;
 

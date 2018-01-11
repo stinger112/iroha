@@ -128,18 +128,20 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
 
     TEST_F(RoleTest, InsertRoleWhenValidName) {
       ASSERT_TRUE(command->insertRole(role));
-      auto roles = query->getRoles();
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(1, roles->size());
-      ASSERT_EQ(role, roles->front());
+      auto roles_res = query->getRoles();
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(1, roles.size());
+      ASSERT_EQ(role, roles.front());
     }
 
     TEST_F(RoleTest, InsertRoleWhenInvalidName) {
       ASSERT_FALSE(command->insertRole(std::string(46, 'a')));
 
-      auto roles = query->getRoles();
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(0, roles->size());
+      auto roles_res = query->getRoles();
+      ASSERT_TRUE(roles_res);
+      auto roles = roles_res.value();
+      ASSERT_EQ(0, roles.size());
     }
 
     class RolePermissionsTest : public WsvQueryCommandTest {
@@ -152,19 +154,21 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
     TEST_F(RolePermissionsTest, InsertRolePermissionsWhenRoleExists) {
       ASSERT_TRUE(command->insertRolePermissions(role, {permission}));
 
-      auto permissions = query->getRolePermissions(role);
-      ASSERT_TRUE(permissions);
-      ASSERT_EQ(1, permissions->size());
-      ASSERT_EQ(permission, permissions->front());
+      auto permissions_res = query->getRolePermissions(role);
+      ASSERT_TRUE(permissions_res);
+      auto permissions = permissions_res.value();
+      ASSERT_EQ(1, permissions.size());
+      ASSERT_EQ(permission, permissions.front());
     }
 
     TEST_F(RolePermissionsTest, InsertRolePermissionsWhenNoRole) {
       auto new_role = role + " ";
       ASSERT_FALSE(command->insertRolePermissions(new_role, {permission}));
 
-      auto permissions = query->getRolePermissions(new_role);
-      ASSERT_TRUE(permissions);
-      ASSERT_EQ(0, permissions->size());
+      auto permissions_res = query->getRolePermissions(new_role);
+      ASSERT_TRUE(permissions_res);
+      auto permissions = permissions_res.value();
+      ASSERT_EQ(0, permissions.size());
     }
 
     class AccountTest : public WsvQueryCommandTest {
@@ -183,7 +187,7 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
     TEST_F(AccountTest, InsertAccountWithJSONData) {
       ASSERT_TRUE(command->insertAccount(account));
       auto acc = query->getAccount(account.account_id);
-      ASSERT_TRUE(acc.has_value());
+      ASSERT_TRUE(acc);
       ASSERT_EQ(account.json_data, acc.value().json_data);
     }
 
@@ -197,7 +201,7 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
       ASSERT_TRUE(command->setAccountKV(
           account.account_id, account.account_id, "id", "val"));
       auto acc = query->getAccount(account.account_id);
-      ASSERT_TRUE(acc.has_value());
+      ASSERT_TRUE(acc);
       ASSERT_EQ(R"({"id@domain": {"id": "val", "key": "value"}})",
                 acc.value().json_data);
     }
@@ -212,7 +216,7 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
       ASSERT_TRUE(
           command->setAccountKV(account.account_id, "admin", "id", "val"));
       auto acc = query->getAccount(account.account_id);
-      ASSERT_TRUE(acc.has_value());
+      ASSERT_TRUE(acc);
       ASSERT_EQ(R"({"admin": {"id": "val"}, "id@domain": {"key": "value"}})",
                 acc.value().json_data);
     }
@@ -227,7 +231,7 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
       ASSERT_TRUE(command->setAccountKV(
           account.account_id, account.account_id, "id", "[val1, val2]"));
       auto acc = query->getAccount(account.account_id);
-      ASSERT_TRUE(acc.has_value());
+      ASSERT_TRUE(acc);
       ASSERT_EQ(R"({"id@domain": {"id": "[val1, val2]", "key": "value"}})",
                 acc.value().json_data);
     }
@@ -242,7 +246,7 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
       ASSERT_TRUE(command->setAccountKV(
           account.account_id, account.account_id, "key", "val2"));
       auto acc = query->getAccount(account.account_id);
-      ASSERT_TRUE(acc.has_value());
+      ASSERT_TRUE(acc);
       ASSERT_EQ(R"({"id@domain": {"key": "val2"}})", acc.value().json_data);
     }
 
@@ -258,28 +262,31 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
     TEST_F(AccountRoleTest, InsertAccountRoleWhenAccountRoleExist) {
       ASSERT_TRUE(command->insertAccountRole(account.account_id, role));
 
-      auto roles = query->getAccountRoles(account.account_id);
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(1, roles->size());
-      ASSERT_EQ(role, roles->front());
+      auto roles_res = query->getAccountRoles(account.account_id);
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(1, roles.size());
+      ASSERT_EQ(role, roles.front());
     }
 
     TEST_F(AccountRoleTest, InsertAccountRoleWhenNoAccount) {
       auto account_id = account.account_id + " ";
       ASSERT_FALSE(command->insertAccountRole(account_id, role));
 
-      auto roles = query->getAccountRoles(account_id);
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(0, roles->size());
+      auto roles_res = query->getAccountRoles(account_id);
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(0, roles.size());
     }
 
     TEST_F(AccountRoleTest, InsertAccountRoleWhenNoRole) {
       auto new_role = role + " ";
       ASSERT_FALSE(command->insertAccountRole(account.account_id, new_role));
 
-      auto roles = query->getAccountRoles(account.account_id);
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(0, roles->size());
+      auto roles_res = query->getAccountRoles(account.account_id);
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(0, roles.size());
     }
 
     /**
@@ -290,9 +297,10 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
     TEST_F(AccountRoleTest, DeleteAccountRoleWhenExist) {
       ASSERT_TRUE(command->insertAccountRole(account.account_id, role));
       ASSERT_TRUE(command->deleteAccountRole(account.account_id, role));
-      auto roles = query->getAccountRoles(account.account_id);
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(0, roles->size());
+      auto roles_res = query->getAccountRoles(account.account_id);
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(0, roles.size());
     }
 
     /**
@@ -303,9 +311,10 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
     TEST_F(AccountRoleTest, DeleteAccountRoleWhenNoAccount) {
       ASSERT_TRUE(command->insertAccountRole(account.account_id, role));
       ASSERT_TRUE(command->deleteAccountRole("no", role));
-      auto roles = query->getAccountRoles(account.account_id);
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(1, roles->size());
+      auto roles_res = query->getAccountRoles(account.account_id);
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(1, roles.size());
     }
 
     /**
@@ -316,9 +325,10 @@ CREATE TABLE IF NOT EXISTS account_has_grantable_permissions (
     TEST_F(AccountRoleTest, DeleteAccountRoleWhenNoRole) {
       ASSERT_TRUE(command->insertAccountRole(account.account_id, role));
       ASSERT_TRUE(command->deleteAccountRole(account.account_id, "no"));
-      auto roles = query->getAccountRoles(account.account_id);
-      ASSERT_TRUE(roles);
-      ASSERT_EQ(1, roles->size());
+      auto roles_res = query->getAccountRoles(account.account_id);
+      ASSERT_TRUE(roles_res);
+      auto &roles = roles_res.value();
+      ASSERT_EQ(1, roles.size());
     }
 
     class AccountGrantablePermissionTest : public WsvQueryCommandTest {

@@ -24,6 +24,7 @@
 namespace iroha {
   namespace model {
 
+
     /**
      * Check that account has role permission
      * @param account_id - account to check

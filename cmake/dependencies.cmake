@@ -74,6 +74,8 @@ find_package(rxcpp)
 ##########################
 find_package(tbb)
 
+find_package(outcome)
+
 ##########################
 #         boost          #
 ##########################
