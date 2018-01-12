@@ -204,8 +204,10 @@ TEST_F(ToriiQueriesTest, FindAccountWhenHasReadPermissions) {
   // Should be called once, after successful stateful validation
   EXPECT_CALL(*wsv_query, getAccount(accountB.account_id))
       .WillOnce(Return(accountB));
+  std::vector<std::string> permissions{can_get_my_account};
+  EXPECT_CALL(*wsv_query, getRolePermissions("user")).WillRepeatedly(Return(permissions));
 
-  std::vector<std::string> roles = {"user"};
+  outcome::result<std::vector<std::string>> roles = std::vector<std::string>{"user"};
   EXPECT_CALL(*wsv_query, getAccountRoles(_)).WillRepeatedly(Return(roles));
 
   iroha::protocol::QueryResponse response;
@@ -218,6 +220,7 @@ TEST_F(ToriiQueriesTest, FindAccountWhenHasReadPermissions) {
   query.mutable_signature()->set_signature(signature_test);
 
   auto stat = torii_utils::QuerySyncClient(Ip, Port).Find(query, response);
+
   ASSERT_TRUE(stat.ok());
   // Should not return Error Response because tx is stateless and stateful valid
   ASSERT_FALSE(response.has_error_response());

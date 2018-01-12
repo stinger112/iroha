@@ -307,6 +307,10 @@ TEST_F(ClientServerTest, SendQueryWhenStatefulInvalid) {
               hasAccountGrantablePermission(
                   "admin@test", "test@test", can_get_my_account))
       .WillOnce(Return(false));
+  std::vector<std::string> roles = {"user"};
+  EXPECT_CALL(*wsv_query, getAccountRoles("admin@test")).WillRepeatedly(Return(roles));
+  std::vector<std::string> permissions = {can_get_my_account};
+  EXPECT_CALL(*wsv_query, getRolePermissions("user")).WillRepeatedly(Return(permissions));
   EXPECT_CALL(*wsv_query, getAccount("test@test")).Times(0);
 
   auto json_query =
