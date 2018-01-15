@@ -20,9 +20,9 @@
 namespace iroha {
   namespace ametsuchi {
 
-    using std::string;
 
-    using outcome::result;
+
+    using std::string;
     using model::Account;
     using model::Asset;
     using model::AccountAsset;
@@ -54,7 +54,7 @@ namespace iroha {
       return result.size() == 1;
     }
 
-    outcome::result<std::vector<std::string>>
+    result<std::vector<std::string>>
     PostgresWsvQuery::getAccountRoles(const std::string &account_id) {
       pqxx::result result;
       try {

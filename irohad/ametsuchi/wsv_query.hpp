@@ -24,14 +24,51 @@
 #include <model/asset.hpp>
 #include <model/peer.hpp>
 #include <nonstd/optional.hpp>
-#include <outcome.hpp>
+#include <boost/variant.hpp>
 #include <string>
 #include <vector>
 #include "model/domain.hpp"
 
+namespace outcome {
+
+  template <typename E>
+  struct Error {
+    Error(E &&e): e(std::forward<E>(e)) {};
+    E e;
+  };
+
+  template <typename V>
+  struct Value {
+    Value(V &&v): v(std::forward<V>(v)) {};
+    V v;
+  };
+
+  template <typename T, typename E>
+  using result = boost::variant<Value<T>, Error<E>>;
+
+  template <typename ValueHandler, typename ErrorHandler>
+  class ResultVisitor : public ValueHandler, public ErrorHandler {
+   public:
+    ResultVisitor(ValueHandler&& value_handler, ErrorHandler&& error_handler):
+        vhandler_{std::forward<ValueHandler>(value_handler)},
+        ehandler_{std::forward<ErrorHandler>(error_handler)} {};
+
+    using ValueHandler::operator();
+    using ErrorHandler::operator();
+   private:
+    ValueHandler vhandler_;
+    ErrorHandler ehandler_;
+  };
+
+  template <typename T, typename E, typename VHandle, typename EHandle>
+  auto match(const result<T, E> &r, VHandle &&value_f, EHandle &&error_f) {
+    ResultVisitor<VHandle, EHandle> matcher(value_f, error_f);
+    return boost::apply_visitor(matcher, r);
+  };
+}
+
 namespace iroha {
   namespace ametsuchi {
-    namespace outcome = OUTCOME_V2_NAMESPACE;
     /**
      *  Public interface for world state view queries
      */
@@ -56,7 +93,7 @@ namespace iroha {
        * @param domain_id - id in the system
        * @return Domain if exist, nullopt otherwise
        */
-      virtual outcome::result<model::Domain> getDomain(
+      virtual outcome::result<model::Domain, std::error_code> getDomain(
           const std::string &domain_id) = 0;
 
       /**
@@ -64,26 +101,26 @@ namespace iroha {
        * @param account_id
        * @return
        */
-      virtual outcome::result<std::vector<std::string>> getAccountRoles(
+      virtual outcome::result<std::vector<std::string>, std::error_code> getAccountRoles(
           const std::string &account_id) = 0;
       /**
        * Get all permissions of a role
        * @param role_name
        * @return
        */
-      virtual outcome::result<std::vector<std::string>> getRolePermissions(
+      virtual outcome::result<std::vector<std::string>, std::error_code> getRolePermissions(
           const std::string &role_name) = 0;
 
       /**
        * @return All roles currently in the system
        */
-      virtual outcome::result<std::vector<std::string>> getRoles() = 0;
+      virtual outcome::result<std::vector<std::string>, std::error_code> getRoles() = 0;
       /**
        * Get account by user account_id
        * @param account_id
        * @return
        */
-      virtual outcome::result<model::Account> getAccount(
+      virtual outcome::result<model::Account, std::error_code> getAccount(
           const std::string &account_id) = 0;
 
       /**
@@ -93,7 +130,7 @@ namespace iroha {
        * @param detail
        * @return
        */
-      virtual outcome::result<std::string> getAccountDetail(
+      virtual outcome::result<std::string, std::error_code> getAccountDetail(
           const std::string &account_id,
           const std::string &creator_account_id,
           const std::string &detail) = 0;
@@ -103,7 +140,7 @@ namespace iroha {
        * @param account_id
        * @return
        */
-      virtual outcome::result<std::vector<pubkey_t>> getSignatories(
+      virtual outcome::result<std::vector<pubkey_t>, std::error_code> getSignatories(
           const std::string &account_id) = 0;
 
       /**
@@ -111,7 +148,7 @@ namespace iroha {
        * @param asset_id
        * @return
        */
-      virtual outcome::result<model::Asset> getAsset(
+      virtual outcome::result<model::Asset, std::error_code> getAsset(
           const std::string &asset_id) = 0;
 
       /**
@@ -120,14 +157,14 @@ namespace iroha {
        * @param asset_id
        * @return
        */
-      virtual outcome::result<model::AccountAsset> getAccountAsset(
+      virtual outcome::result<model::AccountAsset, std::error_code> getAccountAsset(
           const std::string &account_id, const std::string &asset_id) = 0;
 
       /**
        *
        * @return
        */
-      virtual outcome::result<std::vector<model::Peer>> getPeers() = 0;
+      virtual outcome::result<std::vector<model::Peer>, std::error_code> getPeers() = 0;
     };
 
   }  // namespace ametsuchi
