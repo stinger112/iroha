@@ -13,7 +13,7 @@ find_package_handle_standard_args(rttr DEFAULT_MSG
 
 
 set(URL https://github.com/warchant/rttr)
-set(VERSION b38b7e3) # master
+set(VERSION a7c2fb3d14996c4a8d8383917864780e47d5c618) # master
 set_target_description(rttr "C++ Reflection Library" ${URL} ${VERSION})
 
 

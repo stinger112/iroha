@@ -195,7 +195,7 @@ RUN git clone git://github.com/warchant/ed25519.git /tmp/ed25519; \
     rm -rf /tmp/ed25519
 
 RUN git clone https://github.com/warchant/rttr /tmp/rttr; \
-    (cd /tmp/rttr; git checkout 58fbacf); \
+    (cd /tmp/rttr; git checkout a7c2fb3d14996c4a8d8383917864780e47d5c618); \
     cmake -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_UNIT_TESTS=OFF   \
           -DBUILD_BENCHMARKS=OFF   \
