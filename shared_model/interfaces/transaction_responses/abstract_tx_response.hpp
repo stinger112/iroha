@@ -37,12 +37,6 @@ namespace shared_model {
        */
       virtual std::string className() const = 0;
 
-      /**
-       * @return old model status
-       */
-      virtual iroha::model::TransactionResponse::Status oldModelStatus()
-          const = 0;
-
      public:
       // ------------------------| Primitive override |-------------------------
 
@@ -56,7 +50,15 @@ namespace shared_model {
         return tx_response;
       }
 
-      bool operator==(const Model &rhs) const override { return true; }
+      /**
+       * @return old model status
+       */
+      virtual iroha::model::TransactionResponse::Status oldModelStatus()
+          const = 0;
+
+      bool operator==(const Model &rhs) const override {
+        return true;
+      }
     };
   }  // namespace interface
 }  // namespace shared_model

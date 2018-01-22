@@ -33,6 +33,17 @@
 
 namespace shared_model {
   namespace interface {
+    class OldModelStatusVisitor
+        : public boost::static_visitor<
+              iroha::model::TransactionResponse::Status> {
+     public:
+      template <typename InputType>
+      iroha::model::TransactionResponse::Status operator()(
+          const InputType &operand) const {
+        return operand->oldModelStatus();
+      }
+    };
+
     /**
      * TransactionResponse is a status of transaction in system
      */
@@ -82,6 +93,10 @@ namespace shared_model {
       bool operator==(const ModelType &rhs) const override {
         return transactionHash() == rhs.transactionHash()
             and get() == rhs.get();
+      }
+
+      iroha::model::TransactionResponse::Status oldModelStatus() {
+        return boost::apply_visitor(OldModelStatusVisitor(), get());
       }
     };
   }  // namespace interface
