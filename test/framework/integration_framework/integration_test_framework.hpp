@@ -27,13 +27,16 @@
 #include <thread>
 #include <vector>
 #include "crypto/keys_manager_impl.hpp"
+#include "cryptography/blob.hpp"
 #include "cryptography/ed25519_sha3_impl/internal/sha3_hash.hpp"
 #include "framework/integration_framework/iroha_instance.hpp"
 #include "logger/logger.hpp"
 #include "model/block.hpp"
 #include "model/generators/command_generator.hpp"
 #include "model/proposal.hpp"
-#include "model/transaction.hpp"
+
+#include "backend/protobuf/transaction.hpp"
+#include "backend/protobuf/transaction_responses/proto_tx_response.hpp"
 
 namespace integration_framework {
 
@@ -51,9 +54,9 @@ namespace integration_framework {
                                               const iroha::model::Block &block);
 
     template <typename Lambda>
-    IntegrationTestFramework &sendTx(iroha::model::Transaction tx,
+    IntegrationTestFramework &sendTx(shared_model::proto::Transaction tx,
                                      Lambda validation);
-    IntegrationTestFramework &sendTx(iroha::model::Transaction tx);
+    IntegrationTestFramework &sendTx(shared_model::proto::Transaction tx);
 
     template <typename Lambda>
     IntegrationTestFramework &sendQuery(const iroha::model::Query &qry,
@@ -113,58 +116,26 @@ namespace integration_framework {
 
   template <typename Lambda>
   IntegrationTestFramework &IntegrationTestFramework::sendTx(
-      iroha::model::Transaction tx, Lambda validation) {
+      shared_model::proto::Transaction tx, Lambda validation) {
     log_->info("send transaction");
-    // deserialize
-    auto pb_tx = iroha::model::converters::PbTransactionFactory().serialize(tx);
-    // send
     {
       google::protobuf::Empty response;
       iroha_instance_->getIrohaInstance()->getCommandService()->ToriiAsync(
-          pb_tx, response);
+          tx.getTransport(), response);
     }
     // fetch status of transaction
-    iroha::model::TransactionResponse::Status status;
+    std::shared_ptr<shared_model::proto::TransactionResponse> status;
     {
-      iroha::protocol::TxStatus proto_status;
       iroha::protocol::TxStatusRequest request;
-      request.set_tx_hash(iroha::hash(tx).to_string());
+      request.set_tx_hash(shared_model::crypto::toBinaryString(tx.hash()));
       iroha::protocol::ToriiResponse response;
       iroha_instance_->getIrohaInstance()->getCommandService()->StatusAsync(
           request, response);
-      proto_status = response.tx_status();
-
-      switch (proto_status) {
-        case iroha::protocol::TxStatus::STATELESS_VALIDATION_FAILED:
-          status =
-              iroha::model::TransactionResponse::STATELESS_VALIDATION_FAILED;
-          break;
-        case iroha::protocol::TxStatus::STATELESS_VALIDATION_SUCCESS:
-          status =
-              iroha::model::TransactionResponse::STATELESS_VALIDATION_SUCCESS;
-          break;
-        case iroha::protocol::TxStatus::STATEFUL_VALIDATION_FAILED:
-          status =
-              iroha::model::TransactionResponse::STATEFUL_VALIDATION_FAILED;
-          break;
-        case iroha::protocol::TxStatus::STATEFUL_VALIDATION_SUCCESS:
-          status =
-              iroha::model::TransactionResponse::STATEFUL_VALIDATION_SUCCESS;
-          break;
-        case iroha::protocol::TxStatus::COMMITTED:
-          status = iroha::model::TransactionResponse::COMMITTED;
-          break;
-        case iroha::protocol::TxStatus::IN_PROGRESS:
-          status = iroha::model::TransactionResponse::IN_PROGRESS;
-          break;
-        case iroha::protocol::TxStatus::NOT_RECEIVED:
-        default:
-          status = iroha::model::TransactionResponse::NOT_RECEIVED;
-          break;
-      }
+      status =
+          std::make_shared<shared_model::proto::TransactionResponse>(response);
     }
     // check validation function
-    validation(status);
+    validation(*status);
     return *this;
   }
 

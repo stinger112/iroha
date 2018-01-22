@@ -16,6 +16,7 @@
  */
 
 #include "framework/integration_framework/integration_test_framework.hpp"
+#include "model/transaction.hpp"
 
 namespace integration_framework {
   IntegrationTestFramework &IntegrationTestFramework::setInitialState(
@@ -76,7 +77,7 @@ namespace integration_framework {
   }
 
   IntegrationTestFramework &IntegrationTestFramework::sendTx(
-      iroha::model::Transaction tx) {
+      shared_model::proto::Transaction tx) {
     sendTx(tx, [](auto) {});
     return *this;
   }

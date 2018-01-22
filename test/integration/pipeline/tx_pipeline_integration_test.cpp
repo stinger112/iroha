@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+#include "backend/protobuf/transaction.hpp"
+#include "builders/protobuf/transaction.hpp"
+#include "cryptography/crypto_provider/crypto_defaults.hpp"
 #include "datetime/time.hpp"
 #include "framework/integration_framework/integration_test_framework.hpp"
 #include "integration/pipeline/tx_pipeline_integration_test_fixture.hpp"
@@ -77,7 +80,8 @@ class TxPipelineIntegrationTest : public TxPipelineIntegrationTestFixture {
 };
 
 TEST_F(TxPipelineIntegrationTest, TxPipelineTest) {
-  //TODO 19/12/17 motxx - Rework integration test using shared model (IR-715 comment)
+  // TODO 19/12/17 motxx - Rework integration test using shared model (IR-715
+  // comment)
   // generate test command
   auto cmd =
       iroha::model::generators::CommandGenerator().generateAddAssetQuantity(
@@ -103,7 +107,8 @@ TEST_F(TxPipelineIntegrationTest, TxPipelineTest) {
  * @then Validate the transaction
  */
 TEST_F(TxPipelineIntegrationTest, GetTransactionsTest) {
-  //TODO 19/12/17 motxx - Rework integration test using shared model (IR-715 comment)
+  // TODO 19/12/17 motxx - Rework integration test using shared model (IR-715
+  // comment)
   const auto CREATOR_ACCOUNT_ID = "admin@test";
   // send some transaction
   const auto cmd =
@@ -126,7 +131,7 @@ TEST_F(TxPipelineIntegrationTest, GetTransactionsTest) {
 
   auto query =
       iroha::model::generators::QueryGenerator().generateGetTransactions(
-        iroha::time::now(), CREATOR_ACCOUNT_ID, 1, {given_tx_hash});
+          iroha::time::now(), CREATOR_ACCOUNT_ID, 1, {given_tx_hash});
   provider.sign(*query);
 
   const auto pb_query = PbQueryFactory{}.serialize(query);
@@ -165,16 +170,21 @@ TEST(PipelineIntegrationTest, SendQueryWithValidation) {
  * @then receive STATELESS_VALIDATION_SUCCESS status on that tx
  */
 TEST(PipelineIntegrationTest, SendTx) {
-  iroha::model::generators::CommandGenerator gen;
-
-  iroha::model::Transaction tx;
-  tx.created_ts = iroha::time::now();
-  tx.commands.push_back(gen.generateAddAssetQuantity(
-      "user", "test", iroha::Amount().createFromString("0").value()));
+  constexpr auto kUser = "user@test";
+  constexpr auto kAsset = "asset#domain";
+  auto tx = shared_model::proto::TransactionBuilder()
+                .createdTime(iroha::time::now())
+                .creatorAccountId(kUser)
+                .txCounter(1)
+                .addAssetQuantity(kUser, kAsset, "1.0")
+                .build()
+                .signAndAddSignature(
+                    shared_model::crypto::DefaultCryptoAlgorithmType::
+                        generateKeypair());
 
   auto check = [](auto status) {
     ASSERT_EQ(iroha::model::TransactionResponse::STATELESS_VALIDATION_SUCCESS,
-              status);
+              status.oldModelStatus());
   };
   integration_framework::IntegrationTestFramework()
       .setInitialState()
