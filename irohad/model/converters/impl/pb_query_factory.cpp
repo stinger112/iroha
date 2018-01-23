@@ -154,10 +154,12 @@ namespace iroha {
         const auto &pb_sign = pb_query.signature();
 
         Signature sign{};
-        sign.pubkey = pubkey_t::from_string(
-            pb_sign.pubkey(), "PbQueryFactory::deserialize", "pubkey()");
-        sign.signature = sig_t::from_string(
-            pb_sign.signature(), "PbQueryFactory::deserialize", "signature()");
+        sign.pubkey = pubkey_t::from_string(pb_sign.pubkey(),
+                                            "PbQueryFactory::deserialize",
+                                            "Signature::pubkey()");
+        sign.signature = sig_t::from_string(pb_sign.signature(),
+                                            "PbQueryFactory::deserialize",
+                                            "Signature::signature()");
 
         val->query_counter = pl.query_counter();
         val->signature = sign;
