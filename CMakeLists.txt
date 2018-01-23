@@ -41,6 +41,7 @@ option(ENABLE_LIBS_PACKAGING "Enable libs packaging" ON)
 option(SWIG_PYTHON  "Generate Swig Python bindings"  OFF)
 option(SWIG_JAVA    "Generate Swig Java bindings"    OFF)
 option(SWIG_CSHARP  "Generate Swig C# bindings"      OFF)
+option(SWIG_NODE    "Generate Swig NodeJS"           OFF)
 
 if (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug)
@@ -54,6 +55,7 @@ if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
   set(FUZZING OFF)
   set(SWIG_PYTHON OFF)
   set(SWIG_JAVA OFF)
+  set(SWIG_NODE OFF)
 endif()
 
 message(STATUS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
@@ -69,6 +71,7 @@ message(STATUS "-DENABLE_LIBS_PACKAGING=${ENABLE_LIBS_PACKAGING}")
 message(STATUS "-DSWIG_PYTHON=${SWIG_PYTHON}")
 message(STATUS "-DSWIG_JAVA=${SWIG_JAVA}")
 message(STATUS "-DSWIG_CSHARP=${SWIG_CSHARP}")
+message(STATUS "-DSWIG_NODE=${SWIG_NODE}")
 
 SET(IROHA_SCHEMA_DIR "${PROJECT_SOURCE_DIR}/schema")
 include_directories(

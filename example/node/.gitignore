@@ -1,0 +1,7 @@
+# Ignore everything
+*
+!.gitignore
+!prepare.sh
+!binding.gyp
+!package.json
+!package-lock.json
