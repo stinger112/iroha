@@ -71,8 +71,8 @@ namespace iroha {
           model::Signature sig;
           sig.signature = sig_t::from_string(
               pb_sig.signature(), "PbBlockFactory::deserialize", "signature()");
-          sig.pubkey = pubkey_t::from_string(pb_sig.pubkey()),
-          "PbBlockFactory::deserialize", "pubkey()";
+          sig.pubkey = pubkey_t::from_string(
+              pb_sig.pubkey(), "PbBlockFactory::deserialize", "pubkey()");
           block.sigs.push_back(std::move(sig));
         }
 

@@ -37,7 +37,27 @@ TEST(FromStringTest, ConvertTo_blob_t) {
  */
 TEST(FromStringTest, SizeMismatch) {
   try {
-    hash256_t::from_string(std::string(31, 0),
+    hash256_t::from_string(std::string(31, 0));
+  } catch (const std::invalid_argument &e) {
+    ASSERT_STREQ(
+        "blob_t: 'input string' has incorrect "
+        "length\n"
+        "Expected: 32 bytes\n"
+        "Actual: 31 bytes\n",
+        e.what());
+  } catch (...) {
+    FAIL() << "Exception type doesn't match";
+  }
+}
+
+/**
+ * @given byte string, messages for tracability
+ * @when byte string was converted to blob_t which has different size
+ * @then invalid argument exception throws
+ */
+TEST(FromStringTest, SizeMismatchWithMessage) {
+  try {
+    hash256_t::from_string(std::string(33, 1),
                            "FromStringTest::SizeMismatch",
                            "invalid_size_string");
   } catch (const std::invalid_argument &e) {
@@ -45,7 +65,7 @@ TEST(FromStringTest, SizeMismatch) {
         "FromStringTest::SizeMismatch: 'invalid_size_string' has incorrect "
         "length\n"
         "Expected: 32 bytes\n"
-        "Actual: 31 bytes\n",
+        "Actual: 33 bytes\n",
         e.what());
   } catch (...) {
     FAIL() << "Exception type doesn't match";
