@@ -16,7 +16,7 @@
  */
 
 #include "ametsuchi/impl/redis_block_query.hpp"
-#include "cryptography/ed25519_sha3_impl/internal/sha3_hash.hpp"
+#include "model/sha3_hash.hpp"
 
 namespace iroha {
   namespace ametsuchi {
@@ -174,7 +174,7 @@ namespace iroha {
           [this, tx_hashes](auto subscriber) {
             std::for_each(tx_hashes.begin(),
                           tx_hashes.end(),
-                          [ that = this, &subscriber ](auto tx_hash) {
+                          [that = this, &subscriber](auto tx_hash) {
                             subscriber.on_next(
                                 that->getTxByHashSync(tx_hash.to_string()));
                           });

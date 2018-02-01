@@ -19,7 +19,7 @@
 
 #include <endpoint.pb.h>
 
-#include "cryptography/ed25519_sha3_impl/internal/sha3_hash.hpp"
+#include "model/sha3_hash.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "module/irohad/validation/validation_mocks.hpp"
@@ -38,10 +38,10 @@
 constexpr const char *Ip = "0.0.0.0";
 constexpr int Port = 50051;
 
-using ::testing::Return;
-using ::testing::A;
 using ::testing::_;
+using ::testing::A;
 using ::testing::AtLeast;
+using ::testing::Return;
 
 using namespace iroha::ametsuchi;
 using namespace iroha::network;
@@ -135,8 +135,10 @@ TEST_F(ClientServerTest, SendTxWhenValid) {
           "tx_counter": 0,
           "commands": [{
             "command_type": "AddPeer",
-            "address": "localhost",
-            "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+            "peer": {
+              "address": "localhost",
+              "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+            }
         }]})";
 
   JsonTransactionFactory tx_factory;
@@ -158,8 +160,10 @@ TEST_F(ClientServerTest, SendTxWhenInvalidJson) {
       R"({"creator_account_id": "test",
           "commands":[{
             "command_type": "AddPeer",
-            "address": "localhost",
-            "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+            "peer": {
+              "address": "localhost",
+              "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+            }
           }]
         })";
   JsonTransactionFactory tx_factory;
@@ -173,7 +177,7 @@ TEST_F(ClientServerTest, SendTxWhenStatelessInvalid) {
   EXPECT_CALL(*svMock, validate(A<const iroha::model::Transaction &>()))
       .WillOnce(Return(false));
   auto json_string =
-      R"({"signatures": [ {
+      R"({"signatures": [{
             "pubkey":
               "2423232323232323232323232323232323232323232323232323232323232323",
             "signature":
@@ -183,8 +187,10 @@ TEST_F(ClientServerTest, SendTxWhenStatelessInvalid) {
           "tx_counter": 0,
           "commands": [{
             "command_type": "AddPeer",
-            "address": "localhost",
-            "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+              "peer": {
+                "address": "localhost",
+                "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+              }
         }]})";
 
   auto doc = iroha::model::converters::stringToJson(json_string).value();
@@ -209,8 +215,10 @@ TEST_F(ClientServerTest, SendQueryWhenInvalidJson) {
       R"({"creator_account_id": "test",
           "commands":[{
             "command_type": "AddPeer",
-            "address": "localhost",
-            "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+            "peer": {
+              "address": "localhost",
+              "peer_key": "2323232323232323232323232323232323232323232323232323232323232323"
+            }
           }]
         })";
 

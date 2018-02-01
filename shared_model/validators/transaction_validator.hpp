@@ -18,6 +18,7 @@
 #ifndef IROHA_SHARED_MODEL_TRANSACTION_VALIDATOR_HPP
 #define IROHA_SHARED_MODEL_TRANSACTION_VALIDATOR_HPP
 
+#include <boost/format.hpp>
 #include <boost/variant/static_visitor.hpp>
 
 #include "interfaces/transaction.hpp"
@@ -56,8 +57,7 @@ namespace shared_model {
         ReasonsGroupType reason;
         addInvalidCommand(reason, "AddPeer");
 
-        validator_.validatePubkey(reason, ap->peerKey());
-        validator_.validatePeerAddress(reason, ap->peerAddress());
+        validator_.validatePeer(reason, ap->peer());
 
         return reason;
       }

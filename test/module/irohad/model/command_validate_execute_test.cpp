@@ -38,11 +38,11 @@
 #include "model/execution/command_executor_factory.hpp"
 #include "model/permissions.hpp"
 
-using ::testing::_;
 using ::testing::AllOf;
 using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::StrictMock;
+using ::testing::_;
 
 using namespace iroha;
 using namespace iroha::ametsuchi;
@@ -803,7 +803,8 @@ TEST_F(RemoveSignatoryTest, InvalidWhenNoAccount) {
 
 /**
  * @given RemoveSignatory
- * @when command tries to remove signatory from account which does not have any signatories
+ * @when command tries to remove signatory from account which does not have any
+ * signatories
  * @then execute fails and returns false
  */
 TEST_F(RemoveSignatoryTest, InvalidWhenNoSignatories) {
@@ -823,7 +824,8 @@ TEST_F(RemoveSignatoryTest, InvalidWhenNoSignatories) {
 
 /**
  * @given RemoveSignatory
- * @when command tries to remove signatory from non-existing account and it has no signatories
+ * @when command tries to remove signatory from non-existing account and it has
+ * no signatories
  * @then execute fails and returns false
  */
 TEST_F(RemoveSignatoryTest, InvalidWhenNoAccountAndSignatories) {
@@ -843,8 +845,8 @@ TEST_F(RemoveSignatoryTest, InvalidWhenNoAccountAndSignatories) {
 
 /**
  * @given RemoveSignatory
- * @when command tries to remove signatory from creator's account but has no permissions and no grantable permissions
- *       to do that
+ * @when command tries to remove signatory from creator's account but has no
+ * permissions and no grantable permissions to do that
  * @then execute fails and returns false
  */
 TEST_F(RemoveSignatoryTest, InvalidWhenNoPermissionToRemoveFromSelf) {
@@ -960,7 +962,8 @@ TEST_F(SetQuorumTest, InvalidWhenNoAccountButPassedPermissions) {
 
 /**
  * @given SetQuorum
- * @when command tries to set quorum for account which does not have any signatories
+ * @when command tries to set quorum for account which does not have any
+ * signatories
  * @then execute fails and returns false
  */
 TEST_F(SetQuorumTest, InvalidWhenNoSignatories) {
@@ -1395,8 +1398,8 @@ class AddPeerTest : public CommandValidateExecuteTest {
     CommandValidateExecuteTest::SetUp();
 
     add_peer = std::make_shared<AddPeer>();
-    add_peer->address = "iroha_node:10001";
-    add_peer->peer_key.fill(4);
+    add_peer->peer.address = "iroha_node:10001";
+    add_peer->peer.pubkey.fill(4);
 
     command = add_peer;
     role_permissions = {can_add_peer};
@@ -1534,10 +1537,11 @@ TEST_F(AppendRoleTest, InvalidCaseNoAccountRole) {
 }
 
 /**
-* @given AppendRole
-* @when command tries to append non-existing role and creator does not have any roles
-* @then execute() fails and returns false
-*/
+ * @given AppendRole
+ * @when command tries to append non-existing role and creator does not have any
+ * roles
+ * @then execute() fails and returns false
+ */
 TEST_F(AppendRoleTest, InvalidCaseNoAccountRoleAndNoPermission) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .Times(2)
@@ -1551,10 +1555,11 @@ TEST_F(AppendRoleTest, InvalidCaseNoAccountRoleAndNoPermission) {
 }
 
 /**
-* @given AppendRole
-* @when command tries to append role, but creator account does not have necessary permission
-* @then execute() fails and returns false
-*/
+ * @given AppendRole
+ * @when command tries to append role, but creator account does not have
+ * necessary permission
+ * @then execute() fails and returns false
+ */
 TEST_F(AppendRoleTest, InvalidCaseRoleHasNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .Times(2)
@@ -1605,9 +1610,10 @@ class GrantPermissionTest : public CommandValidateExecuteTest {
  public:
   void SetUp() override {
     CommandValidateExecuteTest::SetUp();
-    exact_command = std::make_shared<GrantPermission>("yoda", "CanTeach");
+    const auto perm = "can_teach";
+    exact_command = std::make_shared<GrantPermission>("yoda", perm);
     command = exact_command;
-    role_permissions = {"CanGrantCanTeach"};
+    role_permissions = {can_grant + perm};
   }
   std::shared_ptr<GrantPermission> exact_command;
 };
