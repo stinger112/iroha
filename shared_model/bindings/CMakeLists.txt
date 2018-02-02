@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 add_library(bindings
         model_transaction_builder.cpp
         model_query_builder.cpp
@@ -33,6 +32,10 @@ if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP OR SWIG_NODE)
     include(${SWIG_USE_FILE})
 
     set(CMAKE_SWIG_FLAGS "")
+    if (SHARED_MODEL_DISABLE_COMPATIBILITY)
+        set(CMAKE_SWIG_FLAGS "-DDISABLE_BACKWARD")
+    endif()
+
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     set_source_files_properties(bindings.i PROPERTIES CPLUSPLUS ON)
     set_property(GLOBAL PROPERTY SWIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
@@ -71,11 +74,12 @@ if (SWIG_CSHARP)
 endif()
 
 if (SWIG_NODE)
+
     find_package (nodejs REQUIRED)
     include_directories (
             ${NODEJS_INCLUDE_DIRS}
             ${CMAKE_CURRENT_SOURCE_DIR}/..
-    )
+            )
 
     set (V8_VERSION_HEX 0x0${V8_VERSION_MAJOR}${V8_VERSION_MINOR}${V8_VERSION_PATCH})
     string (LENGTH "${V8_VERSION_HEX}" V8_VERSION_HEX_length)
@@ -87,10 +91,12 @@ if (SWIG_NODE)
 
     if (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
         set(MAC_OPTS "-flat_namespace -undefined suppress")
+        set(MAC_SHARED_LIBRARY "SHARED")
     endif()
 
     set_property(SOURCE bindings.i PROPERTY SWIG_FLAGS "-node" "-DV8_VERSION=${V8_VERSION_HEX}")
     message(STATUS "-I${CMAKE_BINARY_DIR}/../../../shared_model")
-    swig_add_library(irohanode LANGUAGE javascript SOURCES bindings.i)
+    # if we build for Mac, build irohanode as shared library
+    swig_add_library(irohanode TYPE ${MAC_SHARED_LIBRARY} LANGUAGE javascript SOURCES bindings.i)
     swig_link_libraries(irohanode bindings ${MAC_OPTS})
 endif()
