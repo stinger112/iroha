@@ -2,6 +2,8 @@
 *
 !.gitignore
 !prepare.sh
+!clean.sh
 !binding.gyp
 !package.json
 !package-lock.json
+!index.js

@@ -1,19 +1,12 @@
 {
   "name": "irohajs",
   "version": "1.0.0",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "example",
-    "test": "test"
-  },
+  "description": "Example of how to use iroha shared library with node.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "node-gyp": "node-gyp"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hyperledger/iroha.git"
-  },
+  "repository": "git+https://github.com/hyperledger/iroha.git",
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
@@ -25,5 +18,6 @@
     "grpc": "^1.8.4",
     "grpc-tools": "^1.6.6",
     "node-gyp": "^3.6.2"
-  }
+  },
+  "main": "index.js"
 }
