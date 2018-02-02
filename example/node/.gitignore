@@ -1,9 +1,4 @@
 # Ignore everything
-*
-!.gitignore
-!prepare.sh
-!clean.sh
-!binding.gyp
-!package.json
-!package-lock.json
-!index.js
+node_modules/
+pb/
+build*/
