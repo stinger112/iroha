@@ -23,6 +23,7 @@ target_link_libraries(bindings
         shared_model_ed25519_sha3
         generator
         shared_model_stateless_validation
+        iroha_amount
         )
 
 
@@ -35,7 +36,6 @@ if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP OR SWIG_NODE)
     if (SHARED_MODEL_DISABLE_COMPATIBILITY)
         set(CMAKE_SWIG_FLAGS "-DDISABLE_BACKWARD")
     endif()
-
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     set_source_files_properties(bindings.i PROPERTIES CPLUSPLUS ON)
     set_property(GLOBAL PROPERTY SWIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})

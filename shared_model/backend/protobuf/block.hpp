@@ -21,6 +21,9 @@
 #include "interfaces/iroha_internal/block.hpp"
 
 #include <boost/range/numeric.hpp>
+#include "backend/protobuf/common_objects/signature.hpp"
+#include "backend/protobuf/transaction.hpp"
+#include "backend/protobuf/util.hpp"
 #include "common_objects/trivial_proto.hpp"
 #include "model/block.hpp"
 
@@ -39,9 +42,10 @@ namespace shared_model {
       template <class BlockType>
       explicit Block(BlockType &&block)
           : CopyableProto(std::forward<BlockType>(block)),
+            payload_(proto_->payload()),
             transactions_([this] {
               std::vector<w<interface::Transaction>> txs;
-              for (const auto &tx : proto_->payload().transactions()) {
+              for (const auto &tx : payload_.transactions()) {
                 auto tmp = detail::makePolymorphic<proto::Transaction>(tx);
                 txs.emplace_back(tmp);
               }
@@ -59,9 +63,7 @@ namespace shared_model {
               }
               return sigs;
             }),
-            payload_(detail::makeReferenceGenerator(
-                proto_, &iroha::protocol::Block::payload)),
-            payload_blob_([this] { return makeBlob(*payload_); })
+            payload_blob_([this] { return makeBlob(payload_); })
 
       {}
 
@@ -74,7 +76,7 @@ namespace shared_model {
       }
 
       interface::types::HeightType height() const override {
-        return payload_->height();
+        return payload_.height();
       }
 
       const HashType &prevHash() const override {
@@ -103,11 +105,11 @@ namespace shared_model {
       }
 
       interface::types::TimestampType createdTime() const override {
-        return payload_->created_time();
+        return payload_.created_time();
       }
 
       TransactionsNumberType txsNumber() const override {
-        return payload_->tx_number();
+        return payload_.tx_number();
       }
 
       const typename Hashable<Block, iroha::model::Block>::BlobType &payload()
@@ -119,12 +121,11 @@ namespace shared_model {
       // lazy
       template <typename T>
       using Lazy = detail::LazyInitializer<T>;
-
+      const iroha::protocol::Block::Payload &payload_;
       const Lazy<std::vector<w<interface::Transaction>>> transactions_;
       const Lazy<BlobType> blob_;
       const Lazy<HashType> prev_hash_;
       const Lazy<SignatureSetType> signatures_;
-      const Lazy<const iroha::protocol::Block::Payload &> payload_;
       const Lazy<BlobType> payload_blob_;
     };
   }  // namespace proto
