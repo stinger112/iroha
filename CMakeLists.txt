@@ -114,7 +114,3 @@ if (FUZZING)
     message(Fuzzing with compilers other than clang does not supported yet)
   endif()
 endif()
-
-
-
-
