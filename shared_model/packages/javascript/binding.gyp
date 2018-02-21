@@ -3,11 +3,11 @@
     {
       "target_name": "irohanodejs",
       "include_dirs": [
-        "../../shared_model",
-        "../../libs",
-        "../../external/src/martinmoene_optional/include",
-        "../../irohad",
-        "../../schema"
+        "../../../shared_model",
+        "../../../libs",
+        "../../../external/src/martinmoene_optional/include",
+        "../../../irohad",
+        "../../../schema"
       ],
       "sources": [
         "./build_cmake/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx"
