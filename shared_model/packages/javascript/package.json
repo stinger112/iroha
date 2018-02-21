@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stinger112/iroha-js.git"
+    "url": "git+https://github.com/hyperledger/iroha.git"
   },
   "keywords": [
     "iroha",
@@ -19,9 +19,14 @@
     "iroha-node",
     "iroha-nodejs",
     "iroha-javascript",
-    "iroha-client"
+    "iroha-client",
+    "iroha-lib"
   ],
   "contributors": [
+    {
+      "name": "Viacheslav Bikbaev",
+      "email": "viacheslav@soramitsu.co.jp"
+    },
     {
       "name": "Arseniy Fokin",
       "email": "fokin@soramitsu.co.jp"
@@ -29,9 +34,9 @@
   ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/stinger112/iroha-js/issues"
+    "url": "https://github.com/hyperledger/iroha/issues"
   },
-  "homepage": "https://github.com/stinger112/iroha-js#readme",
+  "homepage": "https://github.com/hyperledger/iroha#readme",
   "dependencies": { 
     "node-pre-gyp": "^0.6.39"
   },
