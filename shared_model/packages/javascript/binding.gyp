@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "irohanodejs",
+      "target_name": "<(module_name)",
       "include_dirs": [
         "../../../shared_model",
         "../../../libs",
@@ -38,6 +38,17 @@
             }
           }
         ]
+      ]
+    },
+    {
+      "target_name": "action_after_build",
+      "type": "none",
+      "dependencies": [ "<(module_name)" ],
+      "copies": [
+        {
+          "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
+          "destination": "<(module_path)"
+        }
       ]
     }
   ]
