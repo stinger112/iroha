@@ -60,3 +60,4 @@ typings/
 # Build and generated directories
 build*/
 pb/*
+lib/*
