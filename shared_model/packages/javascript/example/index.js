@@ -15,7 +15,7 @@ function blob2array (blob) {
   return bytearray
 }
 
-var iroha = require('../build/Release/irohanodejs')
+var iroha = require('../index')
 var txBuilder = new iroha.ModelTransactionBuilder()
 var queryBuilder = new iroha.ModelQueryBuilder()
 var crypto = new iroha.ModelCrypto()
