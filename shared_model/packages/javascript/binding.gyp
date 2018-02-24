@@ -1,13 +1,36 @@
 {
+  'variables': {
+    'IROHA_HOME': '../../../'
+  },
   'targets': [
     {
       'target_name': 'shared_model',
       'type': 'none',
       'actions': [
         {
-          'action_name': 'build',
+          'action_name': 'configure',
+          'message': 'Generate CMake build configuration for shared_model...',
           'inputs': [
-            'scripts/prebuild.sh',
+            '<(IROHA_HOME)/shared_model/bindings/CMakeLists.txt'
+          ],
+          'outputs': [
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/Makefile',
+          ],
+          'action': [
+            'cmake', 
+            '-H<(IROHA_HOME)', 
+            '-B<(SHARED_INTERMEDIATE_DIR)', 
+            '-DSWIG_NODE=ON', 
+            '-DSHARED_MODEL_DISABLE_COMPATIBILITY=ON', 
+            '-DCMAKE_BUILD_TYPE=Release', 
+            '-DSWIG_EXECUTABLE=/opt/swig/bin/swig'
+          ]
+        },
+        {
+          'action_name': 'build',
+          'message': 'Build shared_model libraries by CMake...',
+          'inputs': [
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/Makefile',
           ],
           'outputs': [
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx',
@@ -15,7 +38,11 @@
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/irohanode.so'
           ],
           'action': [
-            'sh', 'scripts/prebuild.sh', '<(SHARED_INTERMEDIATE_DIR)', '<(module_path)'
+            'cmake', 
+            '--build', '<(SHARED_INTERMEDIATE_DIR)',
+            '--target', 'irohanode',
+            '--',
+            '-j<!(echo "$(getconf _NPROCESSORS_ONLN)")'
           ]
         },
       ],
@@ -32,11 +59,11 @@
       'target_name': '<(module_name)',
       'dependencies': [ 'shared_model' ],
       'include_dirs': [
-        '../../../shared_model',
-        '../../../libs',
-        '../../../external/src/martinmoene_optional/include',
-        '../../../irohad',
-        '../../../schema'
+        '<(IROHA_HOME)/shared_model',
+        '<(IROHA_HOME)/libs',
+        '<(IROHA_HOME)/external/src/martinmoene_optional/include',
+        '<(IROHA_HOME)/irohad',
+        '<(IROHA_HOME)/schema'
       ],
       'sources': [
         '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx'
