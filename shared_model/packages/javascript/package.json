@@ -1,5 +1,5 @@
 {
-  "name": "iroha-js",
+  "name": "iroha-lib",
   "version": "0.0.1",
   "description": "Modern JavaScript library for Iroha. https://github.com/hyperledger/iroha",
   "main": "index.js",
@@ -7,12 +7,12 @@
     "build": "node-pre-gyp build",
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm ls",
-    "publish": "node-pre-gyp-github publish"
+    "prepare": "node-pre-gyp-github publish",
+    "prepublishOnly": "npm ls"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hyperledger/iroha.git"
+    "url": "git+https://github.com/stinger112/iroha-js.git"
   },
   "keywords": [
     "iroha",
@@ -42,7 +42,6 @@
   "dependencies": {
     "google-protobuf": "^3.5.0",
     "grpc": "^1.9.1",
-    "i": "^0.3.6",
     "node-pre-gyp": "^0.6.39"
   },
   "devDependencies": {
@@ -59,8 +58,8 @@
   "binary": {
     "module_name": "iroha_lib",
     "module_path": "lib/{node_abi}-{platform}-{arch}-{libc}/",
-    "host": "https://your_module.s3-us-west-1.amazonaws.com",
-    "remote_path": "node/{name}/v{version}",
+    "host": "https://github.com/stinger112/iroha-js/releases/download/",
+    "remote_path": "{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{libc}.tar.gz"
   }
 }

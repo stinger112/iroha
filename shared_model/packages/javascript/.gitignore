@@ -58,6 +58,8 @@ typings/
 .env
 
 # Build and generated directories
-build*/
-pb/*
+build/*
+# pb/*
 lib/*
+
+package-lock.json
