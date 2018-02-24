@@ -4,7 +4,7 @@ CURDIR="$(cd "$(dirname "$0")"; pwd)"
 IROHA_HOME="$(dirname $(dirname $(dirname $(dirname "${CURDIR}"))))"
 
 SHARED_INTERMEDIATE_DIR=$1
-CMAKE_BUILD_DIR=$SHARED_INTERMEDIATE_DIR/build_cmake
+CMAKE_BUILD_DIR=$SHARED_INTERMEDIATE_DIR
 
 echo ---------------------------------------------------------------------
 echo "THIS SCRIPT BUILD SHARED MODEL WITH SWIG FOR NODEJS."
@@ -16,6 +16,6 @@ cmake --build $CMAKE_BUILD_DIR --target irohanode -- -j"$(getconf _NPROCESSORS_O
 
 # TODO: link it properly in bindings.gyp for MacOS
 # if [ "$(uname)" == "Darwin" ]; then
- # export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$(pwd)/lib/
+#  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$(pwd)/lib/$MODULE_PATH
 # fi
 

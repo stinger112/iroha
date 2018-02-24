@@ -5,24 +5,24 @@
       "type": "none",
       "actions": [
         {
-          "action_name": "build_cmake",
+          "action_name": "build",
           "inputs": [
-            "prepare.sh",
+            "scripts/prebuild.sh",
           ],
           "outputs": [
-            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx",
-            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/libbindings.a",
-            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/irohanode.so"
+            "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx",
+            "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libbindings.a",
+            "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/irohanode.so"
           ],
           "action": [
-            "sh", "prepare.sh", "<(SHARED_INTERMEDIATE_DIR)", "<(_outputs)"
+            "sh", "scripts/prebuild.sh", "<(SHARED_INTERMEDIATE_DIR)", "<(module_path)"
           ]
         },
       ],
       "copies": [
         {
           "files": [
-            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/irohanode.so"
+            "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/irohanode.so"
           ],
           "destination": "<(module_path)"
         }
@@ -39,7 +39,7 @@
         "../../../schema"
       ],
       "sources": [
-        "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx"
+        "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx"
       ],
       "cflags_cc": ["-std=c++14", "-fexceptions", "-DDISABLE_BACKWARD"],
       "cflags_cc!": ["-fno-rtti"],
@@ -48,7 +48,7 @@
           "OS != 'mac'",
           {
             "libraries": [
-              "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/libbindings.a",
+              "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libbindings.a",
               "<(module_path)/irohanode.so"
             ]
           }
@@ -57,8 +57,8 @@
           "OS == 'mac'",
           {
             "libraries": [
-              "<(module_root_dir)/build_cmake/shared_model/bindings/libbindings.a",
-              "<(module_root_dir)/build_cmake/shared_model/bindings/irohanode.dylib"
+              "<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libbindings.a",
+              "<(module_path)/irohanode.dylib"
             ],
             "xcode_settings": {
               "GCC_ENABLE_CPP_RTTI": "YES",
