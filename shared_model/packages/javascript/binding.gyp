@@ -1,7 +1,36 @@
 {
   "targets": [
     {
+      "target_name": "shared_model",
+      "type": "none",
+      "actions": [
+        {
+          "action_name": "build_cmake",
+          "inputs": [
+            "prepare.sh",
+          ],
+          "outputs": [
+            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx",
+            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/libbindings.a",
+            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/irohanode.so"
+          ],
+          "action": [
+            "sh", "prepare.sh", "<(SHARED_INTERMEDIATE_DIR)", "<(_outputs)"
+          ]
+        },
+      ],
+      "copies": [
+        {
+          "files": [
+            "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/irohanode.so"
+          ],
+          "destination": "<(module_path)"
+        }
+      ]
+    },
+    {
       "target_name": "<(module_name)",
+      "dependencies": [ "shared_model" ],
       "include_dirs": [
         "../../../shared_model",
         "../../../libs",
@@ -10,7 +39,7 @@
         "../../../schema"
       ],
       "sources": [
-        "./build_cmake/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx"
+        "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx"
       ],
       "cflags_cc": ["-std=c++14", "-fexceptions", "-DDISABLE_BACKWARD"],
       "cflags_cc!": ["-fno-rtti"],
@@ -19,8 +48,8 @@
           "OS != 'mac'",
           {
             "libraries": [
-              "<(module_root_dir)/build_cmake/shared_model/bindings/libbindings.a",
-              "<(module_root_dir)/build_cmake/shared_model/bindings/irohanode.so"
+              "<(SHARED_INTERMEDIATE_DIR)/build_cmake/shared_model/bindings/libbindings.a",
+              "<(module_path)/irohanode.so"
             ]
           }
         ],
