@@ -79,7 +79,6 @@ if (SWIG_CSHARP)
 endif()
 
 if (SWIG_NODE)
-
     find_package (nodejs REQUIRED)
     include_directories (
             ${NODEJS_INCLUDE_DIRS}
@@ -101,7 +100,10 @@ if (SWIG_NODE)
 
     set_property(SOURCE bindings.i PROPERTY SWIG_FLAGS "-node" "-DV8_VERSION=${V8_VERSION_HEX}")
     message(STATUS "-I${CMAKE_BINARY_DIR}/../../../shared_model")
-    # if we build for Mac, build irohanode as shared library
-    swig_add_library(irohanode TYPE ${MAC_SHARED_LIBRARY} LANGUAGE javascript SOURCES bindings.i)
+    swig_add_library(irohanode 
+        TYPE STATIC 
+        LANGUAGE javascript 
+        SOURCES bindings.i
+        )
     swig_link_libraries(irohanode bindings ${MAC_OPTS})
 endif()
