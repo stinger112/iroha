@@ -94,37 +94,26 @@
       ],
       'cflags_cc': ['-std=c++14', '-fexceptions', '-DDISABLE_BACKWARD'],
       'cflags_cc!': ['-fno-rtti'],
+      'libraries': [
+        '<(PRODUCT_DIR)/irohanode.a', # Library contains swig runtime
+
+        '-L<(PRODUCT_DIR)',
+        
+        '-lbindings',
+        '-lgenerator',
+        '-lhash',
+        '-liroha_amount',
+        '-lschema',
+        '-lshared_model_ed25519_sha3',
+        '-lshared_model_stateless_validation',
+        '-lcryptography',
+
+        # Third-party libraries
+        '-led25519',
+        '-lprotobuf'
+      ],
       'conditions': [
-        [
-          'OS != "mac"',
-          {
-            'libraries': [
-              '<(PRODUCT_DIR)/irohanode.a', # Library contains swig runtime
-
-              '-L<(PRODUCT_DIR)',
-              
-              '-lbindings',
-              '-lgenerator',
-              '-lhash',
-              '-liroha_amount',
-              '-lschema',
-              '-lshared_model_ed25519_sha3',
-              '-lshared_model_stateless_validation',
-              '-lcryptography',
-
-              # Third-party libraries
-              '-led25519',
-              '-lprotobuf'
-            ]
-          }
-        ],
-        [
-          'OS == "mac"',
-          {
-            'libraries': [
-              '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libbindings.a',
-              '<(module_path)/irohanode.dylib'
-            ],
+        [ 'OS == "mac"', {
             'xcode_settings': {
               'GCC_ENABLE_CPP_RTTI': 'YES',
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
