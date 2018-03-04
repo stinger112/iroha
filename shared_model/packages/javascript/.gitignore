@@ -59,7 +59,9 @@ typings/
 
 # Build and generated directories
 build/*
-# pb/*
+pb/*
 lib/*
 
 package-lock.json
+
+!.npmignore
