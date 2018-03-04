@@ -32,10 +32,7 @@
             '-Dprotobuf_INCLUDE_DIR=<(protobuf_install_dir)/include',
             '-Dprotobuf_LIBRARY=<(protobuf_install_dir)/lib',
             '-Dprotoc_EXECUTABLE=<(protobuf_install_dir)/bin/protoc',
-
-            # TODO: Make hardcoded packages optional
-            '-DSWIG_EXECUTABLE=/opt/swig/bin/swig'
-          ]
+          ],
         },
         {
           'action_name': 'build',
@@ -53,7 +50,7 @@
             '--build', '<(SHARED_INTERMEDIATE_DIR)',
             '--target', 'irohanode',
             '--',
-            '-j<!(echo "$(nproc)")'
+            '-j<!(echo "$(getconf _NPROCESSORS_ONLN)")'
           ]
         },
       ],
