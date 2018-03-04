@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "node-pre-gyp build",
+    "rebuild": "node-pre-gyp rebuild",
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "node-pre-gyp-github publish",
     "prepublishOnly": "npm ls"
   },
   "repository": {
