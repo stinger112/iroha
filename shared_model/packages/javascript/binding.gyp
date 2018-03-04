@@ -44,7 +44,9 @@
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/Makefile',
           ],
           'outputs': [
-            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx'
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx',
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libirohanode.a',
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libbindings.a'
           ],
           'action': [
             'cmake', 
@@ -61,7 +63,7 @@
       'copies': [
         {
           'files': [
-            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/irohanode.a',
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libirohanode.a',
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/libbindings.a',
             '<(SHARED_INTERMEDIATE_DIR)/schema/libschema.a',
             '<(SHARED_INTERMEDIATE_DIR)/libs/generator/libgenerator.a',
@@ -95,10 +97,9 @@
       'cflags_cc': ['-std=c++14', '-fexceptions', '-DDISABLE_BACKWARD'],
       'cflags_cc!': ['-fno-rtti'],
       'libraries': [
-        '<(PRODUCT_DIR)/irohanode.a', # Library contains swig runtime
-
         '-L<(PRODUCT_DIR)',
         
+        '-lirohanode', # Library contains SWIG runtime
         '-lbindings',
         '-lgenerator',
         '-lhash',

@@ -95,15 +95,17 @@ if (SWIG_NODE)
 
     if (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
         set(MAC_OPTS "-flat_namespace -undefined suppress")
-        set(MAC_SHARED_LIBRARY "SHARED")
     endif()
 
     set_property(SOURCE bindings.i PROPERTY SWIG_FLAGS "-node" "-DV8_VERSION=${V8_VERSION_HEX}")
     message(STATUS "-I${CMAKE_BINARY_DIR}/../../../shared_model")
+
+    # Build SWIG library always statically for the subsequent assembly by GYP
     swig_add_library(irohanode 
         TYPE STATIC 
         LANGUAGE javascript 
         SOURCES bindings.i
         )
-    swig_link_libraries(irohanode bindings ${MAC_OPTS})
+    set_target_properties(irohanode PROPERTIES PREFIX ${CMAKE_STATIC_LIBRARY_PREFIX})
+    target_link_libraries(irohanode bindings ${MAC_OPTS})
 endif()
