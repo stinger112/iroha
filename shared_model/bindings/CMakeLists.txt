@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 add_library(bindings
         model_transaction_builder.cpp
         model_query_builder.cpp
@@ -29,7 +30,7 @@ target_link_libraries(bindings
 
 
 if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP OR SWIG_NODE)
-    find_package(SWIG 3.0.12 REQUIRED)
+    find_package(swig REQUIRED)
     include(${SWIG_USE_FILE})
 
     set(CMAKE_SWIG_FLAGS "")
@@ -39,6 +40,8 @@ if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP OR SWIG_NODE)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     set_source_files_properties(bindings.i PROPERTIES CPLUSPLUS ON)
     set_property(GLOBAL PROPERTY SWIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+    add_dependencies(bindings swig)
 endif()
 
 if (SWIG_PYTHON)
