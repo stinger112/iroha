@@ -19,7 +19,7 @@ if(NOT SWIG_EXECUTABLE)
       GIT_PROGRESS   ON
       PATCH_COMMAND ${GIT_EXECUTABLE} apply ${PROJECT_SOURCE_DIR}/patch/add-nodejs8-support-to-swig.patch || true
       # We should install SWIG to properly access SWIG lib
-      CONFIGURE_COMMAND ./autogen.sh COMMAND ./configure --without-pcre --prefix=${EP_PREFIX}/src/swig_swig
+      CONFIGURE_COMMAND ./autogen.sh COMMAND ./configure --without-pcre --disable-ccache --prefix=${EP_PREFIX}/src/swig_swig
       BUILD_IN_SOURCE ON
       BUILD_COMMAND $(MAKE) swig
       TEST_COMMAND "" # remove test step
