@@ -6,7 +6,10 @@ set_directory_properties(PROPERTIES
     EP_PREFIX ${EP_PREFIX}
     )
 
-# Project dependencies.
+
+###################################################################
+##### START OF PROJECT DEPENDENCIES
+
 find_package(Threads REQUIRED)
 
 ##########################
@@ -72,22 +75,37 @@ find_package(tbb)
 ##########################
 #         boost          #
 ##########################
-find_package(Boost 1.65.0 REQUIRED
-    COMPONENTS
+set(BOOST_COMPONENTS
     filesystem
     system
     )
-add_library(boost INTERFACE IMPORTED)
-set_target_properties(boost PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS}
-    INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
+set(BOOST_VERSION 1.65.1)
+message(STATUS "PATH BEFORE:" ${CMAKE_MODULE_PATH})
+
+hunter_add_package(Boost COMPONENTS
+    ${BOOST_COMPONENTS}
+    )
+find_package(Boost CONFIG REQUIRED
+    COMPONENTS
+    ${BOOST_COMPONENTS}
     )
 
-if(ENABLE_LIBS_PACKAGING)
-  foreach (library ${Boost_LIBRARIES})
-    add_install_step_for_lib(${library})
-  endforeach(library)
-endif()
+# find_package(Boost 1.65.0 REQUIRED
+#     COMPONENTS
+#     filesystem
+#     system
+#     )
+# add_library(boost INTERFACE IMPORTED)
+# set_target_properties(boost PROPERTIES
+#     INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS}
+#     INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
+#     )
+
+# if(ENABLE_LIBS_PACKAGING)
+#   foreach (library ${Boost_LIBRARIES})
+#     add_install_step_for_lib(${library})
+#   endforeach(library)
+# endif()
 
 ##########################
 #       benchmark        #
