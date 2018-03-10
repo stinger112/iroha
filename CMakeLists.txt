@@ -53,7 +53,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Coverage" CACHE STRING "" FORCE)
 # Coverage configuration type here
 set(HUNTER_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
 
-include("cmake/HunterGate.cmake")
+include(HunterGate)
 HunterGate(
     URL "https://github.com/ruslo/hunter/archive/v0.20.14.tar.gz"
     SHA1 "18cdbf5c47abdda437c73bf5437b7c3c65afe47c"
@@ -87,7 +87,6 @@ if(COVERAGE)
   include(cmake/analysis.cmake)
 endif()
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 option(BENCHMARKING "Build benchmarks"               OFF)
 option(TESTING      "Build tests"                    ON )
