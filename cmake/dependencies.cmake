@@ -87,12 +87,6 @@ find_package(Boost 1.65.1 CONFIG REQUIRED
     ${BOOST_COMPONENTS}
     )
 
-# if(ENABLE_LIBS_PACKAGING)
-#   foreach (library ${Boost_LIBRARIES})
-#     add_install_step_for_lib(${library})
-#   endforeach(library)
-# endif()
-
 ##########################
 #       benchmark        #
 ##########################
