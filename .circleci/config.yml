@@ -333,7 +333,72 @@ jobs:
           path: build/version.txt
           destination: version.txt
 
-     
+
+  # clean build, which is invoked manually from circle ci workflow interface
+  build-clean:
+    # machine is:
+    # - CPUs: 2
+    # - Processor: Intel(R) Xeon(R) @ 2.3GHz
+    # - RAM: 8 GB
+    # - HD: 100 GB
+    machine: true
+    environment:
+      PARALLELISM: 2
+    steps:
+      - checkout
+      - run: sudo apt update -yqq
+      # compier dependencies
+      - run: sudo apt install -yqq build-essential ccache
+      # grpc dependencies
+      - run: sudo apt install -yqq golang
+      # curl+ssl dependencies
+      - run: sudo apt install -yqq curl libssl-dev zlib1g-dev libcurl4-openssl-dev
+      - restore_cache:
+          keys:
+            - build-clean-{{ arch }}-{{ .Branch }}-
+            - build-clean-{{ arch }}-
+            - build-clean-
+          paths:
+            - ~/.ccache
+      - run:
+          name: ccache setup
+          command: |
+            ccache --version
+            ccache --show-stats
+            ccache --zero-stats
+            ccache --max-size=3G
+            ccache --cleanup
+      - run:
+          name: install cmake 3.5.1
+          command: >
+            git clone https://gitlab.kitware.com/cmake/cmake.git /tmp/cmake;
+            cd /tmp/cmake;
+            git checkout 64130a7e793483e24c1d68bdd234f81d5edb2d51;
+            ./bootstrap --system-curl --parallel=${PARALLELISM} --enable-ccache;
+            sudo make -j${PARALLELISM} install;
+            sudo ldconfig
+          when: always
+      - restore_cache:
+          keys:
+            - hunter-
+          paths:
+            - /home/circleci/.hunter
+      - run: cmake -H. -Bbuild
+      - run: cmake --build build --target all -- -j${PARALLELISM}
+      - run: ccache --show-stats
+      - save_cache:
+          key: hunter-{{ epoch }}
+          paths:
+            - /home/circleci/.hunter
+          when: always
+      - save_cache:
+          key: build-clean-{{ arch }}-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ~/.ccache
+          when: always
+
+
+
 
 workflows:
   version: 2
@@ -341,6 +406,8 @@ workflows:
     jobs:
       # build-macos-release + build -> sonar(pr/release)
       - build-macos-release
+      # https://circleci.com/docs/2.0/workflows/#holding-a-workflow-for-a-manual-approval
+      - build-clean
       - build
       - sonar-pr:
           requires:
@@ -386,3 +453,4 @@ workflows:
                 - master
             tags:
               only: /v[\.0-9]+.*/
+
