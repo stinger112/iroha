@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.5.1)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -44,13 +44,6 @@ set(
     "Hunter passwords"
 )
 
-#########################
-## configuration types ##
-#########################
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Coverage" CACHE STRING "" FORCE)
-
-# we do not gather coverage information for dependencies, so we do not need
-# Coverage configuration type here
 set(HUNTER_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
 
 include(HunterGate)
