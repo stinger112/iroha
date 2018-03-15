@@ -27,7 +27,13 @@ jobs:
             - build-linux-debug-
           paths:
             - ~/.ccache
-
+      - restore_cache:
+          keys:
+            - hunter-linux-debug-{{ arch }}-{{ .Branch }}-
+            - hunter-linux-debug-{{ arch }}-
+            - hunter-linux-debug-
+          paths:
+            - ~/.hunter
       - run:
           name: ccache setup
           command: |
@@ -66,6 +72,10 @@ jobs:
           key: build-linux-debug-{{ arch }}-{{ .Branch }}-{{ epoch }}
           paths:
             - ~/.ccache
+      - save_cache:
+          key: hunter-linux-debug-{{ arch }}-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ~/.hunter
           when: always
       - persist_to_workspace:
           root: /opt/iroha/build
@@ -89,6 +99,13 @@ jobs:
             - build-linux-release-
           paths:
             - ~/.ccache
+      - restore_cache:
+          keys:
+            - hunter-linux-release-{{ arch }}-{{ .Branch }}-
+            - hunter-linux-release-{{ arch }}-
+            - hunter-linux-release-
+          paths:
+            - ~/.hunter
       - run:
           name: ccache setup
           command: |
@@ -118,6 +135,10 @@ jobs:
           key: build-linux-release-{{ arch }}-{{ .Branch }}-{{ epoch }}
           paths:
             - ~/.ccache
+      - save_cache:
+          key: hunter-linux-release-{{ arch }}-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ~/.hunter
           when: always
       - run:
           name: copy deb file
@@ -286,6 +307,13 @@ jobs:
             - mac-external-
           paths:
             - external
+      - restore_cache:
+          keys:
+            - mac-hunter-{{ arch }}-{{ .Branch }}-
+            - mac-hunter-{{ arch }}-
+            - mac-hunter-
+          paths:
+            - ~/.hunter
       - run:
           name: ccache setup
           command: |
@@ -317,6 +345,11 @@ jobs:
           key: mac-external-{{ arch }}-{{ .Branch }}-{{ epoch }}
           paths:
             - external
+          when: always
+      - save_cache:
+          key: mac-hunter-{{ arch }}-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ~/.hunter
           when: always
       - run:
           name: rename artifacts
