@@ -9,9 +9,9 @@ endif()
 ##################################
 ## setup Hunter and its modules ##
 ##################################
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-SET(HUNTER_STATUS_PRINT ON  CACHE BOOL "Verbose info")
-SET(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info"  )
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+set(HUNTER_STATUS_PRINT ON  CACHE BOOL "Verbose info")
+set(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info"  )
 
 # hunter binary cache server
 set(
@@ -59,12 +59,12 @@ HunterGate(
 
 PROJECT(iroha C CXX)
 
-SET(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-SET(CMAKE_CXX_FLAGS "-std=c++1y -Wall")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-SET(CMAKE_CXX_FLAGS_DEBUG   "-g -Wextra -Wno-unused-parameter -Wno-deprecated-declarations -O0")
-SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
-SET(CMAKE_INSTALL_RPATH "../lib")
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+set(CMAKE_CXX_FLAGS "-std=c++1y -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wextra -Wno-unused-parameter -Wno-deprecated-declarations -O0")
+set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
+set(CMAKE_INSTALL_RPATH "../lib")
 
 if(COVERAGE)
   # remove -g flag to reduce binary size

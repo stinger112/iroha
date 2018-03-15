@@ -334,7 +334,6 @@ jobs:
           destination: version.txt
 
 
-  # clean build, which is invoked manually from circle ci workflow interface
   build-clean:
     # machine is:
     # - CPUs: 2
@@ -409,7 +408,6 @@ workflows:
     jobs:
       # build-macos-release + build -> sonar(pr/release)
       - build-macos-release
-      # https://circleci.com/docs/2.0/workflows/#holding-a-workflow-for-a-manual-approval
       - build-clean
       - build
       - sonar-pr:
