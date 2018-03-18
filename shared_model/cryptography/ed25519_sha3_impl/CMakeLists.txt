@@ -22,4 +22,5 @@ add_library(shared_model_ed25519_sha3
 
 target_link_libraries(shared_model_ed25519_sha3
     cryptography
+    boost
     )
