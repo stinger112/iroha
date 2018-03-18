@@ -1,7 +1,6 @@
 {
   'variables': {
-    'iroha_home_dir': '../../../',
-    'protobuf_install_dir': '<!(echo $PROTOBUF_INSTALL_DIR)'
+    'iroha_home_dir': '../../../'
   },
   'targets': [
     {
@@ -27,11 +26,7 @@
             '-DCMAKE_BUILD_TYPE=Release',
 
             # TODO: Maybe this is not necessary
-            '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
-
-            '-Dprotobuf_INCLUDE_DIR=<(protobuf_install_dir)/include',
-            '-Dprotobuf_LIBRARY=<(protobuf_install_dir)/lib',
-            '-Dprotoc_EXECUTABLE=<(protobuf_install_dir)/bin/protoc',
+            '-DCMAKE_POSITION_INDEPENDENT_CODE=ON'
           ],
         },
         {
@@ -70,7 +65,7 @@
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/internal/libcryptography.a',
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/internal/libhash.a',
 
-            '<(protobuf_install_dir)/lib/libprotobuf.a',
+            # Third-party libraries
             '<(iroha_home_dir)/external/src/hyperledger_ed25519-build/libed25519.a'
           ],
           'destination': '<(PRODUCT_DIR)'
@@ -85,8 +80,7 @@
         '<(iroha_home_dir)/libs',
         '<(iroha_home_dir)/external/src/martinmoene_optional/include',
         '<(iroha_home_dir)/irohad',
-        '<(iroha_home_dir)/schema',
-        '<(protobuf_install_dir)/include',
+        '<(iroha_home_dir)/schema'
       ],
       'sources': [
         '<(SHARED_INTERMEDIATE_DIR)/shared_model/bindings/bindingsJAVASCRIPT_wrap.cxx'
@@ -94,8 +88,9 @@
       'cflags_cc': ['-std=c++14', '-fexceptions', '-DDISABLE_BACKWARD'],
       'cflags_cc!': ['-fno-rtti'],
       'libraries': [
+        '-L/usr/local/lib',
         '-L<(PRODUCT_DIR)',
-        
+
         '-lirohanode', # Library contains SWIG runtime
         '-lbindings',
         '-lgenerator',
