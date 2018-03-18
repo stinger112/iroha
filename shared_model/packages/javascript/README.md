@@ -32,13 +32,15 @@ make
 sudo make install
 ```
 
-### Environment Variables
+### For Mac users
 
-You should set some of environment variables to customize build process.
+To build **iroha-lib** on Mac the following dependencies should be installed:
 
-|name|default|description|
-|:---:|:---:|:---:|
-|PROTOBUF_INSTALL_DIR|<standart_system_directories>|Protobuf custom install directory|
+```
+brew install node cmake # Common dependencies
+brew install autoconf automake # SWIG dependencies
+brew install protobuf boost # Iroha dependencies
+```
 
 ---
 
