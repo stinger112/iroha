@@ -25,20 +25,16 @@
     "iroha-lib"
   ],
   "contributors": [
-    {
-      "name": "Viacheslav Bikbaev",
-      "email": "viacheslav@soramitsu.co.jp"
-    },
-    {
-      "name": "Arseniy Fokin",
-      "email": "fokin@soramitsu.co.jp"
-    }
+    "Arseniy Fokin <fokin@soramitsu.co.jp> (https://github.com/stinger112/)",
+    "Viacheslav Bikbaev <viacheslav@soramitsu.co.jp> (https://github.com/lasintez/)"
   ],
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/hyperledger/iroha/issues"
   },
   "homepage": "https://github.com/hyperledger/iroha#readme",
+  "os" : [ "darwin", "linux" ],
+  "cpu" : [ "x64" ],
   "dependencies": {
     "google-protobuf": "^3.5.0",
     "grpc": "^1.9.1",
