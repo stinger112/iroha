@@ -15,7 +15,7 @@ function blob2array (blob) {
   return bytearray
 }
 
-var iroha = require('./build/Release/irohanodejs')
+var iroha = require('iroha-lib')
 var txBuilder = new iroha.ModelTransactionBuilder()
 var queryBuilder = new iroha.ModelQueryBuilder()
 var crypto = new iroha.ModelCrypto()
@@ -45,12 +45,12 @@ var tx = txBuilder
 var txblob = protoTxHelper.signAndAddSignature(tx, keys).blob()
 var txArray = blob2array(txblob)
 // create proto object and send to iroha
-var blockTransaction = require('./pb/block_pb.js').Transaction // block_pb2.Transaction()
+var blockTransaction = require('iroha-lib/pb/block_pb.js').Transaction // block_pb2.Transaction()
 var protoTx = blockTransaction.deserializeBinary(txArray)
 console.log(protoTx.getPayload().getCreatorAccountId())
 
 var grpc = require('grpc')
-var endpointGrpc = require('./pb/endpoint_grpc_pb.js')
+var endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 var client = new endpointGrpc.CommandServiceClient(
   'localhost:50051',
   grpc.credentials.createInsecure()
@@ -78,7 +78,7 @@ p
     console.log('Send transaction status request...')
     return new Promise((resolve, reject) => {
       // create status request
-      var endpointPb = require('./pb/endpoint_pb.js')
+      var endpointPb = require('iroha-lib/pb/endpoint_pb.js')
       var request = new endpointPb.TxStatusRequest()
       request.setTxHash(txHash)
       client.status(request, (err, response) => {
@@ -86,7 +86,7 @@ p
           reject(err)
         } else {
           let status = response.getTxStatus()
-          let TxStatus = require('./pb/endpoint_pb.js').TxStatus
+          let TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
           let statusName = getProtoEnumName(
             TxStatus,
             'iroha.protocol.TxStatus',
@@ -111,7 +111,7 @@ p
       .getAssetInfo('dollar#ru')
       .build()
     let queryBlob = protoQueryHelper.signAndAddSignature(query, keys).blob()
-    let pbQuery = require('./pb/queries_pb.js').Query
+    let pbQuery = require('iroha-lib/pb/queries_pb.js').Query
     let queryArray = blob2array(queryBlob)
     let protoQuery = pbQuery.deserializeBinary(queryArray)
     let client = new endpointGrpc.QueryServiceClient(
@@ -125,7 +125,7 @@ p
         } else {
           // console.log('submitted transaction successfully');
           let type = response.getResponseCase()
-          let responsePb = require('./pb/responses_pb.js')
+          let responsePb = require('iroha-lib/pb/responses_pb.js')
           let name = getProtoEnumName(
             responsePb.QueryResponse.ResponseCase,
             'iroha.protocol.QueryResponse',
