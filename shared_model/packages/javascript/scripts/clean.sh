@@ -1,4 +1,5 @@
 #!/bin/bash
 
 rm -rf build
-rm -rf pb
+rm -rf lib
+rm -rf pb/*.js
