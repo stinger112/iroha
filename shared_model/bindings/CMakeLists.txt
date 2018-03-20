@@ -101,7 +101,6 @@ if (SWIG_NODE)
     endif()
 
     set_property(SOURCE bindings.i PROPERTY SWIG_FLAGS "-node" "-DV8_VERSION=${V8_VERSION_HEX}")
-    message(STATUS "-I${CMAKE_BINARY_DIR}/../../../shared_model")
 
     # Build SWIG library always statically for the subsequent assembly by GYP
     swig_add_library(irohanode 
