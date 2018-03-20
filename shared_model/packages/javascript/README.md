@@ -1,47 +1,68 @@
 # iroha-js
-Modern version of JavaScript library for Iroha. https://github.com/hyperledger/iroha
+
+Official Iroha JavaScript Library. https://github.com/hyperledger/iroha
+
+## Usage
+
+You can use regular Node.js style to import **iroha-lib** package and related protobufs:
+
+```javascript
+const iroha = require('iroha-lib')
+
+const blockTransaction = require('iroha-lib/pb/block_pb.js').Transaction
+const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
+
+...
+
+```
+
+Watch usage in *example* folder.
 
 ## Build
 
+You need this section if you want to build **iroha-lib** manually for publishing or if your architecture/OS not supported yet.
+
 ### Prerequisities
+
+In order to build NPM package by `node-gyp` on your machine you need some global installed dependencies: 
 
 1. CMake (>=3.7)
 
 2. Protobuf (>3.5)
 
-**If you want to publish self-contained NPM package, you MUST build Protobuf statically as described below:**
-```
-git clone --depth 1 --branch v3.5.1 https://github.com/google/protobuf
-cd protobuf
-cmake -Hcmake/ -Bbuild -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release
-sudo cmake --build build/ --target install -- -j"$(nproc)"
-```
-Also, you can set `-DCMAKE_INSTALL_PREFIX=<some_directory>` to customize install directory.
+**WARNING! If you have already installed SWIG, you MUST install patched version instead using [this patch](https://github.com/swig/swig/pull/968.patch)**
 
-3. SWIG (patched, =3.0.12)
+Also, you can watch `install-dependencies.sh` script - it may help to install neccessary dependencies on your system.
 
-**If you have already installed SWIG, you MUST install patched version instead.**
-
-```
-git clone --depth 1 --branch rel-3.0.12 https://github.com/swig/swig
-cd swig
-./autogen.sh
-./configure --without-pcre
-git apply ${IROHA_HOME_DIR}/patch/add-nodejs8-support-to-swig.patch
-make
-sudo make install
-```
-
-### For Mac users
+#### For Mac users
 
 To build **iroha-lib** on Mac the following dependencies should be installed:
 
-```
+```sh
 brew install node cmake # Common dependencies
 brew install autoconf automake # SWIG dependencies
 brew install protobuf boost # Iroha dependencies
 ```
 
+### Build process
+
+1. Clone full Iroha repository
+
+```sh
+git clone https://github.com/hyperledger/iroha.git
+
+```
+
+2. Go to the NPM package directory and start build
+
+```sh
+cd iroha/shared_model/packages/javascript
+npm install
+```
+
+That's pretty all.
+
 ---
 
-This NPM package is in deep pre-alfa phase, so if you have any troubles, please contact maintainers from *package.json*.
+
+This NPM package is in deep pre-alfa phase, so if you have any troubles, feel free to create a new issue or contact contributors from *package.json*.

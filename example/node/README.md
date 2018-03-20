@@ -2,18 +2,16 @@
 
 ## Prerequisites
 
-In order to execute script demonstrating execution of NodeJS client library you need to have NodeJS installed. Any version is appropriate, however, to build and use client library for NodeJS version higher than 7, you have to install SWIG 3.0.12 with [this patch](https://github.com/swig/swig/pull/968.patch).
+1. Make sure you have running iroha on your machine. You can follow [this](https://hyperledger.github.io/iroha-api/#run-the-daemon-irohad) guide to launch iroha daemon. Please run iroha from iroha/example folder, since python script uses keys from there.
 
-1. Run prepare.sh script to build iroha python library and compile proto files:
+2. If you are a lucky owner of a processor with the x64 architecture, you can install **iroha-lib** from the NPM repository with a simple command:
+
 ```sh
-./prepare.sh
-```
-  For Mac users, please use (this way the variable `DYLD_LIBRARY_PATH` will be exported into current terminal session, allowing running script)
-```sh
-. ./prepare.sh
+npm install iroha-lib
 ```
 
-2. Make sure you have running iroha on your machine. You can follow [this](https://hyperledger.github.io/iroha-api/#run-the-daemon-irohad) guide to launch iroha daemon. Please run iroha from iroha/example folder, since python script uses keys from there.
+In other cases, you need to download the complete Iroha repository (in which you are now), go to the *shared_model/packages/javascript* folder and build the package on your system manually using the instructions from **README.md**.
+In such case, you need to change the import paths in this example to *shared_model/packages/javascript*.
 
 ## Launch example
 
