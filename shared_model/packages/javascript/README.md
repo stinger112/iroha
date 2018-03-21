@@ -40,7 +40,7 @@ To build **iroha-lib** on Mac the following dependencies should be installed:
 
 ```sh
 brew install node cmake # Common dependencies
-brew install autoconf automake # SWIG dependencies
+brew install autoconf automake ccache # SWIG dependencies
 brew install protobuf boost # Iroha dependencies
 ```
 
