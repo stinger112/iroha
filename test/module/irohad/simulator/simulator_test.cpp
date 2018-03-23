@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-#include "backend/protobuf/from_old_model.hpp"
 #include "backend/protobuf/transaction.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/model/model_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "module/irohad/validation/validation_mocks.hpp"
 #include "module/shared_model/builders/protobuf/test_block_builder.hpp"
+#include "module/shared_model/builders/protobuf/test_proposal_builder.hpp"
 
 #include "framework/test_subscriber.hpp"
 #include "simulator/impl/simulator.hpp"
@@ -29,15 +29,14 @@
 using namespace iroha;
 using namespace iroha::validation;
 using namespace iroha::ametsuchi;
-using namespace iroha::model;
 using namespace iroha::simulator;
 using namespace iroha::network;
 using namespace framework::test_subscriber;
 
-using ::testing::_;
 using ::testing::A;
 using ::testing::Return;
 using ::testing::ReturnArg;
+using ::testing::_;
 
 using wBlock = std::shared_ptr<shared_model::interface::Block>;
 
@@ -48,7 +47,7 @@ class SimulatorTest : public ::testing::Test {
     factory = std::make_shared<MockTemporaryFactory>();
     query = std::make_shared<MockBlockQuery>();
     ordering_gate = std::make_shared<MockOrderingGate>();
-    crypto_provider = std::make_shared<MockCryptoProvider>();
+    crypto_provider = std::make_shared<iroha::model::MockCryptoProvider>();
   }
 
   void init() {
@@ -60,17 +59,23 @@ class SimulatorTest : public ::testing::Test {
   std::shared_ptr<MockTemporaryFactory> factory;
   std::shared_ptr<MockBlockQuery> query;
   std::shared_ptr<MockOrderingGate> ordering_gate;
-  std::shared_ptr<MockCryptoProvider> crypto_provider;
+  std::shared_ptr<iroha::model::MockCryptoProvider> crypto_provider;
 
   std::shared_ptr<Simulator> simulator;
 };
 
 shared_model::proto::Block makeBlock(int height) {
   return TestBlockBuilder()
-      .txNumber(0)
       .transactions(std::vector<shared_model::proto::Transaction>())
       .height(height)
       .prevHash(shared_model::crypto::Hash(std::string("0", 32)))
+      .build();
+}
+
+shared_model::proto::Proposal makeProposal(int height) {
+  return TestProposalBuilder()
+      .transactions(std::vector<shared_model::proto::Transaction>())
+      .height(height)
       .build();
 }
 
@@ -84,22 +89,17 @@ TEST_F(SimulatorTest, ValidWhenInitialized) {
 
 TEST_F(SimulatorTest, ValidWhenPreviousBlock) {
   // proposal with height 2 => height 1 block present => new block generated
-  auto txs = std::vector<model::Transaction>(2);
-  auto proposal = model::Proposal(txs);
-  proposal.height = 2;
+  auto proposal =
+      std::make_shared<shared_model::proto::Proposal>(makeProposal(2));
 
-  shared_model::proto::Block block = makeBlock(proposal.height - 1);
+  shared_model::proto::Block block = makeBlock(proposal->height() - 1);
 
   EXPECT_CALL(*factory, createTemporaryWsv()).Times(1);
   EXPECT_CALL(*query, getTopBlocks(1))
       .WillOnce(Return(rxcpp::observable<>::just(block).map(
           [](auto &&x) { return wBlock(x.copy()); })));
 
-  std::shared_ptr<shared_model::interface::Proposal> iprop =
-      std::make_shared<shared_model::proto::Proposal>(
-          shared_model::proto::from_old(proposal));
-
-  EXPECT_CALL(*validator, validate(_, _)).WillOnce(Return(iprop));
+  EXPECT_CALL(*validator, validate(_, _)).WillOnce(Return(proposal));
 
   EXPECT_CALL(*ordering_gate, on_proposal())
       .WillOnce(Return(rxcpp::observable<>::empty<iroha::model::Proposal>()));
@@ -111,18 +111,18 @@ TEST_F(SimulatorTest, ValidWhenPreviousBlock) {
   auto proposal_wrapper =
       make_test_subscriber<CallExact>(simulator->on_verified_proposal(), 1);
   proposal_wrapper.subscribe([&proposal](auto verified_proposal) {
-    ASSERT_EQ(verified_proposal.height, proposal.height);
-    ASSERT_EQ(verified_proposal.transactions, proposal.transactions);
+    ASSERT_EQ(verified_proposal->height(), proposal->height());
+    ASSERT_EQ(verified_proposal->transactions(), proposal->transactions());
   });
 
   auto block_wrapper =
       make_test_subscriber<CallExact>(simulator->on_block(), 1);
   block_wrapper.subscribe([&proposal](auto block) {
-    ASSERT_EQ(block.height, proposal.height);
-    ASSERT_EQ(block.transactions, proposal.transactions);
+    ASSERT_EQ(block->height(), proposal->height());
+    ASSERT_EQ(block->transactions(), proposal->transactions());
   });
 
-  simulator->process_proposal(proposal);
+  simulator->process_proposal(*proposal);
 
   ASSERT_TRUE(proposal_wrapper.validate());
   ASSERT_TRUE(block_wrapper.validate());
@@ -130,9 +130,7 @@ TEST_F(SimulatorTest, ValidWhenPreviousBlock) {
 
 TEST_F(SimulatorTest, FailWhenNoBlock) {
   // height 2 proposal => height 1 block not present => no validated proposal
-  auto txs = std::vector<model::Transaction>(2);
-  auto proposal = model::Proposal(txs);
-  proposal.height = 2;
+  auto proposal = makeProposal(2);
 
   EXPECT_CALL(*factory, createTemporaryWsv()).Times(0);
 
@@ -164,11 +162,9 @@ TEST_F(SimulatorTest, FailWhenNoBlock) {
 
 TEST_F(SimulatorTest, FailWhenSameAsProposalHeight) {
   // proposal with height 2 => height 2 block present => no validated proposal
-  auto txs = std::vector<model::Transaction>(2);
-  auto proposal = model::Proposal(txs);
-  proposal.height = 2;
+  auto proposal = makeProposal(2);
 
-  auto block = makeBlock(proposal.height);
+  auto block = makeBlock(proposal.height());
 
   EXPECT_CALL(*factory, createTemporaryWsv()).Times(0);
 

@@ -60,7 +60,7 @@ namespace shared_model {
         return unsigned_;
       }
 
-      crypto::Blob hash() {
+      interface::types::HashType hash() {
         return unsigned_.hash();
       }
 

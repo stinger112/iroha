@@ -153,12 +153,10 @@ namespace shared_model {
         });
       }
 
-      auto getAccountDetail(const interface::types::AccountIdType &account_id,
-                            const interface::types::DetailType &detail) {
+      auto getAccountDetail(const interface::types::AccountIdType &account_id) {
         return queryField([&](auto proto_query) {
           auto query = proto_query->mutable_get_account_detail();
           query->set_account_id(account_id);
-          query->set_detail(detail);
         });
       }
 
@@ -204,12 +202,12 @@ namespace shared_model {
 
       auto build() const {
         static_assert(S == (1 << TOTAL) - 1, "Required fields are not set");
-        auto answer = stateless_validator_.validate(
-            detail::makePolymorphic<Query>(query_));
+        auto result = Query(iroha::protocol::Query(query_));
+        auto answer = stateless_validator_.validate(result);
         if (answer.hasErrors()) {
           throw std::invalid_argument(answer.reason());
         }
-        return BT(Query(iroha::protocol::Query(query_)));
+        return BT(std::move(result));
       }
 
       static const int total = RequiredFields::TOTAL;

@@ -25,6 +25,7 @@
 #include "module/irohad/validation/validation_mocks.hpp"
 #include "module/shared_model/builders/protobuf/test_query_builder.hpp"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
+#include "builders/protobuf/common_objects/proto_account_builder.hpp"
 
 #include "client.hpp"
 
@@ -74,9 +75,8 @@ class ClientServerTest : public testing::Test {
     wsv_query = std::make_shared<MockWsvQuery>();
     block_query = std::make_shared<MockBlockQuery>();
 
-    rxcpp::subjects::subject<
-          std::shared_ptr<shared_model::interface::Proposal>>
-          prop_notifier;
+    rxcpp::subjects::subject<std::shared_ptr<shared_model::interface::Proposal>>
+        prop_notifier;
     rxcpp::subjects::subject<iroha::Commit> commit_notifier;
 
     EXPECT_CALL(*pcsMock, on_proposal())
@@ -95,15 +95,15 @@ class ClientServerTest : public testing::Test {
     auto qpf = std::make_unique<iroha::model::QueryProcessingFactory>(
         wsv_query, block_query);
 
-      auto qpi = std::make_shared<iroha::torii::QueryProcessorImpl>(
-          std::move(qpf));
+    auto qpi =
+        std::make_shared<iroha::torii::QueryProcessorImpl>(std::move(qpf));
 
-      //----------- Server run ----------------
-      runner
-          ->append(std::make_unique<torii::CommandService>( tx_processor, block_query, proposal_delay))
-          .append(std::make_unique<torii::QueryService>(qpi))
-          .run();
-
+    //----------- Server run ----------------
+    runner
+        ->append(std::make_unique<torii::CommandService>(
+            tx_processor, block_query, proposal_delay))
+        .append(std::make_unique<torii::QueryService>(qpi))
+        .run();
 
     runner->waitForServersReady();
   }
@@ -150,9 +150,9 @@ TEST_F(ClientServerTest, SendTxWhenInvalidJson) {
         })";
   JsonTransactionFactory tx_factory;
   auto json_doc = stringToJson(json_string);
-  ASSERT_TRUE(json_doc.has_value());
+  ASSERT_TRUE(json_doc);
   auto model_tx = tx_factory.deserialize(json_doc.value());
-  ASSERT_FALSE(model_tx.has_value());
+  ASSERT_FALSE(model_tx);
 }
 
 TEST_F(ClientServerTest, SendTxWhenStatelessInvalid) {
@@ -192,7 +192,7 @@ TEST_F(ClientServerTest, SendQueryWhenInvalidJson) {
 
   JsonQueryFactory queryFactory;
   auto model_query = queryFactory.deserialize(json_query);
-  ASSERT_FALSE(model_query.has_value());
+  ASSERT_FALSE(model_query);
 }
 
 TEST_F(ClientServerTest, SendQueryWhenStatelessInvalid) {
@@ -218,22 +218,23 @@ TEST_F(ClientServerTest, SendQueryWhenValid) {
   auto account_admin = iroha::model::Account();
   account_admin.account_id = "admin@test";
 
-  auto account_test = iroha::model::Account();
-  account_test.account_id = "test@test";
+  auto account_test = std::shared_ptr<shared_model::interface::Account>(
+      shared_model::proto::AccountBuilder().accountId("test@test").build().copy()
+  );
 
   EXPECT_CALL(*wsv_query,
               hasAccountGrantablePermission(
                   "admin@test", "test@test", can_get_my_acc_detail))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(*wsv_query, getAccountDetail("test@test", "admin@test", "key"))
-      .WillOnce(Return(nonstd::make_optional<std::string>("value")));
+  EXPECT_CALL(*wsv_query, getAccountDetail("test@test"))
+      .WillOnce(Return(boost::make_optional(std::string("value"))));
 
   auto query = QueryBuilder()
                    .createdTime(iroha::time::now())
                    .creatorAccountId("admin@test")
                    .queryCounter(1)
-                   .getAccountDetail("test@test", "key")
+                   .getAccountDetail("test@test")
                    .build()
                    .signAndAddSignature(
                        shared_model::crypto::DefaultCryptoAlgorithmType::
@@ -261,7 +262,7 @@ TEST_F(ClientServerTest, SendQueryWhenStatefulInvalid) {
                    .createdTime(iroha::time::now())
                    .creatorAccountId("admin@test")
                    .queryCounter(1)
-                   .getAccountDetail("test@test", "key")
+                   .getAccountDetail("test@test")
                    .build()
                    .signAndAddSignature(
                        shared_model::crypto::DefaultCryptoAlgorithmType::

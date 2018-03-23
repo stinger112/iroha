@@ -61,9 +61,11 @@
             '<(SHARED_INTERMEDIATE_DIR)/libs/generator/libgenerator.a',
             '<(SHARED_INTERMEDIATE_DIR)/libs/amount/libiroha_amount.a',
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/validators/libshared_model_stateless_validation.a',
-            '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/libshared_model_ed25519_sha3.a',
-            '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/internal/libcryptography.a',
+            # Cryptography libs
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/libshared_model_cryptography.a',
             '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/internal/libhash.a',
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/ed25519_sha3_impl/internal/libed25519_crypto.a',
+            '<(SHARED_INTERMEDIATE_DIR)/shared_model/cryptography/model_impl/libshared_model_cryptography_model.a',
 
             # Third-party libraries
             '<(iroha_home_dir)/external/src/hyperledger_ed25519-build/libed25519.a'
@@ -94,12 +96,14 @@
         '-lirohanode', # Library contains SWIG runtime
         '-lbindings',
         '-lgenerator',
-        '-lhash',
         '-liroha_amount',
         '-lschema',
-        '-lshared_model_ed25519_sha3',
         '-lshared_model_stateless_validation',
-        '-lcryptography',
+        # Cryptography libs
+        '-lshared_model_cryptography',
+        '-lhash',
+        '-led25519_crypto',
+        '-lshared_model_cryptography_model',
 
         # Third-party libraries
         '-led25519',

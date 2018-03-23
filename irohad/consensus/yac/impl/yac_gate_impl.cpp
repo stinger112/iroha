@@ -16,13 +16,19 @@
  */
 
 #include "consensus/yac/impl/yac_gate_impl.hpp"
+#include "backend/protobuf/block.hpp"
+#include "backend/protobuf/from_old_model.hpp"
+#include "builders/protobuf/common_objects/proto_signature_builder.hpp"
 #include "consensus/yac/cluster_order.hpp"
 #include "consensus/yac/messages.hpp"
 #include "consensus/yac/storage/yac_common.hpp"
 #include "consensus/yac/yac_hash_provider.hpp"
 #include "consensus/yac/yac_peer_orderer.hpp"
+#include "cryptography/public_key.hpp"
+#include "interfaces/common_objects/signature.hpp"
 #include "network/block_loader.hpp"
 #include "simulator/block_creator.hpp"
+#include "utils/polymorphic_wrapper.hpp"
 
 namespace iroha {
   namespace consensus {
@@ -43,29 +49,34 @@ namespace iroha {
             delay_(delay) {
         log_ = logger::log("YacGate");
         block_creator_->on_block().subscribe(
-            [this](auto block) { this->vote(block); });
+            [this](auto block) { this->vote(*block); });
       }
 
-      void YacGateImpl::vote(model::Block block) {
-        auto hash = hash_provider_->makeHash(block);
+      void YacGateImpl::vote(const shared_model::interface::Block &block) {
+        std::unique_ptr<model::Block> bl(block.makeOldModel());
+        auto hash = hash_provider_->makeHash(*bl);
         log_->info(
-            "vote for block ({}, {})", hash.proposal_hash, hash.block_hash);
+            "vote for block ({}, {})", hash.proposal_hash, block.hash().toString());
         auto order = orderer_->getOrdering(hash);
-        if (not order.has_value()) {
+        if (not order) {
           log_->error("ordering doesn't provide peers => pass round");
           return;
         }
-        current_block_ = std::make_pair(hash, block);
-        hash_gate_->vote(hash, order.value());
+        current_block_ = std::make_pair(
+            hash,
+            std::unique_ptr<shared_model::interface::Block>(block.copy()));
+        hash_gate_->vote(hash, *order);
       }
 
-      rxcpp::observable<model::Block> YacGateImpl::on_commit() {
+      rxcpp::observable<std::shared_ptr<shared_model::interface::Block>>
+      YacGateImpl::on_commit() {
         return hash_gate_->on_commit().flat_map([this](auto commit_message) {
           // map commit to block if it is present or loaded from other peer
-          return rxcpp::observable<>::create<model::Block>(
+          return rxcpp::observable<>::create<
+              std::shared_ptr<shared_model::interface::Block>>(
               [this, commit_message](auto subscriber) {
                 const auto hash = getHash(commit_message.votes);
-                if (not hash.has_value()) {
+                if (not hash) {
                   log_->info("Invalid commit message, hashes are different");
                   subscriber.on_completed();
                   return;
@@ -75,8 +86,8 @@ namespace iroha {
                   // append signatures of other nodes
                   this->copySignatures(commit_message);
                   log_->info("consensus: commit top block: height {}, hash {}",
-                             current_block_.second.height,
-                             current_block_.second.hash.to_hexstring());
+                             current_block_.second->height(),
+                             current_block_.second->hash().hex());
                   subscriber.on_next(current_block_.second);
                   subscriber.on_completed();
                   return;
@@ -90,7 +101,8 @@ namespace iroha {
                     .delay(std::chrono::milliseconds(delay_))
                     .flat_map([this, model_hash](auto vote) {
                       // map vote to block if it can be loaded
-                      return rxcpp::observable<>::create<model::Block>(
+                      return rxcpp::observable<>::create<
+                          std::shared_ptr<shared_model::interface::Block>>(
                           [this, model_hash, vote](auto subscriber) {
                             auto block = block_loader_->retrieveBlock(
                                 shared_model::crypto::PublicKey(
@@ -99,10 +111,8 @@ namespace iroha {
                                 shared_model::crypto::Hash(
                                     {model_hash.begin(), model_hash.end()}));
                             // if load is successful
-                            if (block.has_value()) {
-                              std::unique_ptr<iroha::model::Block> old_block(
-                                  block.value()->makeOldModel());
-                              subscriber.on_next(*old_block);
+                            if (block) {
+                              subscriber.on_next(block.value());
                             }
                             subscriber.on_completed();
                           });
@@ -125,9 +135,19 @@ namespace iroha {
       }
 
       void YacGateImpl::copySignatures(const CommitMessage &commit) {
-        current_block_.second.sigs.clear();
+        current_block_.second->clearSignatures();
         for (const auto &vote : commit.votes) {
-          current_block_.second.sigs.push_back(vote.hash.block_signature);
+          auto sig = vote.hash.block_signature;
+          auto tmp =
+              shared_model::proto::SignatureBuilder()
+                  .signedData(shared_model::interface::Signature::SignedType(
+                      sig.signature.to_string()))
+                  .publicKey(
+                      shared_model::crypto::PublicKey(sig.pubkey.to_string()))
+                  .build();
+          auto wrap = shared_model::detail::makePolymorphic<
+              shared_model::proto::Signature>(tmp.getTransport());
+          current_block_.second->addSignature(wrap);
         }
       }
     }  // namespace yac

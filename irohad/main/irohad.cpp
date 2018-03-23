@@ -20,6 +20,8 @@
 #include <csignal>
 #include <fstream>
 #include <thread>
+#include "backend/protobuf/from_old_model.hpp"
+#include "common/result.hpp"
 #include "crypto/keys_manager_impl.hpp"
 #include "main/application.hpp"
 #include "main/iroha_conf_loader.hpp"
@@ -134,7 +136,7 @@ int main(int argc, char *argv[]) {
     auto block = loader.parseBlock(file.value());
 
     // Check that provided genesis block file was correct
-    if (not block.has_value()) {
+    if (not block) {
       // Abort execution if not
       log->error("Failed to parse genesis block");
       return EXIT_FAILURE;
@@ -149,10 +151,11 @@ int main(int argc, char *argv[]) {
     log->info("Block is parsed");
 
     // Applying transactions from genesis block to iroha storage
-    irohad.storage->insertBlock(block.value());
+    irohad.storage->insertBlock(shared_model::proto::from_old(block.value()));
     log->info("Genesis block inserted, number of transactions: {}",
               block.value().transactions.size());
   }
+
   // init pipeline components
   irohad.init();
 

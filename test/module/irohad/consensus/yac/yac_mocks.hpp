@@ -1,5 +1,5 @@
 /**
- * Copyright Soramitsu Co., Ltd. 2017 All Rights Reserved.
+ * Copyright Soramitsu Co., Ltd. 2018 All Rights Reserved.
  * http://soramitsu.co.jp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,8 @@
 #include "common/byteutils.hpp"
 #include "consensus/yac/cluster_order.hpp"
 #include "consensus/yac/messages.hpp"
+#include "consensus/yac/storage/yac_proposal_storage.hpp"
+#include "consensus/yac/supermajority_checker.hpp"
 #include "consensus/yac/timer.hpp"
 #include "consensus/yac/yac.hpp"
 #include "consensus/yac/yac_crypto_provider.hpp"
@@ -145,10 +147,10 @@ namespace iroha {
 
       class MockYacPeerOrderer : public YacPeerOrderer {
        public:
-        MOCK_METHOD0(getInitialOrdering, nonstd::optional<ClusterOrdering>());
+        MOCK_METHOD0(getInitialOrdering, boost::optional<ClusterOrdering>());
 
         MOCK_METHOD1(getOrdering,
-                     nonstd::optional<ClusterOrdering>(const YacHash &));
+                     boost::optional<ClusterOrdering>(const YacHash &));
 
         MockYacPeerOrderer() = default;
 
@@ -186,6 +188,23 @@ namespace iroha {
         MOCK_METHOD1(on_vote, void(VoteMessage));
       };
 
+      class MockSupermajorityChecker : public SupermajorityChecker {
+       public:
+        MOCK_CONST_METHOD2(
+            hasSupermajority,
+            bool(const shared_model::interface::SignatureSetType &signatures,
+                 const std::vector<
+                     std::shared_ptr<shared_model::interface::Peer>> &peers));
+        MOCK_CONST_METHOD2(checkSize, bool(uint64_t current, uint64_t all));
+        MOCK_CONST_METHOD2(
+            peersSubset,
+            bool(const shared_model::interface::SignatureSetType &signatures,
+                 const std::vector<
+                     std::shared_ptr<shared_model::interface::Peer>> &peers));
+        MOCK_CONST_METHOD3(
+            hasReject, bool(uint64_t frequent, uint64_t voted, uint64_t all));
+      };
+
       class YacTest : public ::testing::Test {
        public:
         // ------|Network|------
@@ -209,7 +228,7 @@ namespace iroha {
           crypto = std::make_shared<MockYacCryptoProvider>();
           timer = std::make_shared<MockTimer>();
           auto ordering = ClusterOrdering::create(default_peers);
-          ASSERT_TRUE(ordering.has_value());
+          ASSERT_TRUE(ordering);
           yac = Yac::create(YacVoteStorage(),
                             network,
                             crypto,

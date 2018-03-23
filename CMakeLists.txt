@@ -52,6 +52,12 @@ if (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug)
 endif()
 
+if(CMAKE_GENERATOR MATCHES "Make")
+  set(MAKE "$(MAKE)")
+else()
+  set(MAKE make)
+endif()
+
 if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
   message(STATUS "Packaging enabled: forcing non-packaging options to OFF")
   set(BENCHMARKING OFF)
@@ -101,6 +107,8 @@ if(SHARED_MODEL_DISABLE_COMPATIBILITY)
     add_definitions(-DDISABLE_BACKWARD)
 endif()
 
+SET(IROHA_ROOT_PROJECT ON)
+
 add_subdirectory(schema)
 add_subdirectory(libs)
 add_subdirectory(irohad)
@@ -119,7 +127,5 @@ if (FUZZING)
     message(Fuzzing with compilers other than clang does not supported yet)
   endif()
 endif()
-
-
 
 
