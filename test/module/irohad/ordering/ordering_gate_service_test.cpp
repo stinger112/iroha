@@ -22,7 +22,6 @@
 #include "builders/common_objects/peer_builder.hpp"
 #include "framework/test_subscriber.hpp"
 #include "mock_ordering_service_persistent_state.hpp"
-#include "model/asset.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "ordering/impl/ordering_gate_impl.hpp"
@@ -35,7 +34,6 @@
 
 using namespace iroha;
 using namespace iroha::ordering;
-using namespace iroha::model;
 using namespace iroha::network;
 using namespace framework::test_subscriber;
 using namespace iroha::ametsuchi;
@@ -49,10 +47,10 @@ using wPeer = std::shared_ptr<shared_model::interface::Peer>;
 class OrderingGateServiceTest : public ::testing::Test {
  public:
   OrderingGateServiceTest() {
-    peer = std::shared_ptr<shared_model::interface::Peer>(shared_model::proto::PeerBuilder()
+    peer = clone(shared_model::proto::PeerBuilder()
         .address(address)
         .pubkey(shared_model::interface::types::PubkeyType(std::string(32, '0')))
-        .build().copy());
+        .build());
     pcs_ = std::make_shared<MockPeerCommunicationService>();
     EXPECT_CALL(*pcs_, on_commit())
         .WillRepeatedly(Return(commit_subject_.get_observable()));
@@ -63,6 +61,8 @@ class OrderingGateServiceTest : public ::testing::Test {
 
     service_transport = std::make_shared<OrderingServiceTransportGrpc>();
     counter = 2;
+
+    wsv = std::make_shared<MockPeerQuery>();
   }
 
   void SetUp() override {
@@ -128,7 +128,7 @@ class OrderingGateServiceTest : public ::testing::Test {
    * @param i - number of transaction
    */
   void send_transaction(size_t i) {
-    auto tx = std::make_shared<Transaction>();
+    auto tx = std::make_shared<iroha::model::Transaction>();
     tx->tx_counter = i;
     gate->propagateTransaction(tx);
     // otherwise tx may come unordered
@@ -144,7 +144,7 @@ class OrderingGateServiceTest : public ::testing::Test {
   std::shared_ptr<MockPeerCommunicationService> pcs_;
   rxcpp::subjects::subject<Commit> commit_subject_;
 
-  std::vector<Proposal> proposals;
+  std::vector<iroha::model::Proposal> proposals;
   std::atomic<size_t> counter;
   std::condition_variable cv;
   std::mutex m;
@@ -155,6 +155,7 @@ class OrderingGateServiceTest : public ::testing::Test {
   std::shared_ptr<OrderingGateTransportGrpc> gate_transport;
   std::shared_ptr<OrderingServiceTransportGrpc> service_transport;
   std::shared_ptr<MockOrderingServicePersistentState> fake_persistent_state;
+  std::shared_ptr<MockPeerQuery> wsv;
 };
 
 /**
@@ -166,18 +167,8 @@ class OrderingGateServiceTest : public ::testing::Test {
  */
 TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
   // 8 transaction -> proposal -> 2 transaction -> proposal
-
-  std::shared_ptr<MockPeerQuery> wsv = std::make_shared<MockPeerQuery>();
-
-  shared_model::proto::PeerBuilder builder;
-
-  auto key = shared_model::crypto::PublicKey(peer->pubkey().toString());
-  auto tmp = builder.address(peer->address()).pubkey(key).build();
-
-  wPeer w_peer(tmp.copy());
-
   EXPECT_CALL(*wsv, getLedgerPeers())
-      .WillRepeatedly(Return(std::vector<wPeer>{w_peer}));
+      .WillRepeatedly(Return(std::vector<wPeer>{peer}));
 
   const size_t max_proposal = 100;
   const size_t commit_delay = 400;
@@ -236,17 +227,8 @@ TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
 TEST_F(OrderingGateServiceTest, ProposalsReceivedWhenProposalSize) {
   // commits on the fulfilling proposal queue
   // 10 transaction -> proposal with 5 -> proposal with 5
-
-  std::shared_ptr<MockPeerQuery> wsv = std::make_shared<MockPeerQuery>();
-
-  shared_model::proto::PeerBuilder builder;
-
-  auto key = shared_model::crypto::PublicKey(peer->pubkey().toString());
-  auto tmp = builder.address(peer->address()).pubkey(key).build();
-
-  wPeer w_peer(tmp.copy());
   EXPECT_CALL(*wsv, getLedgerPeers())
-      .WillRepeatedly(Return(std::vector<wPeer>{w_peer}));
+      .WillRepeatedly(Return(std::vector<wPeer>{peer}));
 
   const size_t max_proposal = 5;
   const size_t commit_delay = 1000;

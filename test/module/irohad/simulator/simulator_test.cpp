@@ -29,7 +29,6 @@
 using namespace iroha;
 using namespace iroha::validation;
 using namespace iroha::ametsuchi;
-using namespace iroha::model;
 using namespace iroha::simulator;
 using namespace iroha::network;
 using namespace framework::test_subscriber;
@@ -48,7 +47,7 @@ class SimulatorTest : public ::testing::Test {
     factory = std::make_shared<MockTemporaryFactory>();
     query = std::make_shared<MockBlockQuery>();
     ordering_gate = std::make_shared<MockOrderingGate>();
-    crypto_provider = std::make_shared<MockCryptoProvider>();
+    crypto_provider = std::make_shared<iroha::model::MockCryptoProvider>();
   }
 
   void init() {
@@ -60,14 +59,13 @@ class SimulatorTest : public ::testing::Test {
   std::shared_ptr<MockTemporaryFactory> factory;
   std::shared_ptr<MockBlockQuery> query;
   std::shared_ptr<MockOrderingGate> ordering_gate;
-  std::shared_ptr<MockCryptoProvider> crypto_provider;
+  std::shared_ptr<iroha::model::MockCryptoProvider> crypto_provider;
 
   std::shared_ptr<Simulator> simulator;
 };
 
 shared_model::proto::Block makeBlock(int height) {
   return TestBlockBuilder()
-      .txNumber(0)
       .transactions(std::vector<shared_model::proto::Transaction>())
       .height(height)
       .prevHash(shared_model::crypto::Hash(std::string("0", 32)))
@@ -99,7 +97,7 @@ TEST_F(SimulatorTest, ValidWhenPreviousBlock) {
   EXPECT_CALL(*factory, createTemporaryWsv()).Times(1);
   EXPECT_CALL(*query, getTopBlocks(1))
       .WillOnce(Return(rxcpp::observable<>::just(block).map(
-          [](auto &&x) { return wBlock(x.copy()); })));
+          [](auto &&x) { return wBlock(clone(x)); })));
 
   EXPECT_CALL(*validator, validate(_, _)).WillOnce(Return(proposal));
 
@@ -172,7 +170,7 @@ TEST_F(SimulatorTest, FailWhenSameAsProposalHeight) {
 
   EXPECT_CALL(*query, getTopBlocks(1))
       .WillOnce(Return(rxcpp::observable<>::just(block).map(
-          [](auto &&x) { return wBlock(x.copy()); })));
+          [](auto &&x) { return wBlock(clone(x)); })));
 
   EXPECT_CALL(*validator, validate(_, _)).Times(0);
 

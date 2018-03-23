@@ -17,7 +17,7 @@
 
 #include <limits>
 
-#include "builders/common_objects/default_builders.hpp"
+#include "builders/default_builders.hpp"
 #include "framework/result_fixture.hpp"
 #include "model/commands/add_asset_quantity.hpp"
 #include "model/commands/add_peer.hpp"
@@ -39,11 +39,11 @@
 #include "model/permissions.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 
-using ::testing::_;
 using ::testing::AllOf;
 using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::StrictMock;
+using ::testing::_;
 
 using namespace iroha;
 using namespace iroha::ametsuchi;
@@ -90,12 +90,10 @@ class CommandValidateExecuteTest : public ::testing::Test {
               FAIL() << *e.error;
             });
 
-    default_domain = std::shared_ptr<shared_model::interface::Domain>(
-        shared_model::proto::DomainBuilder()
-            .domainId(domain_id)
-            .defaultRole(admin_role)
-            .build()
-            .copy());
+    default_domain = clone(shared_model::proto::DomainBuilder()
+                            .domainId(domain_id)
+                            .defaultRole(admin_role)
+                            .build());
   }
 
   ExecutionResult validateAndExecute() {
@@ -212,7 +210,7 @@ TEST_F(AddAssetQuantityTest, ValidWhenNewWallet) {
   // Add asset first time - no wallet
   // When there is no wallet - new accountAsset will be created
   EXPECT_CALL(*wsv_query, getAccountAsset(add_asset_quantity->account_id, _))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(*wsv_query, getAsset(add_asset_quantity->asset_id))
       .WillOnce(Return(asset));
@@ -251,7 +249,7 @@ TEST_F(AddAssetQuantityTest, ValidWhenExistingWallet) {
 TEST_F(AddAssetQuantityTest, InvalidWhenNoRoles) {
   // Creator has no roles
   EXPECT_CALL(*wsv_query, getAccountRoles(add_asset_quantity->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -292,7 +290,7 @@ TEST_F(AddAssetQuantityTest, InvalidWhenNoAccount) {
       .WillOnce(Return(role_permissions));
   EXPECT_CALL(*wsv_query, getAsset(asset_id)).WillOnce(Return(asset));
   EXPECT_CALL(*wsv_query, getAccount(add_asset_quantity->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -306,7 +304,7 @@ TEST_F(AddAssetQuantityTest, InvalidWhenNoAsset) {
   add_asset_quantity->asset_id = "noass";
 
   EXPECT_CALL(*wsv_query, getAsset(add_asset_quantity->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -415,7 +413,7 @@ TEST_F(SubtractAssetQuantityTest, InvalidWhenNoWallet) {
   EXPECT_CALL(*wsv_query,
               getAccountAsset(subtract_asset_quantity->account_id,
                               subtract_asset_quantity->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(*wsv_query, getAccountRoles(subtract_asset_quantity->account_id))
       .WillOnce(Return(admin_roles));
@@ -478,7 +476,7 @@ TEST_F(SubtractAssetQuantityTest, InvalidWhenOverAmount) {
 TEST_F(SubtractAssetQuantityTest, InvalidWhenNoRoles) {
   // Creator has no roles
   EXPECT_CALL(*wsv_query, getAccountRoles(subtract_asset_quantity->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -541,7 +539,7 @@ TEST_F(SubtractAssetQuantityTest, InvalidWhenNoAsset) {
   subtract_asset_quantity->asset_id = "noass";
 
   EXPECT_CALL(*wsv_query, getAsset(subtract_asset_quantity->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -673,7 +671,7 @@ TEST_F(CreateAccountTest, ValidWhenNewAccount) {
 TEST_F(CreateAccountTest, InvalidWhenNoPermissions) {
   // Creator has no permission
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -709,8 +707,7 @@ TEST_F(CreateAccountTest, InvalidWhenNoDomain) {
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
-  EXPECT_CALL(*wsv_query, getDomain(domain_id))
-      .WillOnce(Return(nonstd::nullopt));
+  EXPECT_CALL(*wsv_query, getDomain(domain_id)).WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -750,7 +747,7 @@ TEST_F(CreateAssetTest, InvalidWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -797,7 +794,7 @@ TEST_F(CreateDomainTest, ValidWhenCreatorHasPermissions) {
 TEST_F(CreateDomainTest, InvalidWhenNoPermissions) {
   // Creator has no permissions
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -930,7 +927,7 @@ TEST_F(RemoveSignatoryTest, InvalidWhenNoAccount) {
       .WillOnce(Return(true));
 
   EXPECT_CALL(*wsv_query, getAccount(remove_signatory->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(*wsv_query, getSignatories(remove_signatory->account_id))
       .WillOnce(Return(many_pubkeys));
@@ -954,7 +951,7 @@ TEST_F(RemoveSignatoryTest, InvalidWhenNoSignatories) {
       .WillOnce(Return(account));
 
   EXPECT_CALL(*wsv_query, getSignatories(remove_signatory->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -972,10 +969,10 @@ TEST_F(RemoveSignatoryTest, InvalidWhenNoAccountAndSignatories) {
       .WillOnce(Return(true));
 
   EXPECT_CALL(*wsv_query, getAccount(remove_signatory->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(*wsv_query, getSignatories(remove_signatory->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1110,7 +1107,7 @@ TEST_F(SetQuorumTest, InvalidWhenNoAccountButPassedPermissions) {
       .WillOnce(Return(account_pubkeys));
 
   EXPECT_CALL(*wsv_query, getAccount(set_quorum->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1128,7 +1125,7 @@ TEST_F(SetQuorumTest, InvalidWhenNoSignatories) {
       .WillOnce(Return(role_permissions));
   set_quorum->account_id = creator->accountId();
   EXPECT_CALL(*wsv_query, getSignatories(set_quorum->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1157,36 +1154,28 @@ class TransferAssetTest : public CommandValidateExecuteTest {
   void SetUp() override {
     CommandValidateExecuteTest::SetUp();
 
-    asset = std::shared_ptr<shared_model::interface::Asset>(
-        shared_model::proto::AssetBuilder()
-            .assetId(asset_id)
-            .domainId(domain_id)
-            .precision(2)
-            .build()
-            .copy());
+    asset = clone(shared_model::proto::AssetBuilder()
+                  .assetId(asset_id)
+                  .domainId(domain_id)
+                  .precision(2)
+                  .build());
 
-    balance = std::shared_ptr<shared_model::interface::Amount>(
-        shared_model::proto::AmountBuilder()
-            .intValue(150)
-            .precision(2)
-            .build()
-            .copy());
+    balance = clone(shared_model::proto::AmountBuilder()
+                  .intValue(150)
+                  .precision(2)
+                  .build());
 
-    src_wallet = std::shared_ptr<shared_model::interface::AccountAsset>(
-        shared_model::proto::AccountAssetBuilder()
-            .assetId(asset_id)
-            .accountId(admin_id)
-            .balance(*balance)
-            .build()
-            .copy());
+    src_wallet = clone(shared_model::proto::AccountAssetBuilder()
+                  .assetId(asset_id)
+                  .accountId(admin_id)
+                  .balance(*balance)
+                  .build());
 
-    dst_wallet = std::shared_ptr<shared_model::interface::AccountAsset>(
-        shared_model::proto::AccountAssetBuilder()
-            .assetId(asset_id)
-            .accountId(account_id)
-            .balance(*balance)
-            .build()
-            .copy());
+    dst_wallet = clone(shared_model::proto::AccountAssetBuilder()
+                  .assetId(asset_id)
+                  .accountId(account_id)
+                  .balance(*balance)
+                  .build());
 
     transfer_asset = std::make_shared<TransferAsset>();
     transfer_asset->src_account_id = admin_id;
@@ -1217,7 +1206,7 @@ TEST_F(TransferAssetTest, ValidWhenNewWallet) {
       .WillRepeatedly(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getAccountAsset(transfer_asset->dest_account_id, _))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(
       *wsv_query,
@@ -1273,7 +1262,7 @@ TEST_F(TransferAssetTest, ValidWhenExistingWallet) {
 TEST_F(TransferAssetTest, InvalidWhenNoPermissions) {
   // Creator has no permissions
   EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->src_account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1282,7 +1271,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoDestAccount) {
   // No destination account exists
   transfer_asset->dest_account_id = "noacc";
   EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->dest_account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(*wsv_query, getAccountRoles(transfer_asset->src_account_id))
       .WillOnce(Return(admin_roles));
@@ -1307,7 +1296,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoSrcAccountAsset) {
   EXPECT_CALL(
       *wsv_query,
       getAccountAsset(transfer_asset->src_account_id, transfer_asset->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1334,7 +1323,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoSrcAccountAssetDuringExecute) {
       getAccountAsset(transfer_asset->src_account_id, transfer_asset->asset_id))
       .Times(2)
       .WillOnce(Return(src_wallet))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   EXPECT_CALL(*wsv_query, getAccount(transfer_asset->dest_account_id))
       .WillOnce(Return(account));
 
@@ -1356,7 +1345,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoAssetDuringValidation) {
       .WillRepeatedly(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getAsset(transfer_asset->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1377,7 +1366,7 @@ TEST_F(TransferAssetTest, InvalidWhenNoAssetId) {
 
   EXPECT_CALL(*wsv_query, getAsset(transfer_asset->asset_id))
       .WillOnce(Return(asset))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   EXPECT_CALL(
       *wsv_query,
       getAccountAsset(transfer_asset->src_account_id, transfer_asset->asset_id))
@@ -1412,7 +1401,7 @@ TEST_F(TransferAssetTest, InvalidWhenInsufficientFunds) {
   EXPECT_CALL(*wsv_query, getAsset(transfer_asset->asset_id))
       .WillOnce(Return(asset));
   EXPECT_CALL(*wsv_query, getAccount(transfer_asset->dest_account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
@@ -1487,21 +1476,18 @@ TEST_F(TransferAssetTest, InvalidWhenWrongPrecisionDuringExecute) {
  * @then execute fails and returns false
  */
 TEST_F(TransferAssetTest, InvalidWhenAmountOverflow) {
-  auto max_balance = std::shared_ptr<shared_model::interface::Amount>(
+  std::shared_ptr<shared_model::interface::Amount> max_balance = clone(
       shared_model::proto::AmountBuilder()
           .intValue(
               std::numeric_limits<boost::multiprecision::uint256_t>::max())
           .precision(2)
-          .build()
-          .copy());
+          .build());
 
-  src_wallet = std::shared_ptr<shared_model::interface::AccountAsset>(
-      shared_model::proto::AccountAssetBuilder()
-          .assetId(src_wallet->assetId())
-          .accountId(src_wallet->accountId())
-          .balance(*max_balance)
-          .build()
-          .copy());
+  src_wallet = clone(shared_model::proto::AccountAssetBuilder()
+                .assetId(src_wallet->assetId())
+                .accountId(src_wallet->accountId())
+                .balance(*max_balance)
+                .build());
 
   EXPECT_CALL(*wsv_query, getAsset(transfer_asset->asset_id))
       .WillOnce(Return(asset));
@@ -1544,7 +1530,7 @@ TEST_F(TransferAssetTest, ValidWhenCreatorHasPermission) {
       .WillOnce(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getAccountAsset(transfer_asset->dest_account_id, _))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   EXPECT_CALL(
       *wsv_query,
@@ -1612,7 +1598,7 @@ TEST_F(AddPeerTest, InvalidCaseWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -1657,7 +1643,7 @@ TEST_F(CreateRoleTest, InvalidCaseWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillRepeatedly(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillRepeatedly(Return(nonstd::nullopt));
+      .WillRepeatedly(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -1725,7 +1711,7 @@ TEST_F(AppendRoleTest, InvalidCaseNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -1738,7 +1724,7 @@ TEST_F(AppendRoleTest, InvalidCaseNoAccountRole) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .Times(2)
       .WillOnce(Return(admin_roles))
-      .WillOnce((Return(nonstd::nullopt)));
+      .WillOnce((Return(boost::none)));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
   EXPECT_CALL(*wsv_query, getRolePermissions("master"))
@@ -1756,11 +1742,11 @@ TEST_F(AppendRoleTest, InvalidCaseNoAccountRoleAndNoPermission) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .Times(2)
       .WillOnce(Return(admin_roles))
-      .WillOnce((Return(nonstd::nullopt)));
+      .WillOnce((Return(boost::none)));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
   EXPECT_CALL(*wsv_query, getRolePermissions("master"))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -1778,7 +1764,7 @@ TEST_F(AppendRoleTest, InvalidCaseRoleHasNoPermissions) {
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .Times(2)
       .WillOnce(Return(role_permissions))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   EXPECT_CALL(*wsv_query, getRolePermissions("master"))
       .WillOnce(Return(role_permissions));
 
@@ -1825,7 +1811,7 @@ TEST_F(DetachRoleTest, InvalidCase) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 
@@ -1871,7 +1857,7 @@ TEST_F(GrantPermissionTest, InvalidCaseWhenNoPermissions) {
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
       .WillOnce(Return(admin_roles));
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   ASSERT_NO_THROW(checkErrorCase(validateAndExecute()));
 }
 

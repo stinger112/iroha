@@ -154,6 +154,8 @@ if(SHARED_MODEL_DISABLE_COMPATIBILITY)
     add_definitions(-DDISABLE_BACKWARD)
 endif()
 
+SET(IROHA_ROOT_PROJECT ON)
+
 add_subdirectory(schema)
 add_subdirectory(libs)
 add_subdirectory(irohad)
@@ -172,7 +174,5 @@ if (FUZZING)
     message(Fuzzing with compilers other than clang does not supported yet)
   endif()
 endif()
-
-
 
 

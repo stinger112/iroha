@@ -48,10 +48,9 @@ namespace shared_model {
     }
 
     inline static shared_model::proto::Query from_old(
-        const iroha::model::Query &qry) {
+        std::shared_ptr<const iroha::model::Query> qry) {
       return shared_model::proto::Query(
-          *iroha::model::converters::PbQueryFactory().serialize(
-              std::make_shared<iroha::model::Query>(qry)));
+          *iroha::model::converters::PbQueryFactory().serialize(qry));
     }
 
     inline static shared_model::proto::Proposal from_old(
@@ -67,7 +66,6 @@ namespace shared_model {
 
     inline static shared_model::proto::QueryResponse from_old(
         std::shared_ptr<iroha::model::QueryResponse> queryResponse) {
-      auto sshash = queryResponse->query_hash.to_hexstring();
       auto proto_resp =
           *iroha::model::converters::PbQueryResponseFactory().serialize(
               queryResponse);

@@ -19,13 +19,13 @@
 
 #include <endpoint.pb.h>
 
+#include "builders/protobuf/common_objects/proto_account_builder.hpp"
 #include "model/sha3_hash.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "module/irohad/validation/validation_mocks.hpp"
 #include "module/shared_model/builders/protobuf/test_query_builder.hpp"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
-#include "builders/protobuf/common_objects/proto_account_builder.hpp"
 
 #include "client.hpp"
 
@@ -150,9 +150,9 @@ TEST_F(ClientServerTest, SendTxWhenInvalidJson) {
         })";
   JsonTransactionFactory tx_factory;
   auto json_doc = stringToJson(json_string);
-  ASSERT_TRUE(json_doc.has_value());
+  ASSERT_TRUE(json_doc);
   auto model_tx = tx_factory.deserialize(json_doc.value());
-  ASSERT_FALSE(model_tx.has_value());
+  ASSERT_FALSE(model_tx);
 }
 
 TEST_F(ClientServerTest, SendTxWhenStatelessInvalid) {
@@ -192,7 +192,7 @@ TEST_F(ClientServerTest, SendQueryWhenInvalidJson) {
 
   JsonQueryFactory queryFactory;
   auto model_query = queryFactory.deserialize(json_query);
-  ASSERT_FALSE(model_query.has_value());
+  ASSERT_FALSE(model_query);
 }
 
 TEST_F(ClientServerTest, SendQueryWhenStatelessInvalid) {
@@ -218,9 +218,8 @@ TEST_F(ClientServerTest, SendQueryWhenValid) {
   auto account_admin = iroha::model::Account();
   account_admin.account_id = "admin@test";
 
-  auto account_test = std::shared_ptr<shared_model::interface::Account>(
-      shared_model::proto::AccountBuilder().accountId("test@test").build().copy()
-  );
+  std::shared_ptr<shared_model::interface::Account> account_test = clone(
+      shared_model::proto::AccountBuilder().accountId("test@test").build());
 
   EXPECT_CALL(*wsv_query,
               hasAccountGrantablePermission(
@@ -228,7 +227,7 @@ TEST_F(ClientServerTest, SendQueryWhenValid) {
       .WillOnce(Return(true));
 
   EXPECT_CALL(*wsv_query, getAccountDetail("test@test"))
-      .WillOnce(Return(nonstd::make_optional<std::string>("value")));
+      .WillOnce(Return(boost::make_optional(std::string("value"))));
 
   auto query = QueryBuilder()
                    .createdTime(iroha::time::now())

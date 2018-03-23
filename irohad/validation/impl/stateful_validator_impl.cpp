@@ -18,9 +18,9 @@
 #include <numeric>
 #include <set>
 
-#include "backend/protobuf/from_old_model.hpp"
+#include <boost/range/adaptor/transformed.hpp>
+
 #include "builders/protobuf/proposal.hpp"
-#include "model/account.hpp"
 #include "validation/impl/stateful_validator_impl.hpp"
 
 namespace iroha {
@@ -37,28 +37,27 @@ namespace iroha {
       log_->info("transactions in proposal: {}",
                  proposal.transactions().size());
       auto checking_transaction = [this](const auto &tx, auto &queries) {
-        return (queries.getAccount(tx.creatorAccountId()) |
+        return bool(queries.getAccount(tx.creatorAccountId()) |
                 [&](const auto &account) {
                   // Check if tx creator has account and has quorum to execute
                   // transaction
                   return tx.signatures().size() >= account->quorum()
                       ? queries.getSignatories(tx.creatorAccountId())
-                      : nonstd::nullopt;
+                      : boost::none;
                 }
                 |
                 [&](const auto &signatories) {
                   // Check if signatures in transaction are account signatory
                   return this->signaturesSubset(tx.signatures(), signatories)
-                      ? nonstd::make_optional(signatories)
-                      : nonstd::nullopt;
+                      ? boost::make_optional(signatories)
+                      : boost::none;
                 })
-            .has_value();
+            ;
       };
 
       // Filter only valid transactions
       auto filter = [&temporaryWsv, checking_transaction](auto &acc,
                                                           const auto &tx) {
-        std::unique_ptr<model::Transaction> old_tx(tx->makeOldModel());
         auto answer =
             temporaryWsv.apply(*(tx.operator->()), checking_transaction);
         if (answer) {

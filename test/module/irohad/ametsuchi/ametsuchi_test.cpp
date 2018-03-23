@@ -24,16 +24,12 @@
 #include "ametsuchi/mutable_storage.hpp"
 #include "builders/protobuf/transaction.hpp"
 #include "framework/test_subscriber.hpp"
-#include "model/account.hpp"
-#include "model/account_asset.hpp"
-#include "model/domain.hpp"
 #include "model/permissions.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_fixture.hpp"
 #include "module/shared_model/builders/protobuf/test_block_builder.hpp"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
 
 using namespace iroha::ametsuchi;
-using namespace iroha::model;
 using namespace framework::test_subscriber;
 
 auto zero_string = std::string(32, '0');
@@ -190,22 +186,21 @@ TEST_F(AmetsuchiTest, SampleTest) {
   iroha::Amount amount;
 
   // Block 1
-  auto block1 =
-      TestBlockBuilder()
-          .transactions(std::vector<shared_model::proto::Transaction>(
-              {TestTransactionBuilder()
-                   .creatorAccountId("admin1")
-                   .createRole(
-                       "user",
-                       std::set<std::string>{
-                           can_add_peer, can_create_asset, can_get_my_account})
-                   .createDomain(domain, "user")
-                   .createAccount(user1name, domain, fake_pubkey)
-                   .build()}))
-          .height(1)
-          .prevHash(fake_hash)
-          .txNumber(1)
-          .build();
+  auto block1 = TestBlockBuilder()
+                    .transactions(std::vector<shared_model::proto::Transaction>(
+                        {TestTransactionBuilder()
+                             .creatorAccountId("admin1")
+                             .createRole("user",
+                                         std::set<std::string>{
+                                             iroha::model::can_add_peer,
+                                             iroha::model::can_create_asset,
+                                             iroha::model::can_get_my_account})
+                             .createDomain(domain, "user")
+                             .createAccount(user1name, domain, fake_pubkey)
+                             .build()}))
+                    .height(1)
+                    .prevHash(fake_hash)
+                    .build();
 
   apply(storage, block1);
 
@@ -225,7 +220,6 @@ TEST_F(AmetsuchiTest, SampleTest) {
                    .build()}))
           .height(2)
           .prevHash(block1.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block2);
@@ -262,7 +256,6 @@ TEST_F(AmetsuchiTest, PeerTest) {
 
   auto block =
       TestBlockBuilder()
-          .txNumber(1)
           .transactions(std::vector<shared_model::proto::Transaction>{txn})
           .prevHash(fake_hash)
           .build();
@@ -297,8 +290,9 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
       TestTransactionBuilder()
           .creatorAccountId(admin)
           .createRole("user",
-                      std::set<std::string>{
-                          can_add_peer, can_create_asset, can_get_my_account})
+                      std::set<std::string>{iroha::model::can_add_peer,
+                                            iroha::model::can_create_asset,
+                                            iroha::model::can_get_my_account})
           .createDomain(domain, "user")
           .createAccount(user1name, domain, fake_pubkey)
           .createAccount(user2name, domain, fake_pubkey)
@@ -314,7 +308,6 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
           .height(1)
           .transactions(std::vector<shared_model::proto::Transaction>({txn1}))
           .prevHash(fake_hash)
-          .txNumber(1)
           .build();
 
   apply(storage, block1);
@@ -341,7 +334,6 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn2}))
           .height(2)
           .prevHash(block1.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block2);
@@ -367,7 +359,6 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn3}))
           .height(3)
           .prevHash(block2.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block3);
@@ -419,8 +410,9 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
       TestTransactionBuilder()
           .creatorAccountId("adminone")
           .createRole("user",
-                      std::set<std::string>{
-                          can_add_peer, can_create_asset, can_get_my_account})
+                      std::set<std::string>{iroha::model::can_add_peer,
+                                            iroha::model::can_create_asset,
+                                            iroha::model::can_get_my_account})
           .createDomain("domain", "user")
           .createAccount("userone", "domain", pubkey1)
           .build();
@@ -429,7 +421,6 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn1}))
           .height(1)
           .prevHash(fake_hash)
-          .txNumber(1)
           .build();
 
   apply(storage, block1);
@@ -458,7 +449,6 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn2}))
           .height(2)
           .prevHash(block1.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block2);
@@ -485,7 +475,6 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn3}))
           .height(3)
           .prevHash(block2.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block3);
@@ -520,7 +509,6 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn4}))
           .height(4)
           .prevHash(block3.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block4);
@@ -554,7 +542,6 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn5}))
           .height(5)
           .prevHash(block4.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block5);
@@ -585,7 +572,6 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
           .transactions(std::vector<shared_model::proto::Transaction>({txn6}))
           .height(6)
           .prevHash(block5.hash())
-          .txNumber(1)
           .build();
 
   apply(storage, block6);
@@ -610,7 +596,6 @@ shared_model::proto::Block getBlock() {
           .transactions(std::vector<shared_model::proto::Transaction>({txn}))
           .height(1)
           .prevHash(fake_hash)
-          .txNumber(1)
           .build();
   return block;
 }
@@ -627,7 +612,7 @@ TEST_F(AmetsuchiTest, TestingStorageWhenInsertBlock) {
 
   log->info("Try insert block");
 
-auto inserted = storage->insertBlock(getBlock());
+  auto inserted = storage->insertBlock(getBlock());
   ASSERT_TRUE(inserted);
 
   log->info("Request ledger information");
@@ -668,7 +653,7 @@ TEST_F(AmetsuchiTest, TestingStorageWhenDropAll) {
 
   log->info("Try insert block");
 
-auto inserted = storage->insertBlock(getBlock());
+  auto inserted = storage->insertBlock(getBlock());
   ASSERT_TRUE(inserted);
 
   log->info("Request ledger information");
@@ -710,8 +695,9 @@ TEST_F(AmetsuchiTest, FindTxByHashTest) {
       TestTransactionBuilder()
           .creatorAccountId("admin1")
           .createRole("user",
-                      std::set<std::string>{
-                          can_add_peer, can_create_asset, can_get_my_account})
+                      std::set<std::string>{iroha::model::can_add_peer,
+                                            iroha::model::can_create_asset,
+                                            iroha::model::can_get_my_account})
           .createDomain("domain", "user")
           .createAccount("user1", "domain", pubkey1)
           .build();
@@ -720,8 +706,9 @@ TEST_F(AmetsuchiTest, FindTxByHashTest) {
       TestTransactionBuilder()
           .creatorAccountId("admin1")
           .createRole("user2",
-                      std::set<std::string>{
-                          can_add_peer, can_create_asset, can_get_my_account})
+                      std::set<std::string>{iroha::model::can_add_peer,
+                                            iroha::model::can_create_asset,
+                                            iroha::model::can_get_my_account})
           .createDomain("domain2", "user")
           .build();
 
@@ -730,7 +717,6 @@ TEST_F(AmetsuchiTest, FindTxByHashTest) {
                        {txn1, txn2}))
                    .height(1)
                    .prevHash(fake_hash)
-                   .txNumber(2)
                    .build();
 
   apply(storage, block);
@@ -893,7 +879,6 @@ TEST_F(AmetsuchiTest, TestRestoreWSV) {
       TestBlockBuilder()
           .transactions(
               std::vector<shared_model::proto::Transaction>{genesis_tx})
-          .txNumber(1)
           .height(1)
           .prevHash(shared_model::crypto::Sha3_256::makeHash(
               shared_model::crypto::Blob("")))
