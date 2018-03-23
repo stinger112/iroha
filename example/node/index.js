@@ -123,7 +123,7 @@ p
         if (err) {
           reject(err)
         } else {
-          // console.log('submitted transaction successfully');
+          console.log('Submitted transaction successfully')
           let type = response.getResponseCase()
           let responsePb = require('iroha-lib/pb/responses_pb.js')
           let name = getProtoEnumName(

@@ -23,10 +23,8 @@
             '-DSWIG_NODE=ON', 
             '-DENABLE_LIBS_PACKAGING=OFF',
             '-DSHARED_MODEL_DISABLE_COMPATIBILITY=ON', 
-            '-DCMAKE_BUILD_TYPE=Release',
-
-            # TODO: Maybe this is not necessary
-            '-DCMAKE_POSITION_INDEPENDENT_CODE=ON'
+            '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
+            '-DCMAKE_BUILD_TYPE=Release'
           ],
         },
         {
@@ -80,8 +78,6 @@
       'include_dirs': [
         '<(iroha_home_dir)/shared_model',
         '<(iroha_home_dir)/libs',
-        '<(iroha_home_dir)/external/src/martinmoene_optional/include',
-        '<(iroha_home_dir)/irohad',
         '<(iroha_home_dir)/schema'
       ],
       'sources': [
