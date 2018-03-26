@@ -13,37 +13,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 set(HUNTER_STATUS_PRINT ON  CACHE BOOL "Verbose info")
 set(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info"  )
 
-# hunter binary cache server
-set(
-    HUNTER_CACHE_SERVERS
-    "https://github.com/soramitsu/hunter-binary-cache;https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
-    CACHE
-    STRING
-    "Hunter cache servers"
-)
-
-# enable this option to upload your binary cache
-# GITHUB_USER=<github_user> environment variable must be set
-# GITHUB_USER_PASSWORD=<github_personal_token> environment variable must be set
-option(HUNTER_RUN_UPLOAD "Upload cache binaries" OFF)
-if(HUNTER_RUN_UPLOAD)
-  if(NOT DEFINED "ENV{GITHUB_USER}")
-    message(FATAL_ERROR "HUNTER_RUN_UPLOAD=ON, but GITHUB_USER env variable is empty")
-  endif()
-  if(NOT DEFINED "ENV{GITHUB_USER_PASSWORD}")
-    message(FATAL_ERROR "HUNTER_RUN_UPLOAD=ON, but GITHUB_USER_PASSWORD env variable is empty, set to personal access token from github")
-  endif()
-endif()
-
-
-set(
-    HUNTER_PASSWORDS_PATH
-    "${CMAKE_SOURCE_DIR}/cmake/hunter-binary-cache.cmake"
-    CACHE
-    FILEPATH
-    "Hunter passwords"
-)
-
 set(HUNTER_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
 
 include(HunterGate)
