@@ -10,6 +10,7 @@ endif()
 ## setup Hunter and its modules ##
 ##################################
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+set(HUNTER_ROOT ${CMAKE_SOURCE_DIR}/external)
 set(HUNTER_STATUS_PRINT ON  CACHE BOOL "Verbose info")
 set(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info"  )
 
@@ -17,8 +18,8 @@ set(HUNTER_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
 
 include(HunterGate)
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.20.14.tar.gz"
-    SHA1 "18cdbf5c47abdda437c73bf5437b7c3c65afe47c"
+    URL "https://github.com/ruslo/hunter/archive/v0.20.28.tar.gz"
+    SHA1 "8fee57e4232e35e28a88f0beafb5f2a739a3fa3c"
     FILEPATH ${CMAKE_SOURCE_DIR}/cmake/hunter-config.cmake
 )
 
