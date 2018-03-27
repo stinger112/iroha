@@ -62,7 +62,7 @@
   "binary": {
     "module_name": "iroha_lib",
     "module_path": "lib/{node_abi}-{platform}-{arch}-{libc}/",
-    "host": "https://github.com/stinger112/iroha-js/releases/download/",
+    "host": "https://github.com/hyperledger/iroha-javascript/releases/download/",
     "remote_path": "{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{libc}.tar.gz"
   }
