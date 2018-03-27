@@ -24,15 +24,19 @@ You need this section if you want to build **iroha-lib** manually for publishing
 
 ### Prerequisities
 
+**
+WARNING!
+If you have already installed SWIG, you MUST install patched version instead using [this patch](https://github.com/swig/swig/pull/968.patch).
+Or just delete global installed SWIG - Iroha be able to pull and compile it automatically.
+**
+
 In order to build NPM package by `node-gyp` on your machine you need some global installed dependencies: 
 
-1. CMake (>=3.7)
+1. CMake (>=3.8.2)
 
-2. Protobuf (>3.5)
+2. Protobuf (>=3.5.1)
 
-**WARNING! If you have already installed SWIG, you MUST install patched version instead using [this patch](https://github.com/swig/swig/pull/968.patch)**
-
-Also, you can watch `install-dependencies.sh` script - it may help to install neccessary dependencies on your system.
+3. Boost (>=1.65.1)
 
 #### For Mac users
 

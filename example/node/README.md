@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. Make sure you have running iroha on your machine. You can follow [this](https://hyperledger.github.io/iroha-api/#run-the-daemon-irohad) guide to launch iroha daemon. Please run iroha from iroha/example folder, since python script uses keys from there.
+1. Make sure you have running iroha on your machine. You can follow [this](https://hyperledger.github.io/iroha-api/#run-the-daemon-irohad) guide to launch iroha daemon. Please use keys for iroha from *iroha/example* folder, since this example uses keys from there.
 
 2. If you are a lucky owner of a processor with the x64 architecture, you can install **iroha-lib** from the NPM repository with a simple command:
 
