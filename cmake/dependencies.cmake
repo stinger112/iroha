@@ -7,8 +7,9 @@ set_directory_properties(PROPERTIES
     )
 
 
-###################################################################
-##### START OF PROJECT DEPENDENCIES
+#########################################
+##### START OF PROJECT DEPENDENCIES #####
+#########################################
 
 find_package(Threads REQUIRED)
 
@@ -77,10 +78,16 @@ set(BOOST_COMPONENTS
 hunter_add_package(Boost COMPONENTS
     ${BOOST_COMPONENTS}
     )
-find_package(Boost 1.65.1 CONFIG REQUIRED
-    COMPONENTS
+find_package(Boost 1.65.1 REQUIRED
+    COMPONENTS 
     ${BOOST_COMPONENTS}
     )
+
+if(ENABLE_LIBS_PACKAGING)
+  foreach (library ${Boost_LIBRARIES})
+    add_install_step_for_lib(${library})
+  endforeach(library)
+endif()
 
 ##########################
 #       benchmark        #

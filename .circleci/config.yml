@@ -27,6 +27,7 @@ jobs:
             - build-linux-debug-
           paths:
             - ~/.ccache
+
       - run:
           name: ccache setup
           command: |
@@ -332,7 +333,7 @@ jobs:
           path: build/version.txt
           destination: version.txt
 
-
+     
 
 workflows:
   version: 2
@@ -340,7 +341,6 @@ workflows:
     jobs:
       # build-macos-release + build -> sonar(pr/release)
       - build-macos-release
-      - build-clean
       - build
       - sonar-pr:
           requires:
@@ -386,4 +386,3 @@ workflows:
                 - master
             tags:
               only: /v[\.0-9]+.*/
-
