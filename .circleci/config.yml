@@ -27,13 +27,6 @@ jobs:
             - build-linux-debug-
           paths:
             - ~/.ccache
-      - restore_cache:
-          keys:
-            - hunter-linux-debug-{{ arch }}-{{ .Branch }}-
-            - hunter-linux-debug-{{ arch }}-
-            - hunter-linux-debug-
-          paths:
-            - ~/.hunter
       - run:
           name: ccache setup
           command: |
@@ -72,10 +65,6 @@ jobs:
           key: build-linux-debug-{{ arch }}-{{ .Branch }}-{{ epoch }}
           paths:
             - ~/.ccache
-      - save_cache:
-          key: hunter-linux-debug-{{ arch }}-{{ .Branch }}-{{ epoch }}
-          paths:
-            - ~/.hunter
           when: always
       - persist_to_workspace:
           root: /opt/iroha/build
@@ -99,13 +88,6 @@ jobs:
             - build-linux-release-
           paths:
             - ~/.ccache
-      - restore_cache:
-          keys:
-            - hunter-linux-release-{{ arch }}-{{ .Branch }}-
-            - hunter-linux-release-{{ arch }}-
-            - hunter-linux-release-
-          paths:
-            - ~/.hunter
       - run:
           name: ccache setup
           command: |
@@ -135,10 +117,6 @@ jobs:
           key: build-linux-release-{{ arch }}-{{ .Branch }}-{{ epoch }}
           paths:
             - ~/.ccache
-      - save_cache:
-          key: hunter-linux-release-{{ arch }}-{{ .Branch }}-{{ epoch }}
-          paths:
-            - ~/.hunter
           when: always
       - run:
           name: copy deb file
@@ -307,13 +285,6 @@ jobs:
             - mac-external-
           paths:
             - external
-      - restore_cache:
-          keys:
-            - mac-hunter-{{ arch }}-{{ .Branch }}-
-            - mac-hunter-{{ arch }}-
-            - mac-hunter-
-          paths:
-            - ~/.hunter
       - run:
           name: ccache setup
           command: |
@@ -346,11 +317,6 @@ jobs:
           paths:
             - external
           when: always
-      - save_cache:
-          key: mac-hunter-{{ arch }}-{{ .Branch }}-{{ epoch }}
-          paths:
-            - ~/.hunter
-          when: always
       - run:
           name: rename artifacts
           command: |
@@ -365,73 +331,6 @@ jobs:
       - store_artifacts:
           path: build/version.txt
           destination: version.txt
-
-
-  build-clean:
-    # machine is:
-    # - CPUs: 2
-    # - Processor: Intel(R) Xeon(R) @ 2.3GHz
-    # - RAM: 8 GB
-    # - HD: 100 GB
-    machine: true
-    environment:
-      PARALLELISM: 2
-      CC: gcc-5
-      CXX: g++-5
-    steps:
-      - checkout
-      - run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-      - run: sudo apt update -yqq
-      # compier dependencies
-      - run: sudo apt install -yqq build-essential g++-5 ccache
-      # grpc dependencies
-      - run: sudo apt install -yqq golang
-      # curl+ssl dependencies
-      - run: sudo apt install -yqq curl libssl-dev zlib1g-dev libcurl4-openssl-dev
-      - restore_cache:
-          keys:
-            - build-clean-{{ arch }}-{{ .Branch }}-
-            - build-clean-{{ arch }}-
-            - build-clean-
-          paths:
-            - ~/.ccache
-      - run:
-          name: ccache setup
-          command: |
-            ccache --version
-            ccache --show-stats
-            ccache --zero-stats
-            ccache --max-size=3G
-            ccache --cleanup
-      - run:
-          name: install cmake 3.5.1
-          command: >
-            git clone https://gitlab.kitware.com/cmake/cmake.git /tmp/cmake;
-            cd /tmp/cmake;
-            git checkout 64130a7e793483e24c1d68bdd234f81d5edb2d51;
-            ./bootstrap --system-curl --parallel=${PARALLELISM} --enable-ccache;
-            sudo make -j${PARALLELISM} install;
-            sudo ldconfig
-          when: always
-      - restore_cache:
-          keys:
-            - hunter-
-          paths:
-            - /home/circleci/.hunter
-      - run: cmake -H. -Bbuild
-      - run: cmake --build build --target all -- -j${PARALLELISM}
-      - run: ccache --show-stats
-      - save_cache:
-          key: hunter-{{ epoch }}
-          paths:
-            - /home/circleci/.hunter
-          when: always
-      - save_cache:
-          key: build-clean-{{ arch }}-{{ .Branch }}-{{ epoch }}
-          paths:
-            - ~/.ccache
-          when: always
-
 
 
 
