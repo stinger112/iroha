@@ -53,7 +53,7 @@ brew install protobuf boost # Iroha dependencies
 1. Clone full Iroha repository
 
 ```sh
-git clone https://github.com/hyperledger/iroha.git
+git clone -b develop --depth=1 https://github.com/hyperledger/iroha
 
 ```
 

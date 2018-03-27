@@ -123,7 +123,7 @@ p
         if (err) {
           reject(err)
         } else {
-          console.log('Submitted transaction successfully');
+          console.log('Submitted transaction successfully')
           let type = response.getResponseCase()
           let responsePb = require('../pb/responses_pb.js')
           let name = getProtoEnumName(
