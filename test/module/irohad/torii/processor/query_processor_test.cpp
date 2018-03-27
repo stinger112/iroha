@@ -26,6 +26,7 @@
 #include "torii/processor/query_processor_impl.hpp"
 
 #include "backend/protobuf/query_responses/proto_error_query_response.hpp"
+#include "builders/protobuf/common_objects/proto_account_builder.hpp"
 #include "cryptography/crypto_provider/crypto_defaults.hpp"
 #include "cryptography/keypair.hpp"
 #include "module/shared_model/builders/protobuf/test_query_builder.hpp"
@@ -35,9 +36,9 @@ using namespace iroha::ametsuchi;
 using namespace iroha::validation;
 using namespace framework::test_subscriber;
 
-using ::testing::_;
 using ::testing::A;
 using ::testing::Return;
+using ::testing::_;
 
 class QueryProcessorTest : public ::testing::Test {
  public:
@@ -79,22 +80,25 @@ TEST_F(QueryProcessorTest, QueryProcessorWhereInvokeInvalidQuery) {
   auto account = model::Account();
   account.account_id = account_id;
   qry_resp->account = account;
+  std::shared_ptr<shared_model::interface::Account> shared_account = clone(
+      shared_model::proto::AccountBuilder().accountId(account_id).build());
   auto role = "admin";
   std::vector<std::string> roles = {role};
   std::vector<std::string> perms = {iroha::model::can_get_my_account};
 
-  EXPECT_CALL(*wsv_queries, getAccount(account_id)).WillOnce(Return(account));
+  EXPECT_CALL(*wsv_queries, getAccount(account_id))
+      .WillOnce(Return(shared_account));
   EXPECT_CALL(*wsv_queries, getAccountRoles(account_id))
       .Times(2)
       .WillRepeatedly(Return(roles));
   EXPECT_CALL(*wsv_queries, getRolePermissions(role)).WillOnce(Return(perms));
 
   auto wrapper = make_test_subscriber<CallExact>(qpi.queryNotifier(), 1);
-  wrapper.subscribe([this](auto response) {
+  wrapper.subscribe([](auto response) {
     auto resp = response->get();
     /// check if obtained response is error response
     boost::apply_visitor(
-        [this](auto val) {
+        [](auto val) {
           if (std::is_same<
                   decltype(val),
                   shared_model::detail::PolymorphicWrapper<

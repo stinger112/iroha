@@ -39,8 +39,8 @@ namespace shared_model {
 
       Transaction(const Transaction &o) : Transaction(o.proto_) {}
 
-      Transaction(Transaction &&o) noexcept : Transaction(std::move(o.proto_)) {
-      }
+      Transaction(Transaction &&o) noexcept
+          : Transaction(std::move(o.proto_)) {}
 
       const interface::types::AccountIdType &creatorAccountId() const override {
         return payload_.creator_account_id();
@@ -80,6 +80,11 @@ namespace shared_model {
         sig->set_signature(crypto::toBinaryString(signature->signedData()));
         signatures_.invalidate();
         return true;
+      }
+
+      bool clearSignatures() override {
+        signatures_->clear();
+        return (signatures_->size() == 0);
       }
 
       interface::types::TimestampType createdTime() const override {

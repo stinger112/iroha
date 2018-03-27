@@ -18,6 +18,18 @@
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
 
+#include "builders/common_objects/account_asset_builder.hpp"
+#include "builders/common_objects/account_builder.hpp"
+#include "builders/common_objects/amount_builder.hpp"
+#include "builders/common_objects/asset_builder.hpp"
+#include "builders/common_objects/peer_builder.hpp"
+#include "builders/common_objects/signature_builder.hpp"
+#include "builders/protobuf/common_objects/proto_account_asset_builder.hpp"
+#include "builders/protobuf/common_objects/proto_account_builder.hpp"
+#include "builders/protobuf/common_objects/proto_amount_builder.hpp"
+#include "builders/protobuf/common_objects/proto_asset_builder.hpp"
+#include "builders/protobuf/common_objects/proto_peer_builder.hpp"
+#include "builders/protobuf/common_objects/proto_signature_builder.hpp"
 #include "framework/test_subscriber.hpp"
 #include "model/permissions.hpp"
 #include "model/queries/responses/account_assets_response.hpp"
@@ -28,12 +40,13 @@
 #include "model/queries/responses/signatories_response.hpp"
 #include "model/queries/responses/transactions_response.hpp"
 #include "model/query_execution.hpp"
+#include "validators/field_validator.hpp"
 
-using ::testing::_;
 using ::testing::AllOf;
 using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::StrictMock;
+using ::testing::_;
 
 using namespace iroha::ametsuchi;
 using namespace iroha::model;
@@ -53,15 +66,19 @@ class QueryValidateExecuteTest : public ::testing::Test {
     EXPECT_CALL(*wsv_query, hasAccountGrantablePermission(_, _, _))
         .WillRepeatedly(Return(false));
 
-    creator.account_id = admin_id;
-    creator.domain_id = domain_id;
-    creator.json_data = "{}";
-    creator.quorum = 1;
+    creator = clone(shared_model::proto::AccountBuilder()
+                        .accountId(admin_id)
+                        .domainId(domain_id)
+                        .jsonData("{}")
+                        .quorum(1)
+                        .build());
 
-    account.account_id = account_id;
-    account.domain_id = domain_id;
-    account.json_data = "{}";
-    account.quorum = 1;
+    account = clone(shared_model::proto::AccountBuilder()
+                        .accountId(account_id)
+                        .domainId(domain_id)
+                        .jsonData("{}")
+                        .quorum(1)
+                        .build());
   }
 
   std::shared_ptr<QueryResponse> validateAndExecute() {
@@ -75,11 +92,10 @@ class QueryValidateExecuteTest : public ::testing::Test {
    * @return wrapper with created transaction
    */
   wTransaction makeTransaction(int counter, std::string creator) {
-    return wTransaction(TestTransactionBuilder()
-                            .creatorAccountId(creator)
-                            .txCounter(counter)
-                            .build()
-                            .copy());
+    return clone(TestTransactionBuilder()
+                     .creatorAccountId(creator)
+                     .txCounter(counter)
+                     .build());
   }
 
   /**
@@ -106,7 +122,7 @@ class QueryValidateExecuteTest : public ::testing::Test {
 
   std::vector<std::string> admin_roles = {admin_role};
   std::vector<std::string> role_permissions;
-  Account creator, account;
+  std::shared_ptr<shared_model::interface::Account> creator, account;
   std::shared_ptr<MockWsvQuery> wsv_query;
   std::shared_ptr<MockBlockQuery> block_query;
 
@@ -259,9 +275,9 @@ TEST_F(GetAccountTest, NoAccountExist) {
       .WillOnce(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getAccount(get_account->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   EXPECT_CALL(*wsv_query, getAccountRoles(get_account->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
@@ -279,15 +295,38 @@ class GetAccountAssetsTest : public QueryValidateExecuteTest {
     get_account_assets->creator_account_id = admin_id;
     query = get_account_assets;
 
-    accountAsset.asset_id = asset_id;
-    accountAsset.account_id = admin_id;
-    iroha::Amount amount(100, 2);
-    accountAsset.balance = amount;
+    std::shared_ptr<shared_model::interface::Amount> amount;
+    shared_model::builder::AmountBuilder<
+        shared_model::proto::AmountBuilder,
+        shared_model::validation::FieldValidator>()
+        .intValue(100)
+        .precision(2)
+        .build()
+        .match(
+            [&](iroha::expected::Value<
+                std::shared_ptr<shared_model::interface::Amount>> &v) {
+              amount = v.value;
+            },
+            [](iroha::expected::Error<std::shared_ptr<std::string>>) {});
+
+    shared_model::builder::AccountAssetBuilder<
+        shared_model::proto::AccountAssetBuilder,
+        shared_model::validation::FieldValidator>()
+        .assetId(asset_id)
+        .accountId(admin_id)
+        .balance(*amount)
+        .build()
+        .match(
+            [&](iroha::expected::Value<
+                std::shared_ptr<shared_model::interface::AccountAsset>> &v) {
+              accountAsset = v.value;
+            },
+            [](iroha::expected::Error<std::shared_ptr<std::string>>) {});
 
     role_permissions = {can_get_my_acc_ast};
   }
   std::shared_ptr<GetAccountAssets> get_account_assets;
-  AccountAsset accountAsset;
+  std::shared_ptr<shared_model::interface::AccountAsset> accountAsset;
 };
 
 /**
@@ -315,7 +354,19 @@ TEST_F(GetAccountAssetsTest, MyAccountValidCase) {
  */
 TEST_F(GetAccountAssetsTest, AllAccountValidCase) {
   get_account_assets->account_id = account_id;
-  accountAsset.account_id = account_id;
+  shared_model::builder::AccountAssetBuilder<
+      shared_model::proto::AccountAssetBuilder,
+      shared_model::validation::FieldValidator>()
+      .assetId(accountAsset->assetId())
+      .accountId(account_id)
+      .balance(accountAsset->balance())
+      .build()
+      .match(
+          [&](iroha::expected::Value<
+              std::shared_ptr<shared_model::interface::AccountAsset>> &v) {
+            accountAsset = v.value;
+          },
+          [](iroha::expected::Error<std::shared_ptr<std::string>>) {});
   role_permissions = {can_get_all_acc_ast};
 
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
@@ -337,7 +388,19 @@ TEST_F(GetAccountAssetsTest, AllAccountValidCase) {
  */
 TEST_F(GetAccountAssetsTest, DomainAccountValidCase) {
   get_account_assets->account_id = account_id;
-  accountAsset.account_id = account_id;
+  shared_model::builder::AccountAssetBuilder<
+      shared_model::proto::AccountAssetBuilder,
+      shared_model::validation::FieldValidator>()
+      .assetId(accountAsset->assetId())
+      .accountId(account_id)
+      .balance(accountAsset->balance())
+      .build()
+      .match(
+          [&](iroha::expected::Value<
+              std::shared_ptr<shared_model::interface::AccountAsset>> &v) {
+            accountAsset = v.value;
+          },
+          [](iroha::expected::Error<std::shared_ptr<std::string>>) {});
   role_permissions = {can_get_domain_acc_ast};
 
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
@@ -359,7 +422,11 @@ TEST_F(GetAccountAssetsTest, DomainAccountValidCase) {
  */
 TEST_F(GetAccountAssetsTest, GrantAccountValidCase) {
   get_account_assets->account_id = account_id;
-  accountAsset.account_id = account_id;
+  accountAsset = clone(shared_model::proto::AccountAssetBuilder()
+                           .assetId(accountAsset->assetId())
+                           .accountId(account_id)
+                           .balance(accountAsset->balance())
+                           .build());
   role_permissions = {};
 
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
@@ -387,7 +454,20 @@ TEST_F(GetAccountAssetsTest, GrantAccountValidCase) {
  */
 TEST_F(GetAccountAssetsTest, DifferentDomainAccountInValidCase) {
   get_account_assets->account_id = "test@test2";
-  accountAsset.account_id = account_id;
+  shared_model::builder::AccountAssetBuilder<
+      shared_model::proto::AccountAssetBuilder,
+      shared_model::validation::FieldValidator>()
+      .assetId(accountAsset->assetId())
+      .accountId(account_id)
+      .balance(accountAsset->balance())
+      .build()
+      .match(
+          [&](iroha::expected::Value<
+              std::shared_ptr<shared_model::interface::AccountAsset>> &v) {
+            accountAsset = v.value;
+          },
+          [](iroha::expected::Error<std::shared_ptr<std::string>>) {});
+  ;
   role_permissions = {can_get_domain_acc_ast};
 
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
@@ -411,7 +491,20 @@ TEST_F(GetAccountAssetsTest, DifferentDomainAccountInValidCase) {
  */
 TEST_F(GetAccountAssetsTest, NoAccountExist) {
   get_account_assets->account_id = "none";
-  accountAsset.account_id = account_id;
+  shared_model::builder::AccountAssetBuilder<
+      shared_model::proto::AccountAssetBuilder,
+      shared_model::validation::FieldValidator>()
+      .assetId(accountAsset->assetId())
+      .accountId(account_id)
+      .balance(accountAsset->balance())
+      .build()
+      .match(
+          [&](iroha::expected::Value<
+              std::shared_ptr<shared_model::interface::AccountAsset>> &v) {
+            accountAsset = v.value;
+          },
+          [](iroha::expected::Error<std::shared_ptr<std::string>>) {});
+  ;
   role_permissions = {can_get_all_acc_ast};
 
   EXPECT_CALL(*wsv_query, getAccountRoles(admin_id))
@@ -421,7 +514,7 @@ TEST_F(GetAccountAssetsTest, NoAccountExist) {
 
   EXPECT_CALL(*wsv_query,
               getAccountAsset(get_account_assets->account_id, asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
@@ -437,11 +530,11 @@ class GetSignatoriesTest : public QueryValidateExecuteTest {
     get_signatories->account_id = admin_id;
     get_signatories->creator_account_id = admin_id;
     query = get_signatories;
-    signs = {iroha::pubkey_t()};
+    signs = {shared_model::interface::types::PubkeyType(std::string(32, '0'))};
     role_permissions = {can_get_my_signatories};
   }
   std::shared_ptr<GetSignatories> get_signatories;
-  std::vector<iroha::pubkey_t> signs;
+  std::vector<shared_model::interface::types::PubkeyType> signs;
 };
 
 /**
@@ -563,7 +656,7 @@ TEST_F(GetSignatoriesTest, NoAccountExist) {
       .WillOnce(Return(role_permissions));
 
   EXPECT_CALL(*wsv_query, getSignatories(get_signatories->account_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
 
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<::ErrorResponse>(response);
@@ -929,9 +1022,13 @@ class GetAssetInfoTest : public QueryValidateExecuteTest {
     qry->creator_account_id = admin_id;
     query = qry;
     role_permissions = {can_read_assets};
-    asset = Asset(asset_id, "test", 2);
+    asset = clone(shared_model::proto::AssetBuilder()
+                      .assetId(asset_id)
+                      .domainId("test")
+                      .precision(2)
+                      .build());
   }
-  Asset asset;
+  std::shared_ptr<shared_model::interface::Asset> asset;
   std::shared_ptr<GetAssetInfo> qry;
 };
 
@@ -980,7 +1077,7 @@ TEST_F(GetAssetInfoTest, AssetInvalidCase) {
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
   EXPECT_CALL(*wsv_query, getAsset(qry->asset_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
   ASSERT_EQ(cast_resp->reason, ErrorResponse::NO_ASSET);
@@ -1114,7 +1211,7 @@ TEST_F(GetRolePermissionsTest, InValidCaseNoRole) {
   EXPECT_CALL(*wsv_query, getRolePermissions(admin_role))
       .WillOnce(Return(role_permissions));
   EXPECT_CALL(*wsv_query, getRolePermissions(qry->role_id))
-      .WillOnce(Return(nonstd::nullopt));
+      .WillOnce(Return(boost::none));
   auto response = validateAndExecute();
   auto cast_resp = std::static_pointer_cast<ErrorResponse>(response);
   ASSERT_EQ(cast_resp->reason, ErrorResponse::NO_ROLES);

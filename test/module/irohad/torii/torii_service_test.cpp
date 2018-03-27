@@ -14,34 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "builders/protobuf/block.hpp"
+#include "builders/protobuf/transaction.hpp"
+#include "builders/protobuf/proposal.hpp"
+#include "endpoint.pb.h"
+#include "main/server_runner.hpp"
 #include "model/converters/pb_transaction_factory.hpp"
 #include "model/sha3_hash.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
-
-#include "endpoint.pb.h"
-#include "main/server_runner.hpp"
-
-#include "torii/command_client.hpp"
-
-#include "torii/command_service.hpp"
-#include "torii/processor/transaction_processor_impl.hpp"
-
-#include "backend/protobuf/from_old_model.hpp"
-#include "builders/protobuf/block.hpp"
-#include "builders/protobuf/transaction.hpp"
-
 #include "module/shared_model/builders/protobuf/test_block_builder.hpp"
 #include "module/shared_model/builders/protobuf/test_proposal_builder.hpp"
+#include "torii/command_client.hpp"
+#include "torii/command_service.hpp"
+#include "torii/processor/transaction_processor_impl.hpp"
 
 constexpr const char *Ip = "0.0.0.0";
 constexpr int Port = 50051;
 constexpr size_t TimesToriiBlocking = 5;
 
-using ::testing::_;
 using ::testing::A;
 using ::testing::AtLeast;
 using ::testing::Return;
+using ::testing::_;
 
 using namespace iroha::network;
 using namespace iroha::ametsuchi;
@@ -64,10 +59,10 @@ class CustomPeerCommunicationServiceMock : public PeerCommunicationService {
       override {}
 
   rxcpp::observable<std::shared_ptr<shared_model::interface::Proposal>>
-  on_proposal() override {
+  on_proposal() const override {
     return prop_notifier_.get_observable();
   }
-  rxcpp::observable<Commit> on_commit() override {
+  rxcpp::observable<Commit> on_commit() const override {
     return commit_notifier_.get_observable();
   }
 
@@ -102,7 +97,6 @@ class ToriiServiceTest : public testing::Test {
         ->append(std::make_unique<torii::CommandService>(
             tx_processor, block_query, proposal_delay))
         .run();
-
 
     runner->waitForServersReady();
   }
@@ -230,7 +224,7 @@ TEST_F(ToriiServiceTest, StatusWhenBlocking) {
 
   // create proposal from these transactions
   auto proposal = std::make_shared<shared_model::proto::Proposal>(
-      TestProposalBuilder().transactions(txs).build());
+      TestProposalBuilder().height(1).createdTime(iroha::time::now()).transactions(txs).build());
   prop_notifier_.get_subscriber().on_next(proposal);
 
   torii::CommandSyncClient client2(client1);
@@ -252,7 +246,6 @@ TEST_F(ToriiServiceTest, StatusWhenBlocking) {
       TestBlockBuilder()
           .transactions(txs)
           .height(1)
-          .txNumber(txs.size())
           .createdTime(0)
           .prevHash(shared_model::crypto::Hash(std::string(32, '0')))
           .build());
@@ -388,13 +381,11 @@ TEST_F(ToriiServiceTest, StreamingFullPipelineTest) {
                                             .build());
   prop_notifier_.get_subscriber().on_next(proposal);
 
-  //  iroha::model::Block block;
   auto block = std::make_shared<proto::Block>(
       proto::BlockBuilder()
           .height(1)
           .createdTime(iroha::time::now())
           .transactions(txs)
-          .txNumber(1)
           .prevHash(crypto::Hash(std::string(32, '0')))
           .build()
           .signAndAddSignature(keypair));

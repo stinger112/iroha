@@ -65,12 +65,12 @@ TEST_F(YacTest, UnknownVoteBeforeCommit) {
  * @then commit not emitted
  */
 TEST_F(YacTest, UnknownVoteAfterCommit) {
-  auto my_peers = std::vector<iroha::model::Peer>(
+  auto my_peers = decltype(default_peers)(
       {default_peers.begin(), default_peers.begin() + 4});
   ASSERT_EQ(4, my_peers.size());
 
   auto my_order = ClusterOrdering::create(my_peers);
-  ASSERT_TRUE(my_order.has_value());
+  ASSERT_TRUE(my_order);
 
   // delay preference
   uint64_t wait_seconds = 10;

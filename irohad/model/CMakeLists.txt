@@ -53,13 +53,12 @@ add_library(model
 target_link_libraries(model
     hash
     sha3_hash
-    optional
     rxcpp
     logger
     iroha_amount
     common_execution
     schema
-    cryptography
+    ed25519_crypto
     rapidjson
     )
 

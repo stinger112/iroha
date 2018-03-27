@@ -21,13 +21,11 @@
 #include "ametsuchi/impl/postgres_block_query.hpp"
 #include "backend/protobuf/from_old_model.hpp"
 #include "framework/test_subscriber.hpp"
-#include "model/sha3_hash.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_fixture.hpp"
 #include "module/shared_model/builders/protobuf/test_block_builder.hpp"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
 
 using namespace iroha::ametsuchi;
-using namespace iroha::model;
 using namespace framework::test_subscriber;
 
 class BlockQueryTest : public AmetsuchiTest {
@@ -66,7 +64,6 @@ class BlockQueryTest : public AmetsuchiTest {
             .transactions(
                 std::vector<shared_model::proto::Transaction>({txn1_1, txn1_2}))
             .prevHash(shared_model::crypto::Hash(zero_string))
-            .txNumber(2)
             .build();
 
     // First tx in block 1
@@ -83,7 +80,6 @@ class BlockQueryTest : public AmetsuchiTest {
             .transactions(
                 std::vector<shared_model::proto::Transaction>({txn2_1, txn2_2}))
             .prevHash(block1.hash())
-            .txNumber(2)
             .build();
 
     for (const auto &b : {block1, block2}) {
@@ -92,8 +88,8 @@ class BlockQueryTest : public AmetsuchiTest {
       // model
       auto old_block = *std::unique_ptr<iroha::model::Block>(b.makeOldModel());
       file->add(b.height(),
-                iroha::stringToBytes(converters::jsonToString(
-                    converters::JsonBlockFactory().serialize(old_block))));
+                iroha::stringToBytes(iroha::model::converters::jsonToString(
+                    iroha::model::converters::JsonBlockFactory().serialize(old_block))));
       index->index(b);
       blocks_total++;
     }

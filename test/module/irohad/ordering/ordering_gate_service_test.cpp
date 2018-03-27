@@ -15,23 +15,28 @@
  * limitations under the License.
  */
 
-#include "backend/protobuf/common_objects/peer.hpp"
+#include <gtest/gtest.h>
+
 #include "builders/protobuf/common_objects/proto_peer_builder.hpp"
+#include "builders/protobuf/transaction.hpp"
 #include "framework/test_subscriber.hpp"
 #include "mock_ordering_service_persistent_state.hpp"
-#include "model/asset.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
+#include "module/irohad/network/network_mocks.hpp"
+#include "module/shared_model/builders/protobuf/test_block_builder.hpp"
+#include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
 #include "ordering/impl/ordering_gate_impl.hpp"
 #include "ordering/impl/ordering_gate_transport_grpc.hpp"
 #include "ordering/impl/ordering_service_impl.hpp"
 #include "ordering/impl/ordering_service_transport_grpc.hpp"
 
+using namespace iroha;
 using namespace iroha::ordering;
-using namespace iroha::model;
 using namespace iroha::network;
 using namespace framework::test_subscriber;
 using namespace iroha::ametsuchi;
 using namespace std::chrono_literals;
+
 using ::testing::Return;
 
 using wPeer = std::shared_ptr<shared_model::interface::Peer>;
@@ -40,13 +45,23 @@ using wPeer = std::shared_ptr<shared_model::interface::Peer>;
 class OrderingGateServiceTest : public ::testing::Test {
  public:
   OrderingGateServiceTest() {
-    peer.address = address;
+    peer = clone(shared_model::proto::PeerBuilder()
+                     .address(address)
+                     .pubkey(shared_model::interface::types::PubkeyType(
+                         std::string(32, '0')))
+                     .build());
+    pcs_ = std::make_shared<MockPeerCommunicationService>();
+    EXPECT_CALL(*pcs_, on_commit())
+        .WillRepeatedly(Return(commit_subject_.get_observable()));
     gate_transport = std::make_shared<OrderingGateTransportGrpc>(address);
     gate = std::make_shared<OrderingGateImpl>(gate_transport);
+    gate->setPcs(*pcs_);
     gate_transport->subscribe(gate);
 
     service_transport = std::make_shared<OrderingServiceTransportGrpc>();
     counter = 2;
+
+    wsv = std::make_shared<MockPeerQuery>();
   }
 
   void SetUp() override {
@@ -86,19 +101,44 @@ class OrderingGateServiceTest : public ::testing::Test {
     }
   }
 
-  TestSubscriber<iroha::model::Proposal> init(size_t times) {
+  TestSubscriber<std::shared_ptr<shared_model::interface::Proposal>> init(
+      size_t times) {
     auto wrapper = make_test_subscriber<CallExact>(gate->on_proposal(), times);
-    wrapper.subscribe([this](auto proposal) { proposals.push_back(proposal); });
     gate->on_proposal().subscribe([this](auto) {
       counter--;
       cv.notify_one();
     });
+    gate->on_proposal().subscribe([this](auto proposal) {
+      proposals.push_back(proposal);
+
+      // emulate commit event after receiving the proposal to perform next
+      // round inside the peer.
+      std::shared_ptr<shared_model::interface::Block> block =
+          std::make_shared<shared_model::proto::Block>(
+              TestBlockBuilder().build());
+      commit_subject_.get_subscriber().on_next(
+          rxcpp::observable<>::just(block));
+    });
+    wrapper.subscribe();
     return wrapper;
   }
 
+  /**
+   * Send a stub transaction to OS
+   * @param i - number of transaction
+   */
   void send_transaction(size_t i) {
-    auto tx = std::make_shared<Transaction>();
-    tx->tx_counter = i;
+    auto tx = std::make_shared<shared_model::proto::Transaction>(
+        shared_model::proto::TransactionBuilder()
+            .txCounter(i)
+            .createdTime(iroha::time::now())
+            .creatorAccountId("admin@ru")
+            .addAssetQuantity("admin@tu", "coin#coin", "1.0")
+            .build()
+            .signAndAddSignature(
+                shared_model::crypto::DefaultCryptoAlgorithmType::
+                    generateKeypair())
+            );
     gate->propagateTransaction(tx);
     // otherwise tx may come unordered
     std::this_thread::sleep_for(20ms);
@@ -108,38 +148,36 @@ class OrderingGateServiceTest : public ::testing::Test {
   std::shared_ptr<OrderingGateImpl> gate;
   std::shared_ptr<OrderingServiceImpl> service;
 
-  std::vector<Proposal> proposals;
+  /// Peer Communication Service and commit subject are required to emulate
+  /// commits for Ordering Service
+  std::shared_ptr<MockPeerCommunicationService> pcs_;
+  rxcpp::subjects::subject<Commit> commit_subject_;
+
+  std::vector<std::shared_ptr<shared_model::interface::Proposal>> proposals;
   std::atomic<size_t> counter;
   std::condition_variable cv;
   std::mutex m;
   std::thread thread;
   std::shared_ptr<grpc::Server> server;
 
-  Peer peer;
+  std::shared_ptr<shared_model::interface::Peer> peer;
   std::shared_ptr<OrderingGateTransportGrpc> gate_transport;
   std::shared_ptr<OrderingServiceTransportGrpc> service_transport;
   std::shared_ptr<MockOrderingServicePersistentState> fake_persistent_state;
+  std::shared_ptr<MockPeerQuery> wsv;
 };
 
 /**
- * @given ordering service
- * @when a bunch of transaction has arrived
- * @then proposal is sent
+ * @given Ordering service
+ * @when  Send 8 transactions
+ *        AND 2 transactions to OS
+ * @then  Received proposal with 8 transactions
+ *        AND proposal with 2 transactions
  */
 TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
   // 8 transaction -> proposal -> 2 transaction -> proposal
-
-  std::shared_ptr<MockPeerQuery> wsv = std::make_shared<MockPeerQuery>();
-
-  shared_model::proto::PeerBuilder builder;
-
-  auto key = shared_model::crypto::PublicKey(peer.pubkey.to_string());
-  auto tmp = builder.address(peer.address).pubkey(key).build();
-
-  wPeer w_peer(tmp.copy());
-
   EXPECT_CALL(*wsv, getLedgerPeers())
-      .WillRepeatedly(Return(std::vector<wPeer>{w_peer}));
+      .WillRepeatedly(Return(std::vector<wPeer>{peer}));
 
   const size_t max_proposal = 100;
   const size_t commit_delay = 400;
@@ -167,25 +205,25 @@ TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
   auto wrapper = init(2);
 
   for (size_t i = 0; i < 8; ++i) {
-    send_transaction(i);
+    send_transaction(i + 1);
   }
 
   cv.wait_for(lk, 10s);
-  send_transaction(8);
   send_transaction(9);
+  send_transaction(10);
   cv.wait_for(lk, 10s);
 
   std::this_thread::sleep_for(1s);
   ASSERT_EQ(proposals.size(), 2);
-  ASSERT_EQ(proposals.at(0).transactions.size(), 8);
-  ASSERT_EQ(proposals.at(1).transactions.size(), 2);
+  ASSERT_EQ(proposals.at(0)->transactions().size(), 8);
+  ASSERT_EQ(proposals.at(1)->transactions().size(), 2);
   ASSERT_EQ(counter, 0);
   ASSERT_TRUE(wrapper.validate());
 
-  size_t i = 0;
+  size_t i = 1;
   for (auto &&proposal : proposals) {
-    for (auto &&tx : proposal.transactions) {
-      ASSERT_EQ(tx.tx_counter, i++);
+    for (auto &&tx : proposal->transactions()) {
+      ASSERT_EQ(tx->transactionCounter(), i++);
     }
   }
 }
@@ -198,17 +236,8 @@ TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
 TEST_F(OrderingGateServiceTest, ProposalsReceivedWhenProposalSize) {
   // commits on the fulfilling proposal queue
   // 10 transaction -> proposal with 5 -> proposal with 5
-
-  std::shared_ptr<MockPeerQuery> wsv = std::make_shared<MockPeerQuery>();
-
-  shared_model::proto::PeerBuilder builder;
-
-  auto key = shared_model::crypto::PublicKey(peer.pubkey.to_string());
-  auto tmp = builder.address(peer.address).pubkey(key).build();
-
-  wPeer w_peer(tmp.copy());
   EXPECT_CALL(*wsv, getLedgerPeers())
-      .WillRepeatedly(Return(std::vector<wPeer>{w_peer}));
+      .WillRepeatedly(Return(std::vector<wPeer>{peer}));
 
   const size_t max_proposal = 5;
   const size_t commit_delay = 1000;
@@ -236,7 +265,7 @@ TEST_F(OrderingGateServiceTest, ProposalsReceivedWhenProposalSize) {
   auto wrapper = init(2);
 
   for (size_t i = 0; i < 10; ++i) {
-    send_transaction(i);
+    send_transaction(i + 1);
   }
 
   // long == something wrong
@@ -246,11 +275,11 @@ TEST_F(OrderingGateServiceTest, ProposalsReceivedWhenProposalSize) {
   ASSERT_EQ(proposals.size(), 2);
   ASSERT_EQ(counter, 0);
 
-  size_t i = 0;
+  size_t i = 1;
   for (auto &&proposal : proposals) {
-    ASSERT_EQ(proposal.transactions.size(), 5);
-    for (auto &&tx : proposal.transactions) {
-      ASSERT_EQ(tx.tx_counter, i++);
+    ASSERT_EQ(proposal->transactions().size(), 5);
+    for (auto &&tx : proposal->transactions()) {
+      ASSERT_EQ(tx->transactionCounter(), i++);
     }
   }
 }
