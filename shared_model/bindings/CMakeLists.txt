@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-add_library(bindings
+add_library(bindings SHARED
         model_transaction_builder.cpp
         model_query_builder.cpp
         model_blocks_query_builder.cpp
@@ -36,7 +36,7 @@ if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP OR SWIG_NODE)
 
     set_source_files_properties(bindings.i PROPERTIES CPLUSPLUS ON)
     set_property(GLOBAL PROPERTY SWIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
+ 
     add_dependencies(bindings swig)
 
     macro (myswig_add_library target)
