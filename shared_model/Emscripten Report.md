@@ -177,7 +177,7 @@ emcc libbindings.bc -o irohalib.js
 cd /opt/iroha/shared_model/bindings
 
 # TODO: We can add optimization -Ox same as on bytecode compilation
-emcc -c -std=c++14 -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_crypto_embind.cpp -o model_crypto_embind.bc
+emcc -c -std=c++14 -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_crypto_embind.cpp model_query_builder_embind.cpp -o model_crypto_embind.bc
 emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 ../build/bindings/libbindings.bc model_crypto_embind.bc -o irohalib.js
 ```
 
@@ -186,7 +186,7 @@ emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 ../build/bindings/libbindings.bc mod
 ```sh
 cd /opt/iroha/shared_model/bindings
 
-emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_crypto_embind.cpp -o model_crypto_embind.bc
+emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_crypto_embind.cpp model_query_builder_embind.cpp -o model_crypto_embind.bc
 emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' ../build/bindings/libbindings.bc model_crypto_embind.bc -o irohalib.js
 ```
 

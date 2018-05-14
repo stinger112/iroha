@@ -1,5 +1,4 @@
 #include "model_crypto.hpp"
-#include "model_query_builder.hpp"
 #include <emscripten/bind.h>
 
 using namespace emscripten;
@@ -49,63 +48,4 @@ EMSCRIPTEN_BINDINGS(model_crypto)
   .function("generateKeypair", &ModelCrypto::generateKeypair)
   .function("fromPrivateKey", &ModelCrypto::fromPrivateKey)
   .function("convertFromExisting", &ModelCrypto::convertFromExisting);
-}
-
-
-// namespace shared_model {
-//   namespace bindings {
-//     class ModelQueryBuilder {}
-// }
-
-using namespace shared_model::proto;
-
-EMSCRIPTEN_BINDINGS(model_query_builder)
-{
-  // TODO: Need to check how it works
-  value_object<shared_model::interface::types::TimestampType>("TimestampType");
-
-  class_<Query>("Query")
-  // .constructor<>()
-  .function("get", &Query::get)
-  .function("creatorAccountId", &Query::creatorAccountId)
-  .function("queryCounter", &Query::queryCounter)
-  .function("blob", &Query::blob)
-  .function("payload", &Query::payload)
-  // Signable override
-  .function("signatures", &Query::signatures)
-  .function("addSignature", &Query::addSignature)
-  .function("clearSignatures", &Query::clearSignatures)
-  .function("createdTime", &Query::createdTime);
-
-  // TODO: Unsigned wrapper is a template and can have many base types
-  typedef UnsignedWrapper<Query> UnsignedWrapperQuery;
-
-  class_<UnsignedWrapperQuery>("UnsignedWrapper")
-    // .constructor<>()
-    .function("signAndAddSignature", &UnsignedWrapperQuery::signAndAddSignature)
-    .function("hash", &UnsignedWrapperQuery::hash);
-
-  /**
-   * Top level ModelQueryBuilder class
-   **/
-  class_<ModelQueryBuilder>("ModelQueryBuilder")
-  .constructor<>()
-  // .function("createdTime", &ModelQueryBuilder::createdTime, optional_override(
-  //   [](ModelQueryBuilder& self, const uint& created_time){
-  //     return self.ModelQueryBuilder::createdTime(created_time);
-  // }))
-  .function("createdTime", &ModelQueryBuilder::createdTime)
-  .function("creatorAccountId", &ModelQueryBuilder::creatorAccountId)
-  .function("queryCounter", &ModelQueryBuilder::queryCounter)
-  .function("getAccount", &ModelQueryBuilder::getAccount)
-  .function("getSignatories", &ModelQueryBuilder::getSignatories)
-  .function("getAccountTransactions", &ModelQueryBuilder::getAccountTransactions)
-  .function("getAccountAssetTransactions", &ModelQueryBuilder::getAccountAssetTransactions)
-  .function("getAccountAssets", &ModelQueryBuilder::getAccountAssets)
-  .function("getRoles", &ModelQueryBuilder::getRoles)
-  .function("getAssetInfo", &ModelQueryBuilder::getAssetInfo)
-  .function("getRolePermissions", &ModelQueryBuilder::getRolePermissions)
-  .function("getTransactions", &ModelQueryBuilder::getTransactions)
-  .function("getAccountDetail", &ModelQueryBuilder::getAccountDetail)
-  .function("build", &ModelQueryBuilder::build);
 }
