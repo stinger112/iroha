@@ -155,7 +155,8 @@ emcmake cmake -H. \
               -DTESTING=OFF \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_CXX_FLAGS="-O0 -std=c++14" \
-              -DCMAKE_PREFIX_PATH=$EMSCRIPTEN/system
+              -DCMAKE_PREFIX_PATH=$EMSCRIPTEN/system \
+              -DEMSCRIPTEN=ON
 
 cmake --build build --target bindings
 ```
@@ -187,7 +188,7 @@ emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 ../build/bindings/libbindings.bc mod
 ```sh
 emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs model_crypto_embind.cpp -o model_crypto_embind.bc
 emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_query_builder_embind.cpp -o model_query_builder_embind.bc
-emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.b -o irohalib.js
+emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.bc -o irohalib.js
 ```
 
 ## WebIDL

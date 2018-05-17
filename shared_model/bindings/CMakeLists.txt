@@ -133,3 +133,7 @@ if (SWIG_NODE)
         ${NODEJS_INCLUDE_DIRS}
         )
 endif()
+
+if (EMSCRIPTEN)
+    set_target_properties(bindings PROPERTIES SUFFIX ".bc")
+endif()

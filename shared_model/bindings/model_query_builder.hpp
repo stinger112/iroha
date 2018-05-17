@@ -9,6 +9,10 @@
 #include "builders/protobuf/queries.hpp"
 #include "builders/protobuf/unsigned_proto.hpp"
 
+#ifdef EMSCRIPTEN
+#include <emscripten/val.h>
+#endif
+
 namespace shared_model {
   namespace bindings {
     /**
@@ -144,6 +148,29 @@ namespace shared_model {
        * @return wrapper on unsigned query
        */
       proto::UnsignedWrapper<proto::Query> build();
+
+    #ifdef EMSCRIPTEN
+     public:
+        ModelQueryBuilder createdTime(
+          const emscripten::val &created_time) {
+            if (created_time.typeOf().as<std::string>() != "number")
+                throw std::invalid_argument("Argument must have type 'number'!");
+
+            std::cout << "[createdTime] arg: " << created_time.as<std::string>() << std::endl;
+
+            return this->createdTime(std::stoull(created_time.as<std::string>()));
+          }
+
+        ModelQueryBuilder queryCounter(
+          const emscripten::val &query_counter) {
+            if (query_counter.typeOf().as<std::string>() != "number")
+                throw std::invalid_argument("Argument must have type 'number'!");
+            
+            std::cout << "[queryCounter] arg: " << query_counter.as<std::string>() << std::endl;
+
+            return this->queryCounter(std::stoull(query_counter.as<std::string>()));
+          }
+    #endif
 
      private:
       proto::TemplateQueryBuilder<
