@@ -145,26 +145,34 @@ cmake --build build --target install
 
 ##############################################################################################
 
-# Compile target **bindings** to bytecode
-
-```
-# TODO: We can use add_compile_options() or target_compile_definitions() CMake's commands
-# TODO: We can add optimization -Ox
+#### Configure project
+```sh
 emcmake cmake -H. \
               -Bbuild \
               -DTESTING=OFF \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_CXX_FLAGS="-O0 -std=c++14" \
               -DCMAKE_PREFIX_PATH=$EMSCRIPTEN/system \
-              -DEMSCRIPTEN=ON
-
-cmake --build build --target bindings
+              -DEMSCRIPTEN=ON \
+              -DCMAKE_VERBOSE_MAKEFILE=ON
 ```
 
-Then you need compile bytecode to javascript:
-
+**Version useful for debug**
+```sh
+emcmake cmake -H. \
+              -Bbuild \
+              -DTESTING=OFF \
+              -DCMAKE_BUILD_TYPE=DEBUG \
+              -DCMAKE_PREFIX_PATH=$EMSCRIPTEN/system \
+              -DEMSCRIPTEN=ON \
 ```
-# TODO: We can add optimization -Ox same as on bytecode compilation
+
+#### Compile target **irohalib** to bytecode
+```sh
+cmake --build build --target irohalib
+```
+
+#### Compile bytecode to javascript:
+```sh
 emcc libbindings.bc -o irohalib.js
 ```
 
@@ -173,18 +181,15 @@ emcc libbindings.bc -o irohalib.js
 # Create C++ glue code to interact with JS
 
 ## Embind
-
 ```sh
 cd /opt/iroha/shared_model/bindings
 
-# TODO: We can add optimization -Ox same as on bytecode compilation
 emcc -c -std=c++14 -I/opt/iroha/shared_model -I/opt/iroha/libs model_crypto_embind.cpp -o model_crypto_embind.bc
 emcc -c -std=c++14 -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_query_builder_embind.cpp -o model_query_builder_embind.bc
 emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.bc -o irohalib.js
 ```
 
 **Build with additional dev arguments**
-
 ```sh
 emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs model_crypto_embind.cpp -o model_crypto_embind.bc
 emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_query_builder_embind.cpp -o model_query_builder_embind.bc
