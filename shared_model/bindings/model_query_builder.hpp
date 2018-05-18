@@ -156,9 +156,13 @@ namespace shared_model {
             if (created_time.typeOf().as<std::string>() != "number")
                 throw std::invalid_argument("Argument must have type 'number'!");
 
-            std::cout << "[createdTime] arg: " << created_time.as<std::string>() << std::endl;
+            // Call Number.toString() JS method.
+            // In other case automatic conversion in val.as sets arg type to String!
+            std::string str_with_long_int = created_time.call<std::string>("toString");
 
-            return this->createdTime(std::stoull(created_time.as<std::string>()));
+            std::cout << "[createdTime] arg: " << str_with_long_int << std::endl;
+
+            return this->createdTime(std::stoull(str_with_long_int));
           }
 
         ModelQueryBuilder queryCounter(
@@ -166,9 +170,13 @@ namespace shared_model {
             if (query_counter.typeOf().as<std::string>() != "number")
                 throw std::invalid_argument("Argument must have type 'number'!");
             
-            std::cout << "[queryCounter] arg: " << query_counter.as<std::string>() << std::endl;
+            // Call Number.toString() JS method.
+            // In other case automatic conversion in val.as sets arg type to String!
+            std::string str_with_long_int = query_counter.call<std::string>("toString");
 
-            return this->queryCounter(std::stoull(query_counter.as<std::string>()));
+            std::cout << "[queryCounter] arg: " << str_with_long_int << std::endl;
+
+            return this->queryCounter(std::stoull(str_with_long_int));
           }
     #endif
 
