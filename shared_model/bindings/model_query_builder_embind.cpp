@@ -27,22 +27,22 @@ using namespace shared_model::crypto;
 
 EMSCRIPTEN_BINDINGS(model_query_builder)
 {
-  // class_<Query>("Query")
-  // // .constructor<>()
-  // .function("get", &Query::get)
-  // .function("creatorAccountId", &Query::creatorAccountId)
-  // .function("queryCounter", &Query::queryCounter)
-  // .function("blob", &Query::blob)
-  // .function("payload", &Query::payload)
-  // // Signable override
-  // .function("signatures", &Query::signatures)
-  // .function("addSignature", &Query::addSignature)
-  // .function("clearSignatures", &Query::clearSignatures)
-  // .function("createdTime", &Query::createdTime);
-
-  class_<Hash>("Hash")
+  class_<Hash, base<Blob>>("Hash")
   .constructor<const std::string&>()
   .function("toString", &Hash::toString);
+
+  class_<Query>("Query")
+  // .constructor<>()
+  .function("get", &Query::get)
+  .function("creatorAccountId", &Query::creatorAccountId)
+  .function("queryCounter", &Query::getQueryCounter)
+  .function("blob", &Query::blob)
+  .function("payload", &Query::payload)
+  // Signable override
+  .function("signatures", &Query::signatures)
+  .function("addSignature", &Query::addSignature)
+  .function("clearSignatures", &Query::clearSignatures)
+  .function("createdTime", &Query::getCreatedTime);
 
   // TODO: Unsigned wrapper is a template and can have many base types
   typedef UnsignedWrapper<Query> UnsignedWrapperQuery;
