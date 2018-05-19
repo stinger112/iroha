@@ -99,6 +99,18 @@ namespace shared_model {
         return *meta_;
       }
 
+    #ifdef EMSCRIPTEN
+     public:
+      const std::string getCreatedTime() {
+        return std::to_string(this->createdTime());
+      }
+
+      // TODO: Need to return std::map with signatures
+      // const std::map &getSignatures() {
+      //   return *signatures_;
+      // }
+    #endif
+
      private:
       // lazy
       template <typename T>

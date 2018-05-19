@@ -18,6 +18,10 @@
 #ifndef IROHA_SHARED_MODEL_MODEL_TRANSACTION_BUILDER_HPP
 #define IROHA_SHARED_MODEL_MODEL_TRANSACTION_BUILDER_HPP
 
+#ifdef EMSCRIPTEN
+#include <emscripten/val.h>
+#endif
+
 #include "builders/protobuf/builder_templates/transaction_template.hpp"
 #include "builders/protobuf/unsigned_proto.hpp"
 #include "cryptography/public_key.hpp"
@@ -248,6 +252,23 @@ namespace shared_model {
        * @return wrapper on unsigned transaction
        */
       proto::UnsignedWrapper<proto::Transaction> build();
+
+    #ifdef EMSCRIPTEN
+     public:
+        ModelTransactionBuilder createdTime(
+          const emscripten::val &created_time) {
+            if (created_time.typeOf().as<std::string>() != "number")
+                throw std::invalid_argument("Argument must have type 'number'!");
+
+            // Call Number.toString() JS method.
+            // In other case automatic conversion in val.as sets arg type to String!
+            std::string str_with_long_int = created_time.call<std::string>("toString");
+
+            std::cout << "[createdTime] arg: " << str_with_long_int << std::endl;
+
+            return this->createdTime(std::stoull(str_with_long_int));
+          }
+    #endif
 
      private:
       proto::TemplateTransactionBuilder<

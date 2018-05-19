@@ -137,6 +137,18 @@ endif()
 if (EMSCRIPTEN)
     set_target_properties(bindings PROPERTIES SUFFIX ".bc")
 
+    add_executable(irohalib
+        model_crypto_embind.cpp
+        model_query_builder_embind.cpp
+        model_transaction_builder_embind.cpp
+    )
+
+    set_target_properties(irohalib 
+        PROPERTIES LINK_FLAGS "--bind \
+                              -s DISABLE_EXCEPTION_CATCHING=0 \
+                              -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]'")
+    target_link_libraries(irohalib bindings)
+
     # add_library(embind_glue SHARED
     #     model_query_builder_embind.cpp
     #     model_crypto_embind.cpp
@@ -144,17 +156,6 @@ if (EMSCRIPTEN)
 
     # set_target_properties(embind_glue 
     #     PROPERTIES SUFFIX ".bc")
-
-    add_executable(irohalib
-        model_query_builder_embind.cpp
-        model_crypto_embind.cpp
-    )
-
-    set_target_properties(irohalib 
-        PROPERTIES LINK_FLAGS "--bind \
-                              -s DISABLE_EXCEPTION_CATCHING=0 \
-                              -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]'")
-    target_link_libraries(irohalib bindings )
 
     # TODO: Need to add global compiler flags (including -Ox)
     # add_custom_target(irohalib
