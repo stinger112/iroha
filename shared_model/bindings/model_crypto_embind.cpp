@@ -1,5 +1,7 @@
-#include "model_crypto.hpp"
 #include <emscripten/bind.h>
+
+// #include "cryptography/hash.hpp"
+#include "model_crypto.hpp"
 
 using namespace emscripten;
 using namespace shared_model::bindings;
@@ -7,10 +9,6 @@ using namespace shared_model::crypto;
 
 EMSCRIPTEN_BINDINGS(model_crypto)
 {
-  // value_object<Keypair>("Keypair")
-  //     .field("publicKey", &Keypair::public_key_)
-  //     .field("privateKey", &Keypair::private_key_);
-
   // TODO: Can we create wrapper for std::exception?
   // class_<std::exception>("IrohaException")
   // .constructor<std::exception>();
@@ -26,6 +24,10 @@ EMSCRIPTEN_BINDINGS(model_crypto)
   .function("blob", &Blob::blob)
   .function("hex", &Blob::hex)
   .function("toString", &Blob::toString);
+
+  class_<Signed, base<Blob>>("Signed")
+  .constructor<const std::string&>()
+  .function("toString", &Signed::toString);
 
   class_<PublicKey, base<Blob>>("PublicKey")
   .constructor<const std::string&>()
