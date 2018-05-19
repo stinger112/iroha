@@ -28,11 +28,11 @@ EMSCRIPTEN_BINDINGS(model_crypto)
   .function("toString", &Blob::toString);
 
   class_<PublicKey, base<Blob>>("PublicKey")
-  .constructor<std::string>()
+  .constructor<const std::string&>()
   .function("toString", &PublicKey::toString);
 
   class_<PrivateKey, base<Blob>>("PrivateKey")
-  .constructor<std::string>()
+  .constructor<const std::string&>()
   .function("toString", &PrivateKey::toString);
 
   class_<Keypair>("Keypair")
