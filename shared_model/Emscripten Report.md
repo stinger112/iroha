@@ -236,17 +236,21 @@ node --inspect-brk=0.0.0.0:9229 test.js
 
 
 
-# Problems
+# Common problems
 
-## Exceptions:
-Uncaught number instead exception 
-https://groups.google.com/forum/#!topic/emscripten-discuss/ZRhTbpeF6SI
-Need to add in compilation process
+## Top-level exceptions
+Problem described in this issue:
+https://github.com/kripken/emscripten/issues/6330
+
+Uncaught **Number** instead an exception. Temporary solution was found [here](https://groups.google.com/forum/#!topic/emscripten-discuss/ZRhTbpeF6SI)
+
+Need to add in this flag compilation process
 ```
 -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]'
 ```
-Function to get text message
-```
+
+JS function to get text message from returned pointer
+```js
 function whatEmscriptenException(ptr) {
     // 8 should be the vtable offset for the what function
     var fPtr = iroha.HEAPU32[(iroha.HEAPU32[(ptr) >> 2] + 8) >> 2];
