@@ -1,6 +1,7 @@
-#include "model_query_builder.hpp"
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
+
+#include "model_query_builder.hpp"
 
 using namespace emscripten;
 using namespace shared_model;
@@ -25,21 +26,29 @@ using namespace shared_model::crypto;
 //     }
 // };
 
+// TODO: Need to return std::map with signatures
+// using namespace shared_model::interface;
+// EMSCRIPTEN_BINDINGS(model_signatures)
+// {
+//   class_<Signature>("Signature")
+// }
+
 EMSCRIPTEN_BINDINGS(model_query_builder)
 {
+  // TODO: Move Hash to module_crypto because it's common class
   class_<Hash, base<Blob>>("Hash")
   .constructor<const std::string&>()
   .function("toString", &Hash::toString);
 
+  register_vector<Hash>("HashVector");
+
   class_<Query>("Query")
-  // .constructor<>()
-  .function("get", &Query::get)
+  // .function("get", &Query::get)
   .function("creatorAccountId", &Query::creatorAccountId)
   .function("queryCounter", &Query::getQueryCounter)
   .function("blob", &Query::blob)
   .function("payload", &Query::payload)
-  // Signable override
-  .function("signatures", &Query::signatures)
+  // .function("signatures", &Query::signatures)
   .function("addSignature", &Query::addSignature)
   .function("clearSignatures", &Query::clearSignatures)
   .function("createdTime", &Query::getCreatedTime);
