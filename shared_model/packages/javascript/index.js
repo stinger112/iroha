@@ -17,10 +17,10 @@ function whatEmscriptenException(ptr) {
  * Wrap class object into Proxy to catch errors from bulders' methods.
  * WARNING! We assume that wrapped object has just methods and constructors.
  * @param {*} obj Any non-primitive object
- * @returns {Proxy|*}
+ * @returns {Proxy|*} 
  */
 function wrap(obj) {
-  if (typeof obj === Object(obj)) {
+  if (obj === Object(obj)) {
     return new Proxy(obj, {
       // Control invocation all properties (which are methods)
       get(target, propKey, receiver) {
@@ -28,12 +28,15 @@ function wrap(obj) {
 
         if (typeof propKey !== 'symbol' // Don't wrap built-in symbols!
               && typeof calledProperty === 'function') {
-          console.log(
-            `[DEBUG] Reading method`, propKey,`of target`, target.constructor.name
-          )
+          // console.log(
+          //   `[DEBUG] Reading method`, propKey,`of target`, target.constructor.name
+          // )
+
+          // Returned function is an emscripten exceptions catcher
           return (...args) => {
-            // console.log('[DEBUG] Called callback with args: ', args)
             try {
+              // console.log('[DEBUG] Called callback with args: ', args)
+
               return wrap(calledProperty.apply(target, args))
             } catch(e) {
               throw typeof e === 'number' ?
@@ -41,7 +44,7 @@ function wrap(obj) {
             }
           }
         } else {
-          console.log(`[DEBUG] Target property`, propKey, `not a function!`)
+          // console.log(`[DEBUG] Target property`, propKey, `not a function!`)
 
           return calledProperty
         }
