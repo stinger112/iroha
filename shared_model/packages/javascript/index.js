@@ -16,41 +16,46 @@ function whatEmscriptenException(ptr) {
 /**
  * Wrap class object into Proxy to catch errors from bulders' methods.
  * WARNING! We assume that wrapped object has just methods and constructors.
- * @param {*} obj
- * @returns {Proxy}
+ * @param {*} obj Any non-primitive object
+ * @returns {Proxy|*}
  */
 function wrap(obj) {
-  return new Proxy(obj, {
-    // Control invocation all properties (which are methods)
-    get(target, propKey, receiver) {
-      if (typeof target[propKey] === 'function') {
-        console.log(
-          `[DEBUG] Reading method ${propKey} of target ${target.constructor.name}`
-        )
+  if (typeof obj === Object(obj)) {
+    return new Proxy(obj, {
+      // Control invocation all properties (which are methods)
+      get(target, propKey, receiver) {
+        const calledProperty = Reflect.get(...arguments)
 
-        return (...args) => {
-          console.log('[DEBUG] Called callback with args: ', args)
-          try {
-            return wrap(Reflect.get(...arguments).apply(target, args))
-          } catch(exceptionPtr) {
-            const message = whatEmscriptenException(exceptionPtr)
-            // console.log('[DEBUG] Exception message: ', message)
-            throw new Error(message)
+        if (typeof propKey !== 'symbol' // Don't wrap built-in symbols!
+              && typeof calledProperty === 'function') {
+          console.log(
+            `[DEBUG] Reading method`, propKey,`of target`, target.constructor.name
+          )
+          return (...args) => {
+            // console.log('[DEBUG] Called callback with args: ', args)
+            try {
+              return wrap(calledProperty.apply(target, args))
+            } catch(e) {
+              throw typeof e === 'number' ?
+                      new Error(whatEmscriptenException(e)) : e
+            }
           }
+        } else {
+          console.log(`[DEBUG] Target property`, propKey, `not a function!`)
+
+          return calledProperty
         }
-      } else {
-        console.log(`[DEBUG] Target property "${propKey}" not a function!`)
+      },
 
-        return Reflect.get(...arguments)
+      // Control builders constructors to enable "get" traps
+      construct(target, args) {
+          // console.log(`Construct new "${target}"`)
+          return wrap(new target(...args))
       }
-    },
-
-    // Control builders constructors to enable "get" traps
-    construct(target, args) {
-        // console.log(`Construct new "${target}"`)
-        return wrap(new target(...args))
-    }
-  })
+    })
+  } else {
+    return obj
+  }
 }
 
 module.exports = Object.entries(Module)
