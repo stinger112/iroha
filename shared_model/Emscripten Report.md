@@ -1,4 +1,4 @@
-0. Устанавливаем переменные среды нужные для кросскомпиляции
+0. Set variables needed for Emscripten crosscompilation
 
 ```
 source /opt/emsdk/emsdk_set_env.sh
@@ -7,7 +7,7 @@ source /opt/emsdk/emsdk_set_env.sh
 
 
 
-1. Скопировать хидеры **Boost 1.65.1** в *${EMSCRIPTEN_ROOT_PATH}/system/include*
+1. Copy **Boost 1.65.1** headers into *${EMSCRIPTEN_ROOT_PATH}/system/include*
 
 ```
 # TODO: Can we use system/local to store headers|libs|share|etc?
@@ -16,7 +16,7 @@ source /opt/emsdk/emsdk_set_env.sh
 
 
 
-2. Сборка Protobuf
+2. Build Protobuf
 
 ```
 # TODO: We can use CMAKE_INSTALL_PREFIX:PATH=$EMSCRIPTEN/system to install Protobuf to Emscripten directory 
@@ -97,7 +97,7 @@ Install script do this:
 
 
 
-3. Сборка iroha-ed25519
+3. Build iroha-ed25519
 
 ```
 emcmake cmake -H. \
@@ -111,7 +111,7 @@ emcmake cmake -H. \
 cmake --build build --target install
 ```
 
-Затем переместить файлы:
+Then move files:
 ```
 -- Install configuration: "Release"
 -- Installing: /usr/local/lib/static/libed25519.a
@@ -131,14 +131,14 @@ cmake --build build --target install
 -- Installing: /usr/local/share/ed25519/cmake/ed25519Config-release.cmake
 ```
 
-В директорию *${EMSCRIPTEN_ROOT_PATH}/system/include*
+Into directory *${EMSCRIPTEN_ROOT_PATH}/system/include*
 
 
 
 
 4. **OPTIONAL** Install Node.js headers
 
-..Нужна дополнительная информация...
+..Need more information...
 
 
 
@@ -214,24 +214,29 @@ node --inspect-brk=0.0.0.0:9229 test.js
 
 
 
-# Отчёт по средствам описания биндингов (интерфейсов для JS)
+# Summary about binding tools (for JS classes interfaces)
 
 ## Embind
 
 ### Pros:
-1. Сильная интеграция с плюсовым кодом. Работает автофолдинг.
-2. Type Inference. При изменении плюсового кода (например сигнатур) сразу будет видна ошибка или биндинг перестроится автоматически.
-3. Ошибки показывает компилятор
+1. Strong integration with C++. Works with static analisys and autofolding.
+2. Type Inference. When we will change C++ part with incompatible signatures some amount of errors will appears momentally.
+3. Convenient errors from C++ compiler.
 
 ### Cons:
-1. Дополнительные телодвижения для Resource Management: нужно использовать `smart_pointer` или JS функции `delete()`/`deleteLater()`
-2. Синтаксис менее декларативный чем в WebIDL
+1. Requires more effort for Resource Management: we have to use `smart_pointer` or JS `delete()`/`deleteLater()` functions.
+2. Less declarative syntaxis then WebIDL.
+3. Docs are inconvenient and not fully described all features.
 
 ## WebIDL
 
 ### Pros
-1. Более декларативный синтаксис
-2. Широкая поддержка как W3C стандарта
+1. Declarative syntax
+2. Supported by W3C
+
+### Cons:
+1. Not so flexible type system. We are actively using templates and polimorphism, so such syntax can cause problems.
+2. Needs additional tools and compilation steps to build bindings wrapper.
 
 
 
