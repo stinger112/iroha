@@ -8,10 +8,10 @@ using namespace shared_model;
 using namespace shared_model::bindings;
 using namespace shared_model::proto;
 
-using namespace shared_model::crypto;
-
 EMSCRIPTEN_BINDINGS(model_transaction_builder)
 {
+  register_vector<std::string>("StringVector");
+
   class_<Transaction>("Transaction")
   .function("creatorAccountId", &Transaction::creatorAccountId)
 //   .function("commands", &Transaction::commands)
