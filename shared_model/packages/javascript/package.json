@@ -7,7 +7,7 @@
     "prepare": "sh scripts/generate-protobuf.sh",
     "prepublishOnly": "npm ls",
     "install": "node-pre-gyp install --fallback-to-build",
-    "test": "tape tests/**/*.js | tap-dot",
+    "test": "tape tests/**/*.js | tap-spec",
     "build": "node-pre-gyp build",
     "rebuild": "node-pre-gyp rebuild",
     "build-and-test": "npm install --build-from-source=iroha-lib && npm run test"
@@ -49,6 +49,7 @@
     "npm": "^5.8.0",
     "run": "^1.4.0",
     "standard": "^11.0.1",
+    "tap-spec": "^4.1.1",
     "test": "^0.6.0"
   },
   "devDependencies": {
