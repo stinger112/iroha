@@ -1,6 +1,5 @@
 #include <emscripten/bind.h>
 
-// #include "cryptography/hash.hpp"
 #include "model_crypto.hpp"
 
 using namespace emscripten;
@@ -10,13 +9,6 @@ using namespace shared_model::crypto;
 EMSCRIPTEN_BINDINGS(model_crypto)
 {
   // TODO: Can we create wrapper for std::exception?
-  // class_<std::exception>("IrohaException")
-  // .constructor<std::exception>();
-  // .function("what", &std::invalid_argument::what);
-
-  // class_<std::invalid_argument>("InvalidArgumentException")
-  // .constructor<std::string>()
-  // .function("what", &std::invalid_argument::what, allow_raw_pointers());
 
   class_<Blob>("Blob")
   .constructor<std::string>()
