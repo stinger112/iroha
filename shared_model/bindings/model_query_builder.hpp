@@ -154,7 +154,7 @@ namespace shared_model {
         ModelQueryBuilder createdTime(
           const emscripten::val &created_time) {
             if (created_time.typeOf().as<std::string>() != "number")
-                throw std::invalid_argument("Argument must have type 'number'!");
+                throw std::invalid_argument("Cannot pass argument as a Number");
 
             // Call Number.toString() JS method.
             // In other case automatic conversion in val.as sets arg type to String!
@@ -168,7 +168,7 @@ namespace shared_model {
         ModelQueryBuilder queryCounter(
           const emscripten::val &query_counter) {
             if (query_counter.typeOf().as<std::string>() != "number")
-                throw std::invalid_argument("Argument must have type 'number'!");
+                throw std::invalid_argument("Cannot pass argument as a Number");
             
             // Call Number.toString() JS method.
             // In other case automatic conversion in val.as sets arg type to String!
