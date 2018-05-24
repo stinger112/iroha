@@ -6,7 +6,7 @@ const accountId = 'admin@test'
 const assetId = 'coin#test'
 
 test('ModelQueryBuilder tests', function (t) {
-  t.plan(48)
+  t.plan(52)
 
   let queryBuilder = new iroha.ModelQueryBuilder()
   const time = (new Date()).getTime()
@@ -19,6 +19,8 @@ test('ModelQueryBuilder tests', function (t) {
   t.throws(() => queryBuilder.creatorAccountId(accountId).createdTime(time).build(), /Missing concrete query/, 'Should throw Missing concrete query')
   t.throws(() => queryBuilder.creatorAccountId(accountId).createdTime(time).queryCounter(1).build(), /Missing concrete query/, 'Should throw Missing concrete query')
   t.throws(() => queryBuilder.creatorAccountId('').createdTime(time).queryCounter(1).getAccount(accountId).build(), /Wrongly formed creator_account_id, passed value: ''/, 'Should throw Wrongly formed creator_account_id')
+  t.throws(() => queryBuilder.creatorAccountId(accountId).createdTime().build(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
+  t.throws(() => queryBuilder.creatorAccountId(accountId).createdTime('').build(), ERROR_MESSAGES.WRONG_ARGUMENT_TYPE, 'Should throw ...argument 1 of type...')
   t.throws(() => queryBuilder.creatorAccountId(accountId).createdTime(0).queryCounter(1).getAccount(accountId).build(), /bad timestamp: too old, timestamp: 0, now:/, 'Should throw bad timestamp: too old')
   t.throws(() => queryBuilder.creatorAccountId(accountId).createdTime(time).queryCounter(0).getAccount(accountId).build(), /Counter should be > 0, passed value: 0/, 'Should throw Counter should be > 0')
 
