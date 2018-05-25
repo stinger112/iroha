@@ -4,7 +4,7 @@ const iroha = {
   ModelQueryBuilder, 
   Hash, 
   HashVector 
-} = require('./index.js')
+} = require('../index.js')
 
 const publicKey = '407e57f50ca48969b08ba948171bb2435e035d82cec417e18e4a38f5fb113f83'
 const privateKey = '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb'
@@ -20,8 +20,8 @@ const assetId = 'coin#test'
 // Test createdTime
 const time = Date.now()
 const counter = 1
-// Нужны тесты с получением точного конечного hash от собранного объекта!!
-// Нужны тесты на переполнение unsigned long
+// TODO: Need tests to get hash of built object
+// TODO: Need tests to unsigned long overflowing
 // var correctQuery = queryBuilder.creatorAccountId(accountId).createdTime(time).queryCounter(counter)
 // console.log(correctQuery.getAccount(accountId).build().hash().toString())
 
