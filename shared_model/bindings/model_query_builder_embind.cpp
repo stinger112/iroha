@@ -50,7 +50,6 @@ EMSCRIPTEN_BINDINGS(model_query_builder)
   .function("payload", &Query::payload)
   // .function("signatures", &Query::signatures)
   .function("addSignature", &Query::addSignature)
-  .function("clearSignatures", &Query::clearSignatures)
   .function("createdTime", &Query::getCreatedTime);
 
   // TODO: Unsigned wrapper is a template and can have many base types

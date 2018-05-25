@@ -19,7 +19,6 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder)
   .function("payload", &Transaction::payload)
 //   .function("signatures", &Transaction::getSignatures)
   .function("addSignature", &Transaction::addSignature)
-  .function("clearSignatures", &Transaction::clearSignatures)
   .function("createdTime", &Transaction::getCreatedTime);
 
   // TODO: Unsigned wrapper is a template and can have many base types
