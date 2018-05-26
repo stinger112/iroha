@@ -6,12 +6,12 @@
 #ifndef IROHA_SHARED_MODEL_MODEL_QUERY_BUILDER_HPP
 #define IROHA_SHARED_MODEL_MODEL_QUERY_BUILDER_HPP
 
-#include "builders/protobuf/queries.hpp"
-#include "builders/protobuf/unsigned_proto.hpp"
-
 #ifdef EMSCRIPTEN
 #include <emscripten/val.h>
 #endif
+
+#include "builders/protobuf/queries.hpp"
+#include "builders/protobuf/unsigned_proto.hpp"
 
 namespace shared_model {
   namespace bindings {
@@ -152,32 +152,10 @@ namespace shared_model {
     #ifdef EMSCRIPTEN
      public:
         ModelQueryBuilder createdTime(
-          const emscripten::val &created_time) {
-            if (created_time.typeOf().as<std::string>() != "number")
-                throw std::invalid_argument("Cannot pass argument as a Number");
-
-            // Call Number.toString() JS method.
-            // In other case automatic conversion in val.as sets arg type to String!
-            std::string str_with_long_int = created_time.call<std::string>("toString");
-
-            std::cout << "[createdTime] arg: " << str_with_long_int << std::endl;
-
-            return this->createdTime(std::stoull(str_with_long_int));
-          }
+            const emscripten::val &created_time);
 
         ModelQueryBuilder queryCounter(
-          const emscripten::val &query_counter) {
-            if (query_counter.typeOf().as<std::string>() != "number")
-                throw std::invalid_argument("Cannot pass argument as a Number");
-            
-            // Call Number.toString() JS method.
-            // In other case automatic conversion in val.as sets arg type to String!
-            std::string str_with_long_int = query_counter.call<std::string>("toString");
-
-            std::cout << "[queryCounter] arg: " << str_with_long_int << std::endl;
-
-            return this->queryCounter(std::stoull(str_with_long_int));
-          }
+            const emscripten::val &query_counter);
     #endif
 
      private:
