@@ -8,8 +8,6 @@ using namespace shared_model::crypto;
 
 EMSCRIPTEN_BINDINGS(model_crypto)
 {
-  // TODO: Can we create wrapper for std::exception?
-
   class_<Blob>("Blob")
   .constructor<std::string>()
   .function("fromHexString", &Blob::fromHexString)
