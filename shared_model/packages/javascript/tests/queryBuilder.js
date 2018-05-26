@@ -11,7 +11,6 @@ test('ModelQueryBuilder tests', function (t) {
   let queryBuilder = new iroha.ModelQueryBuilder()
   const time = (new Date()).getTime()
 
-  // TODO: Add tests for createdTime(<not_a_number>) and createdTime(<empty>)
   // Tests for concrete query
   t.comment('Basic QueryBuilder tests')
   t.throws(() => queryBuilder.build(), /Missing concrete query/, 'Should throw Missing concrete query')

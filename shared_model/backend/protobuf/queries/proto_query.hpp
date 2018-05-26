@@ -80,11 +80,6 @@ namespace shared_model {
       const std::string getCreatedTime() {
         return std::to_string(this->createdTime());
       }
-
-      // TODO: Need to return std::map with signatures
-      // const std::map &getSignatures() {
-      //   return *signatures_;
-      // }
     #endif
 
      private:

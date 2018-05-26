@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-add_library(bindings SHARED
+add_library(bindings
         model_transaction_builder.cpp
         model_query_builder.cpp
         model_blocks_query_builder.cpp
@@ -36,7 +36,6 @@ if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP OR SWIG_NODE)
 
     set_source_files_properties(bindings.i PROPERTIES CPLUSPLUS ON)
     set_property(GLOBAL PROPERTY SWIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
- 
     add_dependencies(bindings swig)
 
     macro (myswig_add_library target)
@@ -148,21 +147,4 @@ if (EMSCRIPTEN)
                               -s DISABLE_EXCEPTION_CATCHING=0 \
                               -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]'")
     target_link_libraries(irohalib bindings)
-
-    # add_library(embind_glue SHARED
-    #     model_query_builder_embind.cpp
-    #     model_crypto_embind.cpp
-    #     )
-
-    # set_target_properties(embind_glue 
-    #     PROPERTIES SUFFIX ".bc")
-
-    # TODO: Need to add global compiler flags (including -Ox)
-    # add_custom_target(irohalib
-    #     COMMAND emcc --bind \\
-    #                  -s DISABLE_EXCEPTION_CATCHING=0 \\
-    #                  -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' \\
-    #                  libbindings.bc libembind_glue.bc -o irohalib.js
-    #     DEPENDS bindings embind_glue
-    # )
 endif()
