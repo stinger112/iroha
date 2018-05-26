@@ -25,7 +25,7 @@
  * Because `uint64_t` and have a size more than safe size of JS `Number` type,
  * Embind maintainers can't add safe conversion between them.
  */
-uint64_t convert_from_js_to_uint64(const emscripten::val &input) {
+static uint64_t convert_from_js_to_uint64(const emscripten::val &input) {
   if (input.typeOf().as<std::string>() != "number")
       throw std::invalid_argument("Cannot pass argument as a Number");
 
