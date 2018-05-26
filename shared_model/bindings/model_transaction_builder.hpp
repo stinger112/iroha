@@ -256,18 +256,7 @@ namespace shared_model {
     #ifdef EMSCRIPTEN
      public:
         ModelTransactionBuilder createdTime(
-          const emscripten::val &created_time) {
-            if (created_time.typeOf().as<std::string>() != "number")
-                throw std::invalid_argument("Argument must have type 'number'!");
-
-            // Call Number.toString() JS method.
-            // In other case automatic conversion in val.as sets arg type to String!
-            std::string str_with_long_int = created_time.call<std::string>("toString");
-
-            std::cout << "[createdTime] arg: " << str_with_long_int << std::endl;
-
-            return this->createdTime(std::stoull(str_with_long_int));
-          }
+          const emscripten::val &created_time);
     #endif
 
      private:
