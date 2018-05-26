@@ -167,7 +167,7 @@ namespace shared_model {
     }
 
   #ifdef EMSCRIPTEN
-    ModelQueryBuilder ModelQueryBuilder::createdTime(
+    ModelTransactionBuilder ModelTransactionBuilder::createdTime(
         const emscripten::val &created_time) {
       return this->createdTime(convert_from_js_to_uint64(created_time));
     }
