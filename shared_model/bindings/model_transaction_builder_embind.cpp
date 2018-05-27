@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
+#include "model_proto.hpp"
 #include "model_transaction_builder.hpp"
 
 using namespace emscripten;
@@ -10,8 +11,6 @@ using namespace shared_model::proto;
 
 EMSCRIPTEN_BINDINGS(model_transaction_builder)
 {
-  register_vector<std::string>("StringVector");
-
   class_<Transaction>("Transaction")
   .function("creatorAccountId", &Transaction::creatorAccountId)
 //   .function("commands", &Transaction::commands)
@@ -21,10 +20,15 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder)
   .function("addSignature", &Transaction::addSignature)
   .function("createdTime", &Transaction::getCreatedTime);
 
-  typedef UnsignedWrapper<Transaction> UnsignedWrapperTransaction;  
-  class_<UnsignedWrapperTransaction>("UnsignedWrapperTransaction")
-  .function("signAndAddSignature", &UnsignedWrapperTransaction::signAndAddSignature)
-  .function("hash", &UnsignedWrapperTransaction::hash);
+  typedef UnsignedWrapper<Transaction> UnsignedTx;  
+  class_<UnsignedTx>("UnsignedTx")
+  .function("signAndAddSignature", &UnsignedTx::signAndAddSignature)
+  .function("hash", &UnsignedTx::hash);
+
+  typedef ModelProto<UnsignedTx> ModelProtoTransaction;
+  class_<ModelProtoTransaction>("ModelProtoTransaction")
+  .constructor<>()
+  .function("signAndAddSignature", &ModelProtoTransaction::signAndAddSignature);
 
   /**
    * Top level ModelTransactionBuilder class

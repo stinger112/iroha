@@ -3,19 +3,22 @@ const { ERROR_MESSAGES } = require('./helpers')
 const iroha = { 
   Blob, 
   Hash, 
+  ByteVector,
+  StringVector,
   HashVector
 } = require('../index.js')
 
 test('Common unit tests', function (t) {
-  t.plan(12)
+  t.plan(13)
   
   const hexString = '11111111111111111111111111111111'
 
   t.comment('Blob tests')
   t.throws(() => new Blob(), ERROR_MESSAGES.INVALID_CONSTRUCTOR_PARAMETERS, 'Should throw illegal number of arguments')
-  t.ok(new Blob('') instanceof Blob, 'Should have the same type as Blob')
+  t.ok(new Blob('') instanceof Blob, 'Should be an instance of Blob')
   
   const blob = new Blob(hexString)
+  t.ok(blob.blob() instanceof ByteVector, 'Should be an instance of ByteVector')
   t.equals(blob.hex(), '3131313131313131313131313131313131313131313131313131313131313131', 'Should be the same as hex representation')
   t.equals(blob.size(), hexString.length, 'Should have the same as length of hexString')
   // t.equals(blob.toString(), 'Hash: [3131313131313131313131313131313131313131313131313131313131313131 ]', 'Should be in the format of log')
@@ -23,7 +26,7 @@ test('Common unit tests', function (t) {
 
   t.comment('Hash tests')
   t.throws(() => new Hash(), ERROR_MESSAGES.INVALID_CONSTRUCTOR_PARAMETERS, 'Should throw illegal number of arguments')
-  t.ok(new Hash('') instanceof Hash, 'Should have the same type as Hash')
+  t.ok(new Hash('') instanceof Hash, 'Should be an instance of Hash')
 
   const hash = new Hash(hexString)
   t.equals(hash.hex(), '3131313131313131313131313131313131313131313131313131313131313131', 'Should be the same as hex representation')
