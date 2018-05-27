@@ -9,7 +9,7 @@ test('ModelQueryBuilder tests', function (t) {
   t.plan(52)
 
   let queryBuilder = new iroha.ModelQueryBuilder()
-  const time = (new Date()).getTime()
+  const time = Date.now()
 
   // Tests for concrete query
   t.comment('Basic QueryBuilder tests')
