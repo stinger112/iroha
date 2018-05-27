@@ -33,8 +33,6 @@ static uint64_t convert_from_js_to_uint64(const emscripten::val &input) {
   // It prevents automatic conversion in val.as treats val as JS String
   std::string str_with_ll_uint = input.call<std::string>("toString");
 
-  std::cout << "[DEBUG] arg: " << str_with_ll_uint << std::endl;
-
   return std::stoull(str_with_ll_uint);
 }
 
