@@ -16,7 +16,7 @@ test('ModelTransactionBuilder tests', function (t) {
   let keypair = crypto.convertFromExisting(publicKey, privateKey)
 
   let txBuilder = new iroha.ModelTransactionBuilder()
-  const time = (new Date()).getTime()
+  const time = Date.now()
   const futureTime = 2400000000000
   const address = '0.0.0.0:50051'
 
