@@ -1,24 +1,18 @@
-0. Set variables needed for Emscripten crosscompilation
+# Emscripten Report
 
-```
+## Prerequisites
+0. Set variables needed for Emscripten crosscompilation
+```sh
 source /opt/emsdk/emsdk_set_env.sh
 ```
 
-
-
-
 1. Copy **Boost 1.65.1** headers into *${EMSCRIPTEN_ROOT_PATH}/system/include*
-
-```
+```sh
 # TODO: Can we use system/local to store headers|libs|share|etc?
 ```
 
-
-
-
 2. Build Protobuf
-
-```
+```sh
 # TODO: We can use CMAKE_INSTALL_PREFIX:PATH=$EMSCRIPTEN/system to install Protobuf to Emscripten directory 
 emcmake cmake \
     -DCMAKE_BUILD_TYPE=Release \
@@ -31,17 +25,16 @@ emcmake cmake \
 cmake --build build --target libprotobuf
 ```
 
+### Compilation problems
 
-## Compilation problems
-
-### The first problem (target libprotobuf):
+#### The first problem (target libprotobuf):
 Problems with macro GOOGLE_FALLTHROUGH_INTENDED and clang::fallthrough
 https://github.com/google/protobuf/issues/4122
 
-#### Solution:
+##### Solution:
 Patch file */root/dev/protobuf/src/google/protobuf/stubs/port.h*: comment out the definition of GOOGLE_FALLTHROUGH_INTENDED
 
-```
+```sh
 #TODO: Can we can specify some compiler options to fix GOOGLE_FALLTHROUGH_INTENDED problem?
 
 # LEGACY COMMAND DON'T USE IT
@@ -54,8 +47,7 @@ Patch file */root/dev/protobuf/src/google/protobuf/stubs/port.h*: comment out th
 #    -Bbuild
 ```
 
-### The second problem (target libprotoc):
-
+#### The second problem (target libprotoc):
 Error log:
 ```
 [ 41%] Generating /root/dev/protobuf/src/google/protobuf/compiler/js/well_known_types_embed.cc
@@ -67,14 +59,12 @@ CMakeFiles/Makefile2:217: recipe for target 'CMakeFiles/libprotoc.dir/all' faile
 make[1]: *** [CMakeFiles/libprotoc.dir/all] Error 2
 Makefile:129: recipe for target 'all' failed
 make: *** [all] Error 2
-
 ```
 
-#### Solution 
+##### Solution 
 Not found yet!
 
-
-## Install Protobuf
+### Install Protobuf
 - Move content of *~/dev/protobuf/build/lib/cmake/protobuf* to */opt/emsdk/emscripten/1.37.39/system/share/protobuf/cmake*
 Install script do this:
 ```
@@ -91,15 +81,10 @@ Install script do this:
 ```
 
 - Move *~/dev/protobuf/build/libprotobuf.a* to *$EMSCRIPTEN/system/lib*
-
 - Move protobuf headers to *$EMSCRIPTEN/system/include*
 
-
-
-
 3. Build iroha-ed25519
-
-```
+```sh
 emcmake cmake -H. \
               -Bbuild \
               -DTESTING=OFF \
@@ -133,19 +118,12 @@ Then move files:
 
 Into directory *${EMSCRIPTEN_ROOT_PATH}/system/include*
 
-
-
-
 4. **OPTIONAL** Install Node.js headers
-
 ..Need more information...
-
-
-
 
 ##############################################################################################
 
-#### Configure project
+## Configure project
 ```sh
 emcmake cmake -H. \
               -Bbuild \
@@ -176,11 +154,9 @@ cmake --build build --target irohalib
 emcc libbindings.bc -o irohalib.js
 ```
 
+## Create C++ glue code to interact with JS
 
-
-# Create C++ glue code to interact with JS
-
-## Embind
+### Embind
 ```sh
 cd /opt/iroha/shared_model/bindings
 
@@ -196,54 +172,43 @@ emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/
 emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.bc -o irohalib.js
 ```
 
-## WebIDL
-
+### WebIDL
 ```sh
 python $EMSCRIPTEN/tools/webidl_binder.py bindings.idl glue
 ```
 
-
-
-
-# Debug Node.js app remotely
-
+## Debug Node.js app remotely
 ```sh
 node --inspect-brk=0.0.0.0:9229 test.js
 ```
 
+## Summary about binding tools (for JS classes interfaces)
 
+### Embind
 
-
-# Summary about binding tools (for JS classes interfaces)
-
-## Embind
-
-### Pros:
+#### Pros:
 1. Strong integration with C++. Works with static analisys and autofolding.
 2. Type Inference. When we will change C++ part with incompatible signatures some amount of errors will appears momentally.
 3. Convenient errors from C++ compiler.
 
-### Cons:
+#### Cons:
 1. Requires more effort for Resource Management: we have to use `smart_pointer` or JS `delete()`/`deleteLater()` functions.
 2. Less declarative syntaxis then WebIDL.
 3. Docs are inconvenient and not fully described all features.
 
-## WebIDL
+### WebIDL
 
-### Pros
+#### Pros
 1. Declarative syntax
 2. Supported by W3C
 
-### Cons:
+#### Cons:
 1. Not so flexible type system. We are actively using templates and polimorphism, so such syntax can cause problems.
 2. Needs additional tools and compilation steps to build bindings wrapper.
 
+## Common problems
 
-
-
-# Common problems
-
-## Top-level exceptions
+### Top-level exceptions
 Problem described in this issue:
 https://github.com/kripken/emscripten/issues/6330
 
@@ -262,3 +227,17 @@ function whatEmscriptenException(ptr) {
     console.info(iroha.AsciiToString(iroha.dynCall_ii(fPtr, ptr)));
 }
 ```
+
+### Support of unsigned long long
+Problem described in this issue:
+https://groups.google.com/d/msg/emscripten-discuss/zQA7PjGUC98/2OQMMyY7BgAJ
+
+Unfortunately, Embind doesn't have any integrated representation of 64 bit types. 
+Because `uint64_t` and such types have a size more than safe size of JS `Number` type, maintainers can't add safe conversion between them.
+We need to add to a C++ code some overloading methods allow convert `std::string` or `emscripten::val` to `uint64_t` and vice versa.
+
+### Unwraped methods and classes
+1. Wrap `signatures()` method. It can return `std::map` that automatically binds by Embind.
+*shared_model/backend/protobuf/queries/proto_query.hpp*
+*shared_model/backend/protobuf/queries/transaction.hpp*
+2. Wrap `std::exception`-based classes to return exceptions by `std::shared_pointer`
