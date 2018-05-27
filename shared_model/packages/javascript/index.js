@@ -39,21 +39,20 @@ function whatEmscriptenException(ptr) {
 function wrap(obj) {
   if (obj === Object(obj)) {
     return new Proxy(obj, {
-      // Control invocation all properties (which are methods)
+      // Wrap constructors to enable "get" traps on new objects
+      construct(target, args) {
+        return wrap(new target(...args))
+      },
+
+      // Wrap every object's method
       get(target, propKey, receiver) {
         const calledProperty = Reflect.get(...arguments)
 
         if (typeof propKey !== 'symbol' // Don't wrap built-in symbols!
               && typeof calledProperty === 'function') {
-          // console.log(
-          //   `[DEBUG] Reading method`, propKey,`of target`, target.constructor.name
-          // )
-
-          // Returned function is an emscripten exceptions catcher
+          // Returned function is an Emscripten exceptions catcher
           return (...args) => {
             try {
-              // console.log('[DEBUG] Called callback with args: ', args)
-
               return wrap(calledProperty.apply(target, args))
             } catch(e) {
               throw typeof e === 'number' ?
@@ -61,16 +60,8 @@ function wrap(obj) {
             }
           }
         } else {
-          // console.log(`[DEBUG] Target property`, propKey, `not a function!`)
-
           return calledProperty
         }
-      },
-
-      // Control builders constructors to enable "get" traps
-      construct(target, args) {
-          // console.log(`Construct new "${target}"`)
-          return wrap(new target(...args))
       }
     })
   } else {
@@ -78,6 +69,7 @@ function wrap(obj) {
   }
 }
 
+// Filter Module properties to get only classes and wrap them
 module.exports = Object.entries(Module)
 .filter(([propKey, prop]) => prop && prop.hasOwnProperty('argCount'))
 .map(([propKey, prop]) => [propKey, wrap(prop)])

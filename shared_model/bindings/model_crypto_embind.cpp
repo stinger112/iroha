@@ -9,11 +9,12 @@ using namespace shared_model::crypto;
 EMSCRIPTEN_BINDINGS(model_crypto)
 {
   class_<Blob>("Blob")
-  .constructor<std::string>()
-  .function("fromHexString", &Blob::fromHexString)
-  .function("blob", &Blob::blob)
+  .constructor<const std::string&>()
+  // .function("blob", &Blob::blob)
   .function("hex", &Blob::hex)
+  .function("size", &Blob::size)
   .function("toString", &Blob::toString);
+  // .class_function("fromHexString", &Blob::fromHexString);
 
   class_<Signed, base<Blob>>("Signed")
   .constructor<const std::string&>()

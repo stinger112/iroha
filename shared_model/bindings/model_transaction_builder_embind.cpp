@@ -21,9 +21,7 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder)
   .function("addSignature", &Transaction::addSignature)
   .function("createdTime", &Transaction::getCreatedTime);
 
-  // TODO: Unsigned wrapper is a template and can have many base types
-  typedef UnsignedWrapper<Transaction> UnsignedWrapperTransaction;
-  
+  typedef UnsignedWrapper<Transaction> UnsignedWrapperTransaction;  
   class_<UnsignedWrapperTransaction>("UnsignedWrapperTransaction")
   .function("signAndAddSignature", &UnsignedWrapperTransaction::signAndAddSignature)
   .function("hash", &UnsignedWrapperTransaction::hash);
