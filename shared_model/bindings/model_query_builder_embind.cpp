@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
+#include "model_proto.hpp"
 #include "model_query_builder.hpp"
 
 using namespace emscripten;
@@ -27,12 +28,15 @@ EMSCRIPTEN_BINDINGS(model_query_builder)
   .function("addSignature", &Query::addSignature)
   .function("createdTime", &Query::getCreatedTime);
 
-  // TODO: Unsigned wrapper is a template and can have many base types
-  typedef UnsignedWrapper<Query> UnsignedWrapperQuery;
-  
-  class_<UnsignedWrapperQuery>("UnsignedWrapper")
-  .function("signAndAddSignature", &UnsignedWrapperQuery::signAndAddSignature)
-  .function("hash", &UnsignedWrapperQuery::hash);
+  typedef UnsignedWrapper<Query> UnsignedQuery;
+  class_<UnsignedQuery>("UnsignedQuery")
+  .function("signAndAddSignature", &UnsignedQuery::signAndAddSignature)
+  .function("hash", &UnsignedQuery::hash);
+
+  typedef ModelProto<UnsignedQuery> ModelProtoQuery;
+  class_<ModelProtoQuery>("ModelProtoQuery")
+  .constructor<>()
+  .function("signAndAddSignature", &ModelProtoQuery::signAndAddSignature);
 
   /**
    * Top level ModelQueryBuilder class

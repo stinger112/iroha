@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-const Module = require('../../build/bindings/irohalib.js')
+const Module = require('./lib/irohalib.js')
 
 /**
  * Get message of std::exception by Emscripten raw ptr.

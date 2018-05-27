@@ -8,12 +8,15 @@ using namespace shared_model::crypto;
 
 EMSCRIPTEN_BINDINGS(model_crypto)
 {
+  register_vector<uint8_t>("ByteVector");
+  register_vector<std::string>("StringVector");
+
   class_<Blob>("Blob")
   .constructor<const std::string&>()
-  // .function("blob", &Blob::blob)
+  .function("blob", &Blob::blob)
   .function("hex", &Blob::hex)
   .function("size", &Blob::size)
-  .function("toString", &Blob::toString);
+  // .function("toString", &Blob::toString)
   // .class_function("fromHexString", &Blob::fromHexString);
 
   class_<Signed, base<Blob>>("Signed")
