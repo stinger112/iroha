@@ -144,6 +144,7 @@ if (EMSCRIPTEN)
 
     set_target_properties(irohalib 
         PROPERTIES LINK_FLAGS "--bind \
+                              -s MODULARIZE_INSTANCE=1 \
                               -s DISABLE_EXCEPTION_CATCHING=0 \
                               -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]'")
     target_link_libraries(irohalib bindings)
