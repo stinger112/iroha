@@ -17,24 +17,29 @@ EMSCRIPTEN_BINDINGS(model_crypto)
   .function("hex", &Blob::hex)
   .function("size", &Blob::size)
   // .function("toString", &Blob::toString)
-  // .class_function("fromHexString", &Blob::fromHexString);
+  // .class_function("fromHexString", &Blob::fromHexString)
+  ;
 
   class_<Signed, base<Blob>>("Signed")
   .constructor<const std::string&>()
-  .function("toString", &Signed::toString);
+  .function("toString", &Signed::toString)
+  ;
 
   class_<PublicKey, base<Blob>>("PublicKey")
   .constructor<const std::string&>()
-  .function("toString", &PublicKey::toString);
+  .function("toString", &PublicKey::toString)
+  ;
 
   class_<PrivateKey, base<Blob>>("PrivateKey")
   .constructor<const std::string&>()
-  .function("toString", &PrivateKey::toString);
+  .function("toString", &PrivateKey::toString)
+  ;
 
   class_<Keypair>("Keypair")
   .constructor<PublicKey, PrivateKey>()
   .function("publicKey", &Keypair::publicKey)
-  .function("privateKey", &Keypair::privateKey);
+  .function("privateKey", &Keypair::privateKey)
+  ;
 
   /**
    * Top level ModelCrypto class
@@ -43,5 +48,6 @@ EMSCRIPTEN_BINDINGS(model_crypto)
   .constructor<>()
   .function("generateKeypair", &ModelCrypto::generateKeypair)
   .function("fromPrivateKey", &ModelCrypto::fromPrivateKey)
-  .function("convertFromExisting", &ModelCrypto::convertFromExisting);
+  .function("convertFromExisting", &ModelCrypto::convertFromExisting)
+  ;
 }
