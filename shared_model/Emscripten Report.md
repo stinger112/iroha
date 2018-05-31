@@ -17,7 +17,7 @@ source /opt/emsdk/emsdk_set_env.sh
 emcmake cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -Dprotobuf_BUILD_TESTS=OFF \
-    -DCMAKE_CXX_FLAGS="-O3" \
+    -DCMAKE_CXX_FLAGS="-Oz" \
     -Hcmake \
     -Bbuild
 
@@ -130,8 +130,7 @@ emcmake cmake -H. \
               -DTESTING=OFF \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_PREFIX_PATH=$EMSCRIPTEN/system \
-              -DEMSCRIPTEN=ON \
-              -DCMAKE_VERBOSE_MAKEFILE=ON
+              -DEMSCRIPTEN=ON
 ```
 
 **Version useful for debug**
@@ -139,9 +138,10 @@ emcmake cmake -H. \
 emcmake cmake -H. \
               -Bbuild \
               -DTESTING=OFF \
-              -DCMAKE_BUILD_TYPE=DEBUG \
+              -DCMAKE_BUILD_TYPE=Debug \
               -DCMAKE_PREFIX_PATH=$EMSCRIPTEN/system \
               -DEMSCRIPTEN=ON \
+              -DCMAKE_VERBOSE_MAKEFILE=ON
 ```
 
 #### Compile target **irohalib** to bytecode
@@ -160,16 +160,16 @@ emcc libbindings.bc -o irohalib.js
 ```sh
 cd /opt/iroha/shared_model/bindings
 
+# You also can add "-c -Wno-deprecated-declarations" to suppress compilation warnings
 emcc -c -std=c++14 -I/opt/iroha/shared_model -I/opt/iroha/libs model_crypto_embind.cpp -o model_crypto_embind.bc
 emcc -c -std=c++14 -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_query_builder_embind.cpp -o model_query_builder_embind.bc
-emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.bc -o irohalib.js
-```
 
-**Build with additional dev arguments**
-```sh
-emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs model_crypto_embind.cpp -o model_crypto_embind.bc
-emcc -c -std=c++14 -c -Wno-deprecated-declarations -I/opt/iroha/shared_model -I/opt/iroha/libs -I/opt/iroha/irohad -I/opt/iroha/schema model_query_builder_embind.cpp -o model_query_builder_embind.bc
-emcc --bind -s DISABLE_EXCEPTION_CATCHING=0 -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.bc -o irohalib.js
+emcc --bind \
+     -s MODULARIZE_INSTANCE=1 \
+     -s DISABLE_EXCEPTION_CATCHING=0 \
+     -s EXTRA_EXPORTED_RUNTIME_METHODS='["AsciiToString"]' \
+     ../build/bindings/libbindings.bc model_crypto_embind.bc model_query_builder_embind.bc \
+     -o irohalib.js
 ```
 
 ### WebIDL
@@ -235,6 +235,14 @@ https://groups.google.com/d/msg/emscripten-discuss/zQA7PjGUC98/2OQMMyY7BgAJ
 Unfortunately, Embind doesn't have any integrated representation of 64 bit types. 
 Because `uint64_t` and such types have a size more than safe size of JS `Number` type, maintainers can't add safe conversion between them.
 We need to add to a C++ code some overloading methods allow convert `std::string` or `emscripten::val` to `uint64_t` and vice versa.
+
+### No exported symbols if ENVIRONMENT_IS_WEB=true
+Problem described in this issue:
+https://github.com/kripken/emscripten/issues/5864
+
+When you trying to start irohalib in Web Browsers it automatically sets `ENVIRONMENT_IS_WEB=true` and exports no symbols.
+So if you intended to use CommonJS modules, you need to add `-s MODULARIZE=1` flag on the last compilation step. 
+It also allow to add new custom properties to a generated Module object.
 
 ### Unwraped methods and classes
 1. Wrap `signatures()` method. It can return `std::map` that automatically binds by Embind.
