@@ -57,11 +57,14 @@ typings/
 # dotenv environment variables file
 .env
 
-# Build and generated directories
+# generated files and directories
+irohalib.js
+irohalib.js.mem
 build/*
 pb/*
 lib/*
 
+# I prefer to disable lockfiles
 package-lock.json
 
 !.npmignore
