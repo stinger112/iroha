@@ -146,7 +146,7 @@ emcmake cmake -H. \
 
 #### Compile target **irohalib** to bytecode
 ```sh
-cmake --build build --target irohalib
+cmake --build build --target irohalib -- -j$(nproc)
 ```
 
 #### Compile bytecode to javascript:

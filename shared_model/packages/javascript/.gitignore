@@ -58,8 +58,6 @@ typings/
 .env
 
 # generated files and directories
-irohalib.js
-irohalib.js.mem
 build/*
 pb/*
 lib/*
