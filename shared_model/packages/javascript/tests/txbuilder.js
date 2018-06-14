@@ -173,6 +173,7 @@ test('ModelTransactionBuilder tests', function (t) {
   t.throws(() => correctTx.setAccountDetail(adminAccountId, '', 'value').build(), /Wrongly formed key, passed value: ''/, 'Should throw Wrongly formed key')
   t.throws(() => correctTx.setAccountDetail(adminAccountId, '@@@', 'value').build(), /Wrongly formed key, passed value: '@@@'/, 'Should throw Wrongly formed key')
   t.doesNotThrow(() => correctTx.setAccountDetail(adminAccountId, 'key', 'value').build(), null, 'Should not throw any exceptions')
+  t.doesNotThrow(() => correctTx.setAccountDetail(adminAccountId, 'key', '大卫王').build(), null, 'Should allow UTF-16 characters')
 
   // setAccountQuorum() tests
   t.comment('Testing setAccountQuorum()')
