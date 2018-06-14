@@ -249,3 +249,10 @@ It also allow to add new custom properties to a generated Module object.
 *shared_model/backend/protobuf/queries/proto_query.hpp*
 *shared_model/backend/protobuf/queries/transaction.hpp*
 2. Wrap `std::exception`-based classes to return exceptions by `std::shared_pointer`
+
+### No automatic conversion between UTF-8 and ASCII strings
+Problem described in this issue:
+https://github.com/kripken/emscripten/issues/2421
+
+When you are using non ASCII string to put it into some field you are being able to set and even get it in those languages where string types based on UTF. But if you are trying to get this string in languages where string types are in ASCII, you meet decoding problems.
+So we need automatic conversion or some helper methods for it.
