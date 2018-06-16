@@ -6,7 +6,7 @@ const accountId = 'admin@test'
 const assetId = 'coin#test'
 
 test('ModelQueryBuilder tests', function (t) {
-  t.plan(52)
+  t.plan(49)
 
   let queryBuilder = new iroha.ModelQueryBuilder()
   const time = Date.now()
@@ -29,39 +29,39 @@ test('ModelQueryBuilder tests', function (t) {
   // getAccount() tests
   t.comment('Testing getAccount()')
   t.throws(() => correctQuery.getAccount(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getAccount('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id,')
-  t.throws(() => correctQuery.getAccount('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id,')
+  t.throws(() => correctQuery.getAccount('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getAccount('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.doesNotThrow(() => correctQuery.getAccount(accountId).build(), null, 'Should not throw any exceptions')
 
   // getSignatories() tests
   t.comment('Testing getSignatories()')
   t.throws(() => correctQuery.getSignatories(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getSignatories('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id,')
-  t.throws(() => correctQuery.getSignatories('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id,')
+  t.throws(() => correctQuery.getSignatories('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getSignatories('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.doesNotThrow(() => correctQuery.getSignatories(accountId).build(), null, 'Should not throw any exceptions')
 
   // getAccountTransactions() tests
   t.comment('Testing getAccountTransactions()')
   t.throws(() => correctQuery.getAccountTransactions(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getAccountTransactions('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id,')
-  t.throws(() => correctQuery.getAccountTransactions('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id,')
+  t.throws(() => correctQuery.getAccountTransactions('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getAccountTransactions('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.doesNotThrow(() => correctQuery.getAccountTransactions(accountId).build(), null, 'Should not throw any exceptions')
 
   // getAccountAssetTransactions() tests
   t.comment('Testing getAccountAssetTransactions()')
   t.throws(() => correctQuery.getAccountAssetTransactions(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
   t.throws(() => correctQuery.getAccountAssetTransactions(''), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getAccountAssetTransactions('', assetId).build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id,')
-  t.throws(() => correctQuery.getAccountAssetTransactions('@@@', assetId).build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id,')
-  t.throws(() => correctQuery.getAccountAssetTransactions(accountId, '').build(), /Wrongly formed asset_id, passed value: ''/, 'Should throw Wrongly formed asset_id,')
-  t.throws(() => correctQuery.getAccountAssetTransactions(accountId, '@@@').build(), /Wrongly formed asset_id, passed value: '@@@'/, 'Should throw Wrongly formed asset_id,')
+  t.throws(() => correctQuery.getAccountAssetTransactions('', assetId).build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getAccountAssetTransactions('@@@', assetId).build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getAccountAssetTransactions(accountId, '').build(), /Wrongly formed asset_id, passed value: ''/, 'Should throw Wrongly formed asset_id')
+  t.throws(() => correctQuery.getAccountAssetTransactions(accountId, '@@@').build(), /Wrongly formed asset_id, passed value: '@@@'/, 'Should throw Wrongly formed asset_id')
   t.doesNotThrow(() => correctQuery.getAccountAssetTransactions(accountId, assetId).build(), null, 'Should not throw any exceptions')
 
   // getAccountAssets() tests
   t.comment('Testing getAccountAssets()')
   t.throws(() => correctQuery.getAccountAssets(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
-  t.throws(() => correctQuery.getAccountAssets('').build(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
-  t.throws(() => correctQuery.getAccountAssets('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id,')
+  t.throws(() => correctQuery.getAccountAssets('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getAccountAssets('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.doesNotThrow(() => correctQuery.getAccountAssets(accountId).build(), null, 'Should not throw any exceptions')
 
   // getRoles() tests
@@ -71,15 +71,15 @@ test('ModelQueryBuilder tests', function (t) {
   // getAssetInfo() tests
   t.comment('Testing getAssetInfo()')
   t.throws(() => correctQuery.getAssetInfo(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getAssetInfo('').build(), /Wrongly formed asset_id, passed value: ''/, 'Should throw Wrongly formed asset_id,')
-  t.throws(() => correctQuery.getAssetInfo('@@@').build(), /Wrongly formed asset_id, passed value: '@@@'/, 'Should throw Wrongly formed asset_id,')
+  t.throws(() => correctQuery.getAssetInfo('').build(), /Wrongly formed asset_id, passed value: ''/, 'Should throw Wrongly formed asset_id')
+  t.throws(() => correctQuery.getAssetInfo('@@@').build(), /Wrongly formed asset_id, passed value: '@@@'/, 'Should throw Wrongly formed asset_id')
   t.doesNotThrow(() => correctQuery.getAssetInfo(assetId).build(), null, 'Should not throw any exceptions')
 
   // getRolePermissions() tests
   t.comment('Testing getRolePermissions()')
   t.throws(() => correctQuery.getRolePermissions(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getRolePermissions('').build(), /Wrongly formed role_id, passed value: ''/, 'Should throw Wrongly formed role_id,')
-  t.throws(() => correctQuery.getRolePermissions('@@@').build(), /Wrongly formed role_id, passed value: '@@@'/, 'Should throw Wrongly formed role_id,')
+  t.throws(() => correctQuery.getRolePermissions('').build(), /Wrongly formed role_id, passed value: ''/, 'Should throw Wrongly formed role_id')
+  t.throws(() => correctQuery.getRolePermissions('@@@').build(), /Wrongly formed role_id, passed value: '@@@'/, 'Should throw Wrongly formed role_id')
   t.doesNotThrow(() => correctQuery.getRolePermissions('role').build(), null, 'Should not throw any exceptions')
 
   // getTransactions() tests
@@ -98,8 +98,8 @@ test('ModelQueryBuilder tests', function (t) {
   // getAccountDetail() tests
   t.comment('Testing getAccountDetail()')
   t.throws(() => correctQuery.getAccountDetail(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
-  t.throws(() => correctQuery.getAccountDetail('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id,')
-  t.throws(() => correctQuery.getAccountDetail('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id,')
+  t.throws(() => correctQuery.getAccountDetail('').build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctQuery.getAccountDetail('@@@').build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.doesNotThrow(() => correctQuery.getAccountDetail(accountId).build(), null, 'Should not throw any exceptions')
 
   t.end()
