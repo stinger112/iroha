@@ -4,7 +4,7 @@
   "description": "Modern JavaScript library for Iroha. https://github.com/hyperledger/iroha",
   "main": "index.js",
   "scripts": {
-    "prepare": "sh scripts/generate-protobuf.sh",
+    "prepare": "sh scripts/prepare.sh",
     "prepublishOnly": "npm ls",
     "test": "tape tests/**/*.js | tap-spec"
   },
