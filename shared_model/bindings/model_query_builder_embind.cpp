@@ -14,29 +14,34 @@ using namespace shared_model::crypto;
 EMSCRIPTEN_BINDINGS(model_query_builder)
 {
   register_vector<Hash>("HashVector");
+  
   class_<Hash, base<Blob>>("Hash")
   .constructor<const std::string&>()
-  .function("toString", &Hash::toString);
+  .function("toString", &Hash::toString)
+  ;
 
   class_<Query>("Query")
-  // .function("get", &Query::get)
   .function("creatorAccountId", &Query::creatorAccountId)
   .function("queryCounter", &Query::getQueryCounter)
   .function("blob", &Query::blob)
   .function("payload", &Query::payload)
-  // .function("signatures", &Query::signatures)
   .function("addSignature", &Query::addSignature)
-  .function("createdTime", &Query::getCreatedTime);
+  .function("createdTime", &Query::getCreatedTime)
+  ;
 
-  typedef UnsignedWrapper<Query> UnsignedQuery;
-  class_<UnsignedQuery>("UnsignedQuery")
-  .function("signAndAddSignature", &UnsignedQuery::signAndAddSignature)
-  .function("hash", &UnsignedQuery::hash);
+  typedef UnsignedWrapper<Query> UnsignedWrapper;
+  class_<UnsignedWrapper>("UnsignedQuery")
+  .function("signAndAddSignature", &UnsignedWrapper::signAndAddSignature)
+  .function("finish", &UnsignedWrapper::finish)
+  .function("hash", &UnsignedWrapper::hash)
+  ;
 
-  typedef ModelProto<UnsignedQuery> ModelProtoQuery;
-  class_<ModelProtoQuery>("ModelProtoQuery")
-  .constructor<>()
-  .function("signAndAddSignature", &ModelProtoQuery::signAndAddSignature);
+  typedef ModelProto<UnsignedWrapper> ModelProto;
+  class_<ModelProto>("ModelProtoQuery")
+  .constructor<UnsignedWrapper&>()
+  .function("signAndAddSignature", &ModelProto::signAndAddSignature)
+  .function("finish", &ModelProto::finish)
+  ;
 
   /**
    * Top level ModelQueryBuilder class
@@ -56,5 +61,6 @@ EMSCRIPTEN_BINDINGS(model_query_builder)
   .function("getRolePermissions", &ModelQueryBuilder::getRolePermissions)
   .function("getTransactions", &ModelQueryBuilder::getTransactions)
   .function("getAccountDetail", &ModelQueryBuilder::getAccountDetail)
-  .function("build", &ModelQueryBuilder::build);
+  .function("build", &ModelQueryBuilder::build)
+  ;
 }

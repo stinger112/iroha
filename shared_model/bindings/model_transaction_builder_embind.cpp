@@ -13,22 +13,26 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder)
 {
   class_<Transaction>("Transaction")
   .function("creatorAccountId", &Transaction::creatorAccountId)
-//   .function("commands", &Transaction::commands)
+  .function("quorum", &Transaction::quorum)
   .function("blob", &Transaction::blob)
   .function("payload", &Transaction::payload)
-//   .function("signatures", &Transaction::getSignatures)
   .function("addSignature", &Transaction::addSignature)
-  .function("createdTime", &Transaction::getCreatedTime);
+  .function("createdTime", &Transaction::getCreatedTime)
+  ;
 
-  typedef UnsignedWrapper<Transaction> UnsignedTx;  
-  class_<UnsignedTx>("UnsignedTx")
-  .function("signAndAddSignature", &UnsignedTx::signAndAddSignature)
-  .function("hash", &UnsignedTx::hash);
+  typedef UnsignedWrapper<Transaction> UnsignedWrapper;  
+  class_<UnsignedWrapper>("UnsignedTx")
+  .function("signAndAddSignature", &UnsignedWrapper::signAndAddSignature)
+  .function("finish", &UnsignedWrapper::finish)
+  .function("hash", &UnsignedWrapper::hash)
+  ;
 
-  typedef ModelProto<UnsignedTx> ModelProtoTransaction;
-  class_<ModelProtoTransaction>("ModelProtoTransaction")
-  .constructor<>()
-  .function("signAndAddSignature", &ModelProtoTransaction::signAndAddSignature);
+  typedef ModelProto<UnsignedWrapper> ModelProto;
+  class_<ModelProto>("ModelProtoTransaction")
+  .constructor<UnsignedWrapper&>()
+  .function("signAndAddSignature", &ModelProto::signAndAddSignature)
+  .function("finish", &ModelProto::finish)
+  ;
 
   /**
    * Top level ModelTransactionBuilder class
@@ -53,5 +57,6 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder)
   .function("setAccountQuorum", &ModelTransactionBuilder::setAccountQuorum)
   .function("subtractAssetQuantity", &ModelTransactionBuilder::subtractAssetQuantity)
   .function("transferAsset", &ModelTransactionBuilder::transferAsset)
-  .function("build", &ModelTransactionBuilder::build);
+  .function("build", &ModelTransactionBuilder::build)
+  ;
 }
