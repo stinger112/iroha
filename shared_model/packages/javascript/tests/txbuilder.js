@@ -10,7 +10,7 @@ const assetId = 'coin#test'
 const testAccountId = 'test@test'
 
 test('ModelTransactionBuilder tests', function (t) {
-  t.plan(133)
+  t.plan(134)
 
   let crypto = new iroha.ModelCrypto()
   let keypair = crypto.convertFromExisting(publicKey, privateKey)
@@ -126,8 +126,8 @@ test('ModelTransactionBuilder tests', function (t) {
 
   let emptyPerm = new iroha.RolePermissionSet()
   let validPermissions = new iroha.RolePermissionSet()
-  validPermissions.set(iroha.Role_kAddPeer)
-  validPermissions.set(iroha.Role_kAddAssetQty)
+  validPermissions.set(iroha.Role.kAddPeer)
+  validPermissions.set(iroha.Role.kAddAssetQty)
 
   t.throws(() => correctTx.createRole('new_user_role', emptyPerm).build(), /Permission set should contain at least one permission/, 'Should throw Permission set should contain at least one permission')
   t.throws(() => correctTx.createRole('', validPermissions).build(), /Wrongly formed role_id, passed value: ''/, 'Should throw Wrongly formed role_id')
