@@ -16,8 +16,6 @@ EMSCRIPTEN_BINDINGS(model_crypto)
   .function("blob", &Blob::blob)
   .function("hex", &Blob::hex)
   .function("size", &Blob::size)
-  // .function("toString", &Blob::toString)
-  // .class_function("fromHexString", &Blob::fromHexString)
   ;
 
   class_<Signed, base<Blob>>("Signed")
