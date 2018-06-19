@@ -126,8 +126,8 @@ test('ModelTransactionBuilder tests', function (t) {
 
   let emptyPerm = new iroha.RolePermissionSet()
   let validPermissions = new iroha.RolePermissionSet()
-  validPermissions.set(iroha.Role_kAddPeer)
-  validPermissions.set(iroha.Role_kAddAssetQty)
+  validPermissions.set(iroha.Role.kAddPeer)
+  validPermissions.set(iroha.Role.kAddAssetQty)
 
   t.doesNotThrow(() => correctTx.createRole('new_user_role', emptyPerm).build(), null, 'Should not throw any exceptions')
   t.throws(() => correctTx.createRole('', validPermissions).build(), /Wrongly formed role_id, passed value: ''/, 'Should throw Wrongly formed role_id')

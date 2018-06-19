@@ -69,8 +69,12 @@ function wrap(obj) {
   }
 }
 
-// Filter Module properties to get only classes and wrap them
+// Export proxyfied embinded classes
 module.exports = Object.entries(Module)
 .filter(([propKey, prop]) => prop && prop.hasOwnProperty('argCount'))
 .map(([propKey, prop]) => [propKey, wrap(prop)])
 .reduce((obj, [k, v]) => Object.assign(obj, { [k]: v }), {})
+
+// Export embinded enums
+module.exports.Role = Module.Role
+module.exports.Grantable = Module.Grantable
