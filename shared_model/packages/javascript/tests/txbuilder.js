@@ -149,19 +149,19 @@ test('ModelTransactionBuilder tests', function (t) {
   t.comment('Testing grantPermission()')
   t.throws(() => correctTx.grantPermission(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
   t.throws(() => correctTx.grantPermission(''), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
-  t.throws(() => correctTx.grantPermission('', iroha.Grantable_kSetMyQuorum).build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
-  t.throws(() => correctTx.grantPermission('@@@', iroha.Grantable_kSetMyQuorum).build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctTx.grantPermission('', iroha.Grantable.kSetMyQuorum).build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctTx.grantPermission('@@@', iroha.Grantable.kSetMyQuorum).build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.throws(() => correctTx.grantPermission(adminAccountId, '').build(), ERROR_MESSAGES.WRONG_ARGUMENT_TYPE, 'Should throw WRONG_ARGUMENT_TYPE')
-  t.doesNotThrow(() => correctTx.grantPermission(adminAccountId, iroha.Grantable_kSetMyQuorum).build(), null, 'Should not throw any exceptions')
+  t.doesNotThrow(() => correctTx.grantPermission(adminAccountId, iroha.Grantable.kSetMyQuorum).build(), null, 'Should not throw any exceptions')
 
   // revokePermission() tests
   t.comment('Testing revokePermission()')
   t.throws(() => correctTx.revokePermission(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
   t.throws(() => correctTx.revokePermission(''), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
-  t.throws(() => correctTx.revokePermission('', iroha.Grantable_kSetMyQuorum).build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
-  t.throws(() => correctTx.revokePermission('@@@', iroha.Grantable_kSetMyQuorum).build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctTx.revokePermission('', iroha.Grantable.kSetMyQuorum).build(), /Wrongly formed account_id, passed value: ''/, 'Should throw Wrongly formed account_id')
+  t.throws(() => correctTx.revokePermission('@@@', iroha.Grantable.kSetMyQuorum).build(), /Wrongly formed account_id, passed value: '@@@'/, 'Should throw Wrongly formed account_id')
   t.throws(() => correctTx.revokePermission(adminAccountId, '').build(), ERROR_MESSAGES.WRONG_ARGUMENT_TYPE, 'Should throw WRONG_ARGUMENT_TYPE')
-  t.doesNotThrow(() => correctTx.revokePermission(adminAccountId, iroha.Grantable_kSetMyQuorum).build(), null, 'Should not throw any exceptions')
+  t.doesNotThrow(() => correctTx.revokePermission(adminAccountId, iroha.Grantable.kSetMyQuorum).build(), null, 'Should not throw any exceptions')
 
   // setAccountDetail() tests
   t.comment('Testing setAccountDetail()')

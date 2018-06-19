@@ -93,6 +93,27 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder)
   .function("isSubsetOf", &RolePermissionSet::isSubsetOf)
   ;
 
+  using Grantable = interface::permissions::Grantable;
+  enum_<Grantable>("Grantable")
+  .value("kAddMySignatory", Grantable::kAddMySignatory)
+  .value("kRemoveMySignatory", Grantable::kRemoveMySignatory)
+  .value("kSetMyQuorum", Grantable::kSetMyQuorum)
+  .value("kSetMyAccountDetail", Grantable::kSetMyAccountDetail)
+  .value("kTransferMyAssets", Grantable::kTransferMyAssets)
+  ;
+
+  using GrantablePermissionSet = interface::GrantablePermissionSet;
+  class_<GrantablePermissionSet>("GrantablePermissionSet")
+  .constructor<>()
+  .function("size", &GrantablePermissionSet::size)
+  .function("reset", &GrantablePermissionSet::reset)
+  .function("set", &GrantablePermissionSet::set)
+  .function("unset", &GrantablePermissionSet::unset)
+  .function("test", &GrantablePermissionSet::test)
+  .function("none", &GrantablePermissionSet::none)
+  .function("isSubsetOf", &GrantablePermissionSet::isSubsetOf)
+  ;
+
   /**
    * Top level ModelTransactionBuilder class
    **/
