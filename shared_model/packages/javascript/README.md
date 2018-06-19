@@ -2,7 +2,7 @@
 
 Official Iroha JavaScript Library. https://github.com/hyperledger/iroha
 
-This package fully compatible with [Iroha 1.0 beta-2](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-2)
+This package fully compatible with [Iroha 1.0 beta-3](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-2)
 
 ## Usage
 
