@@ -23,8 +23,6 @@ test('Common unit tests', function (t) {
   t.ok(blob.blob() instanceof ByteVector, 'Should be an instance of ByteVector')
   t.equals(blob.hex(), '3131313131313131313131313131313131313131313131313131313131313131', 'Should be the same as hex representation')
   t.equals(blob.size(), hexString.length, 'Should have the same as length of hexString')
-  // t.equals(blob.toString(), 'Hash: [3131313131313131313131313131313131313131313131313131313131313131 ]', 'Should be in the format of log')
-  // t.equals(Blob.fromHexString(hexString).hex(), hexString, 'Should be the same as hexString')
 
   t.comment('Hash tests')
   t.throws(() => new Hash(), ERROR_MESSAGES.INVALID_CONSTRUCTOR_PARAMETERS, 'Should throw illegal number of arguments')
@@ -33,7 +31,6 @@ test('Common unit tests', function (t) {
   const hash = new Hash(hexString)
   t.equals(hash.hex(), '3131313131313131313131313131313131313131313131313131313131313131', 'Should be the same as hex representation')
   t.equals(hash.toString(), 'Hash: [3131313131313131313131313131313131313131313131313131313131313131 ]', 'Should be in the format of log')
-  // t.equals(hash.fromHexString(), null, 'Should not throw any exceptions')
 
   t.comment('HashVector tests')
   t.ok(new HashVector() instanceof HashVector, 'Should have the same type as HashVector')
