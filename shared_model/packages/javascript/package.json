@@ -33,7 +33,7 @@
   "homepage": "https://github.com/hyperledger/iroha#readme",
   "dependencies": {
     "google-protobuf": "^3.5.0",
-    "grpc": "^1.12.2"
+    "grpc": "^1.11.3"
   },
   "devDependencies": {
     "grpc-tools": "^1.6.6",

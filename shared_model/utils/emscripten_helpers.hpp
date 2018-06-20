@@ -27,7 +27,7 @@
  */
 static uint64_t convert_from_js_to_uint64(const emscripten::val &input) {
   if (input.typeOf().as<std::string>() != "number")
-      throw std::invalid_argument("Cannot pass argument as a Number");
+    throw std::invalid_argument("Cannot pass argument as a Number");
 
   // Get string with a number by Number.toString() JS method
   // It prevents automatic conversion in val.as treats val as JS String
