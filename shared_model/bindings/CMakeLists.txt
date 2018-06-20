@@ -142,6 +142,7 @@ if (EMSCRIPTEN)
         model_transaction_builder_embind.cpp
     )
 
+    # Bind embind glue with compiled LLVM bytecode to get final js file  
     set_target_properties(irohalib 
         PROPERTIES LINK_FLAGS "--bind \
                               --memory-init-file 0 \
