@@ -1,3 +1,8 @@
+/**
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 var test = require('tape')
 const { ERROR_MESSAGES } = require('./helpers')
 var iroha = require('../index')

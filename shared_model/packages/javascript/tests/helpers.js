@@ -1,4 +1,9 @@
 /**
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Standard exception messages for Iroha Library.
  * You can export what you want to use in tests.
  */
