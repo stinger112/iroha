@@ -82,9 +82,11 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder) {
   using RolePermissionSet = interface::RolePermissionSet;
   class_<RolePermissionSet>("RolePermissionSet")
       .constructor<>()
-      .function("size", &RolePermissionSet::size)
+      .class_function("size", &RolePermissionSet::size)
       .function("reset", &RolePermissionSet::reset)
-      .function("set", &RolePermissionSet::set)
+      .function(
+          "set",
+          select_overload<RolePermissionSet &(Role)>(&RolePermissionSet::set))
       .function("unset", &RolePermissionSet::unset)
       .function("test", &RolePermissionSet::test)
       .function("none", &RolePermissionSet::none)
@@ -101,9 +103,11 @@ EMSCRIPTEN_BINDINGS(model_transaction_builder) {
   using GrantablePermissionSet = interface::GrantablePermissionSet;
   class_<GrantablePermissionSet>("GrantablePermissionSet")
       .constructor<>()
-      .function("size", &GrantablePermissionSet::size)
+      .class_function("size", &GrantablePermissionSet::size)
       .function("reset", &GrantablePermissionSet::reset)
-      .function("set", &GrantablePermissionSet::set)
+      .function("set",
+                select_overload<GrantablePermissionSet &(Grantable)>(
+                    &GrantablePermissionSet::set))
       .function("unset", &GrantablePermissionSet::unset)
       .function("test", &GrantablePermissionSet::test)
       .function("none", &GrantablePermissionSet::none)

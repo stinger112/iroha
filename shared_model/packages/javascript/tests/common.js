@@ -55,7 +55,7 @@ test('Permissions tests', function (t) {
   t.doesNotThrow(() => new RolePermissionSet(), null, 'Should be presented as a class')
 
   const perms = new RolePermissionSet()
-  t.equals(perms.size(), 43, 'Should have size 43')
+  t.equals(RolePermissionSet.size(), 43, 'Should have size 43')
   t.throws(() => perms.set(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw ILLEGAL_NUMBER_OF_ARGUMENTS')
   // TODO: Type checking doesn't work with enums, so we need to add checkers in library wrapper
   // t.throws(() => perms.set(''), ERROR_MESSAGES.WRONG_ARGUMENT_TYPE, 'Should throw WRONG_ARGUMENT_TYPE')
