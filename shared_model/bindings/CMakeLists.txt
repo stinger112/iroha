@@ -140,6 +140,7 @@ if (EMSCRIPTEN)
         model_crypto_embind.cpp
         model_query_builder_embind.cpp
         model_transaction_builder_embind.cpp
+        client_api_embind.cpp
     )
 
     # Bind embind glue with compiled LLVM bytecode to get final js file  
