@@ -9,45 +9,53 @@ const {
   hashTransaction,
   signTransaction,
   validateTransaction
-} = require('../index.js')
+} = require('../index')
 const cmd = require('../pb/commands_pb')
 const {
   Transaction
-} = require('../pb/block_pb')
+} = require('../pb/transaction_pb')
 
 function validAddPeer () {
-  let peer = new cmd.Peer()
-  peer.setAddress('127.0.0.1:50500')
-  peer.setPeerKey('vd1YQE0TFeDrJ5AsXXyOsGAsFiOPAFdz30BrwZEwiSk=')
-
-  let addPeer = new cmd.AddPeer()
-  addPeer.setPeer(peer)
-
   let command = new cmd.Command()
-  command.setAddPeer(addPeer)
-
+  command.setAddPeer(
+    // Create addPeer
+    (() => {
+      let addPeer = new cmd.AddPeer()
+      addPeer.setPeer(
+        // Create Peer
+        (() => {
+          let peer = new cmd.Peer()
+          peer.setAddress('127.0.0.1:50500')
+          peer.setPeerKey('vd1YQE0TFeDrJ5AsXXyOsGAsFiOPAFdz30BrwZEwiSk=')
+          return peer
+        })()
+      )
+      return addPeer
+    })()
+  )
   return command
-}
-
-function defaultPayload (commands) {
-  let reducedPayload = new Transaction.Payload.ReducedPayload()
-
-  reducedPayload.setCreatorAccountId('admin@test')
-  reducedPayload.setCreatedTime(Date.now())
-  reducedPayload.setQuorum(1)
-
-  reducedPayload.addCommands(commands)
-
-  return reducedPayload
 }
 
 function createUnsignedTx (commands) {
   let tx = new Transaction()
-  let payload = new Transaction.Payload()
-  payload.setReducedPayload(
-    defaultPayload(commands)
+  tx.setPayload(
+    // Create Payload
+    (() => {
+      let payload = new Transaction.Payload()
+      payload.setReducedPayload(
+        // Create ReducedPayload
+        (() => {
+          let reducedPayload = new Transaction.Payload.ReducedPayload()
+          reducedPayload.setCreatorAccountId('admin@test')
+          reducedPayload.setCreatedTime(Date.now())
+          reducedPayload.setQuorum(1)
+          reducedPayload.addCommands(commands)
+          return reducedPayload
+        })()
+      )
+      return payload
+    })()
   )
-  tx.setPayload(payload)
 
   return tx
 }
