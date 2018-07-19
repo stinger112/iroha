@@ -5,11 +5,10 @@
 
 const test = require('tape')
 const { ERROR_MESSAGES } = require('./helpers')
-const { 
-  Blob, 
-  Hash, 
+const {
+  Blob,
+  Hash,
   ByteVector,
-  StringVector,
   HashVector,
   Role,
   RolePermissionSet
@@ -17,13 +16,13 @@ const {
 
 test('Common unit tests', function (t) {
   t.plan(13)
-  
+
   const hexString = '11111111111111111111111111111111'
 
   t.comment('Blob tests')
   t.throws(() => new Blob(), ERROR_MESSAGES.INVALID_CONSTRUCTOR_PARAMETERS, 'Should throw illegal number of arguments')
   t.ok(new Blob('') instanceof Blob, 'Should be an instance of Blob')
-  
+
   const blob = new Blob(hexString)
   t.ok(blob.blob() instanceof ByteVector, 'Should be an instance of ByteVector')
   t.equals(blob.hex(), '3131313131313131313131313131313131313131313131313131313131313131', 'Should be the same as hex representation')
@@ -50,7 +49,7 @@ test('Common unit tests', function (t) {
 
 test('Permissions tests', function (t) {
   t.plan(6)
-  
+
   t.comment('RolePermissionSet tests')
   t.doesNotThrow(() => new RolePermissionSet(), null, 'Should be presented as a class')
 

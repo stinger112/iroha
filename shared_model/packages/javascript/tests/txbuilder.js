@@ -41,7 +41,6 @@ test('ModelTransactionBuilder tests', function (t) {
   let correctTx = txBuilder.creatorAccountId(adminAccountId).createdTime(time)
 
   // addAssetQuantity() tests
-  //TODO: 
   // t.comment('Testing addAssetQuantity()')
   // t.throws(() => correctTx.addAssetQuantity(), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
   // t.throws(() => correctTx.addAssetQuantity(''), ERROR_MESSAGES.ILLEGAL_NUMBER_OF_ARGUMENTS, 'Should throw Illegal number of arguments')
