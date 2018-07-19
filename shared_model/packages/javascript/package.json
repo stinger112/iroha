@@ -1,6 +1,6 @@
 {
   "name": "iroha-lib",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Modern JavaScript library for Iroha. https://github.com/hyperledger/iroha",
   "main": "index.js",
   "scripts": {

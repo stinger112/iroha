@@ -1,14 +1,21 @@
 #!/bin/bash
 
 CURDIR="$(cd "$(dirname "$0")"; pwd)"
-IROHA_HOME="$(dirname $(dirname $(dirname $(dirname "${CURDIR}"))))"
+SHARED_MODEL_HOME="$(dirname $(dirname $(dirname "${CURDIR}")))"
 
-sh $CURDIR/clean.sh
-sh $CURDIR/generate-protobuf.sh
+# Are we inside Iroha repository?
+if [ -d "${SHARED_MODEL_HOME}/schema" ]; then
+  echo "Prepare the package..."
 
-echo "Copying compiled library files..."
+  sh $CURDIR/clean.sh
+  sh $CURDIR/generate-protobuf.sh
 
-mkdir -p $CURDIR/../lib
-cp -u $IROHA_HOME/shared_model/build/bindings/irohalib.js $CURDIR/../lib
+  echo "Copying compiled library files..."
 
-echo "Preparing has finished successfully!"
+  mkdir -p $CURDIR/../lib
+  cp -u ${SHARED_MODEL_HOME}/build/bindings/irohalib.js $CURDIR/../lib
+
+  echo "All preparations have been finished successfully!"
+else
+  echo "This is standalone installation. No preparations needed."
+fi
