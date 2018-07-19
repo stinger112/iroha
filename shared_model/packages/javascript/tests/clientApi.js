@@ -4,49 +4,16 @@
  */
 
 const test = require('tape')
-const iroha = require('../index.js')
 const {
-  ByteVector,
-  ModelCrypto
+  ModelCrypto,
+  hashTransaction,
+  signTransaction,
+  validateTransaction
 } = require('../index.js')
 const cmd = require('../pb/commands_pb')
 const {
   Transaction
 } = require('../pb/block_pb')
-
-/**
- * Conversion between native and custom types.
- * @param {Blob|ByteVector} blob object from bindings
- * @return {Uint8Array}
- */
-function blob2array (blob) {
-  let bytes = new Uint8Array(blob.size())
-  for (let i = 0; i < blob.size(); ++i) {
-    bytes[i] = blob.get(i)
-  }
-  return bytes
-}
-
-/**
- * Get transaction and serialize it to ByteVector value.
- * @param {Transaction} tx
- * @return {ByteVector}
- */
-function serialize (tx) {
-  return tx.serializeBinary().reduce((bv, currentByte) => {
-    bv.push_back(currentByte)
-    return bv
-  }, new ByteVector())
-}
-
-/**
- * Get ByteVector and parse it to Transaction object.
- * @param {ByteVector} vec
- * @return {Transaction}
- */
-function deserialize (vec) {
-  return Transaction.deserializeBinary(blob2array(vec))
-}
 
 function validAddPeer () {
   let peer = new cmd.Peer()
@@ -83,30 +50,6 @@ function createUnsignedTx (commands) {
   tx.setPayload(payload)
 
   return tx
-}
-
-function hashTransaction (tx) {
-  return blob2array(iroha.hashTransaction(
-    serialize(tx)
-  ))
-}
-
-function signTransaction (tx, keys) {
-  return deserialize(
-    iroha.signTransaction(
-      serialize(tx), keys
-    )
-  )
-}
-
-function validateTransaction (tx) {
-  let error = iroha.validateTransaction(serialize(tx))
-
-  if (error === '') {
-    return true
-  } else {
-    throw new Error(error)
-  }
 }
 
 test('Client API tests', function (t) {
