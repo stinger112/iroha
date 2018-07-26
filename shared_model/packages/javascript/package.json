@@ -33,13 +33,15 @@
   "homepage": "https://github.com/hyperledger/iroha#readme",
   "dependencies": {
     "google-protobuf": "^3.5.0",
-    "grpc": "^1.11.3"
+    "grpc": "^1.11.3",
+    "grpc-web-client": "^0.6.2"
   },
   "devDependencies": {
     "grpc-tools": "^1.6.6",
     "standard": "^11.0.1",
     "tap-spec": "^4.1.1",
-    "tape": "^4.9.0"
+    "tape": "^4.9.0",
+    "ts-protoc-gen": "^0.7.6"
   },
   "directories": {
     "example": "example",
