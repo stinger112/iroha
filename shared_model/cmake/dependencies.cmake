@@ -7,7 +7,9 @@ set_directory_properties(PROPERTIES
     )
 
 # Project dependencies.
-find_package(Threads REQUIRED)
+if (NOT EMSCRIPTEN)
+  find_package(Threads REQUIRED)
+endif()
 
 ################################
 #           protobuf           #

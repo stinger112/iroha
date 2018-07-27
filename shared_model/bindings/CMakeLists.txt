@@ -133,3 +133,21 @@ if (SWIG_NODE)
         ${NODEJS_INCLUDE_DIRS}
         )
 endif()
+
+if (EMSCRIPTEN)
+    set_target_properties(bindings PROPERTIES SUFFIX ".bc")
+
+    add_executable(irohacrypto
+        model_crypto_embind.cpp
+        client_api_embind.cpp
+    )
+
+    # Bind embind glue with compiled LLVM bytecode to get final js file
+    set_target_properties(irohacrypto
+        PROPERTIES LINK_FLAGS "--bind \
+                              --memory-init-file 0 \
+                              -s MODULARIZE_INSTANCE=1 \
+                              -s DISABLE_EXCEPTION_CATCHING=0 \
+                              -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]'")
+    target_link_libraries(irohacrypto bindings)
+endif()
