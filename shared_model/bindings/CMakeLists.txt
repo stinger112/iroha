@@ -143,12 +143,13 @@ if (EMSCRIPTEN)
         client_api_embind.cpp
     )
 
-    # Bind embind glue with compiled LLVM bytecode to get final js file  
+    # Bind embind glue with compiled LLVM bytecode to get final js file
     set_target_properties(irohalib 
         PROPERTIES LINK_FLAGS "--bind \
                               --memory-init-file 0 \
                               -s MODULARIZE_INSTANCE=1 \
                               -s DISABLE_EXCEPTION_CATCHING=0 \
-                              -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]'")
+                              -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"AsciiToString\"]' \
+                              -s TOTAL_MEMORY=256MB")
     target_link_libraries(irohalib bindings)
 endif()
