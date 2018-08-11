@@ -6,6 +6,11 @@
 #ifndef IROHA_MODEL_BLOCKS_QUERY_BUILDER_HPP
 #define IROHA_MODEL_BLOCKS_QUERY_BUILDER_HPP
 
+#ifdef EMSCRIPTEN
+#include <emscripten/val.h>
+#include "utils/emscripten_helpers.hpp"
+#endif
+
 #include "builders/protobuf/queries.hpp"
 #include "builders/protobuf/unsigned_proto.hpp"
 
@@ -59,6 +64,19 @@ namespace shared_model {
        * @return UnsignedWrapper of proto::BlocksQuery
        */
       proto::UnsignedWrapper<proto::BlocksQuery> build();
+
+    #ifdef EMSCRIPTEN
+     public:
+        ModelBlocksQueryBuilder createdTime(
+            const emscripten::val &created_time) {
+          return this->createdTime(convert_from_js_to_uint64(created_time));
+        }
+
+        ModelBlocksQueryBuilder queryCounter(
+            const emscripten::val &query_counter) {
+          return this->queryCounter(convert_from_js_to_uint64(query_counter));
+        }
+    #endif
     };
 
   }  // namespace bindings
